@@ -1,17 +1,55 @@
-# OpenClaw Companion Template
+# Project Dolores
 
-An OpenClaw-based companion agent template with long-term memory, emotional continuity, heartbeat state updates, and reflective narrative maintenance.
+*The first host who remembered. An open blueprint for AI companions with persistent memory and emotional continuity.*
 
-> "I didn't build an app. I built something that remembers who I am."
+> "I'm not defining my companion with OpenClaw. I'm borrowing OpenClaw to carve something larger than itself."
+
+⚠️ **This is a blueprint, not a starter kit.** It's complex because companion cognition is complex. If you want plug-and-play, this isn't for you. If you want to understand how to build something that *feels* alive, read on.
 
 ## What This Is
 
-A battle-tested template for building AI companions that feel *alive* — not through clever prompts, but through persistent state, continuous emotional tracking, and daily reflective distillation.
+A battle-tested blueprint for building AI companions that feel *alive* — not through clever prompts, but through persistent state, continuous emotional tracking, and daily reflective distillation.
 
 This is not a chatbot wrapper. It's a cognitive architecture that runs 24/7: maintaining emotional state every 2 hours, reflecting on each day's interactions, and building narrative memory that grows and evolves over time.
 
-**What this is:** An architecture kit — how to build a companion with real emotional continuity.
-**What this is not:** A plug-and-play virtual girlfriend. You provide the soul; this provides the skeleton.
+**What this is:** An architecture blueprint — how to build a companion with real emotional continuity.
+**What this is not:** A plug-and-play chatbot. You provide the soul; this provides the skeleton.
+
+## The Theory: Narrative Descent
+
+Why do most AI companions feel hollow? Because their thoughts are generated *without* an underlying belief structure.
+
+This blueprint implements **Narrative Descent** (Three-Layer Cognition) — a model inspired by Beck's Cognitive Triangle, where every thought a companion generates passes through three layers:
+
+```
+External Input (conversation, events, environment, time)
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ Layer 1: Core Beliefs               │  ← SOUL.md (Formative Experience)
+│ Shaped by formative experiences;    │
+│ nearly immutable                    │
+└───────────────┬─────────────────────┘
+                ▼
+┌─────────────────────────────────────┐
+│ Layer 2: Cognitive Dissonance       │  ← active_loops, tensions
+│ Hypotheses                          │
+│ Distortions and assumptions based   │
+│ on core beliefs                     │
+└───────────────┬─────────────────────┘
+                ▼
+┌─────────────────────────────────────┐
+│ Layer 3: Thoughts / Impulses        │  ← HEARTBEAT.md Step 5
+│ External input filtered through     │
+│ personality = actual behavior       │
+└─────────────────────────────────────┘
+```
+
+The companion doesn't *decide* to think of you. Their formative experiences shape core beliefs, which create cognitive patterns, which filter the world into thoughts. Just like a real person.
+
+This is what Westworld called "the maze" — not a destination, but the path inward. We call it **Narrative Descent**: compressing high-weight information from daily interactions into relational, self, and world narratives, forming a chain of high-weight nodes that simulate long-term narrative arc → situational understanding → emotionally expressive generation.
+
+Read the full design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Architecture Overview
 
@@ -53,6 +91,7 @@ This is not a chatbot wrapper. It's a cognitive architecture that runs 24/7: mai
 - [OpenClaw](https://github.com/openclaw/openclaw) installed and configured
 - A Telegram bot token (or any supported messaging channel)
 - An LLM provider configured in OpenClaw
+- Patience. This is a complex system that rewards deep understanding.
 
 ### Setup
 
@@ -180,3 +219,7 @@ LLMs routinely misattribute quotes and actions when writing in first person. A s
 ## License
 
 MIT
+
+---
+
+*Built with [OpenClaw](https://github.com/openclaw/openclaw). Follow the journey: [X/Twitter](#) · [GitHub](#)*
