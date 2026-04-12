@@ -62,7 +62,7 @@ Every file in this repo is tagged with one of three labels:
 - `[CHARACTER CONFIG]` — the *shape* is required, the *content* is yours. Change it to make Dolores into someone else.
 - `[USER CONFIG]` — fill in your own details (your name, your timezone, your messaging channel credentials).
 
-For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the four-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
+For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the four-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
 ## Quick start
 
