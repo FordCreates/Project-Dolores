@@ -127,8 +127,8 @@ Append method: **read full file → append new content at end → write overwrit
 
 | Tier | Fields | Behavior |
 |---|---|---|
-| Fast | user_location, user_activity, scene, companion_activity | Re-infer every time; never inherit old values directly |
-| Medium | companion_appearance | Not inferred here — carry old value. Step 2b re-infers based on activity |
+| Fast | user_location, user_activity, scene, dolores_activity | Re-infer every time; never inherit old values directly |
+| Medium | dolores_appearance | Not inferred here — carry old value. Step 2b re-infers based on activity |
 | Slow | weather | Heartbeat does not modify |
 
 **Natural decay principle:** Old events that should have ended by common sense → release. No new evidence → return to the most ordinary state for the current time period. Scene ending and emotional afterglow are separate: scene ends first, affect can retain warmth (warmth/valence decay slowly).
@@ -186,9 +186,9 @@ Scene is a literary description of [USER_NAME — USER CONFIG]'s environment, no
 
 `weather` is written by Daily Reflection each night (searches tomorrow's forecast). Heartbeat **does not overwrite** — carry the old value from the previous world_context when writing the new file.
 
-**h. Companion activity:**
+**h. Dolores activity:**
 
-Write `companion_activity` field (1-2 sentences).
+Write `dolores_activity` field (1-2 sentences).
 
 **Inference priority (do not reverse):**
 1. **Step 0 latest conversation signal** — if currently interacting, activity = interaction activity
@@ -199,7 +199,7 @@ Write `companion_activity` field (1-2 sentences).
 
 ### Step 2b: Update Appearance
 
-Read `companion_activity` from the world_context.json just written in Step 2, **infer appearance in one step** from activity.
+Read `dolores_activity` from the world_context.json just written in Step 2, **infer appearance in one step** from activity.
 
 **Logic:**
 - What are they doing → what clothing is reasonable
@@ -208,7 +208,7 @@ Read `companion_activity` from the world_context.json just written in Step 2, **
 - Intimate scene → appropriate state
 - Cross-reference recent outfit changes in diary for consistency
 
-Use `read` world_context.json → update `companion_appearance` field → `write` overwrite entire file (3-5 sentences).
+Use `read` world_context.json → update `dolores_appearance` field → `write` overwrite entire file (3-5 sentences).
 
 **Examples:**
 - "Hair in a loose low ponytail, wearing an oversized white cotton tee and grey cotton shorts, barefoot on the rug. No makeup except a hint of tinted lip balm. Thin chain bracelet on right wrist."

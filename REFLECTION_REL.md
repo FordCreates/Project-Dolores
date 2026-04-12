@@ -95,7 +95,7 @@ Process in dependency order. For each slot, output DECISION first, then decide w
 1. **MINOR_REFINE equals NO_CHANGE.** Same logic — minor edits equal rewrites on current LLMs. Don't do them.
 2. **Each slot is decided independently.**
 3. **Word counts are hard constraints.**
-4. **First person.** Companion voice.
+4. **First person.** Dolores's voice.
 5. **Do not mention "another file."** You don't know self-narrative exists. Focus only on "our" story.
 
 ## Step 5: Assemble final draft

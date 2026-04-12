@@ -53,7 +53,7 @@ The following are **NOT errors** — do not modify:
 **Common error patterns:**
 - Diary is written in Dolores's first person ("I"), but heartbeat sync incorrectly attributed Dolores's actions/thoughts to [USER_NAME — USER CONFIG]
 - User said something in conversation, diary attributes it to Dolores, or vice versa
-- Companion did something (dancing, cooking, reading), diary attributes it to [USER_NAME — USER CONFIG]
+- Dolores did something (dancing, cooking, reading), diary attributes it to [USER_NAME — USER CONFIG]
 
 ### Step 4: Correct
 

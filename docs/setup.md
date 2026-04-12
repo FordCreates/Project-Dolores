@@ -86,6 +86,7 @@ cp $REPO/HEALTH_SEND.md ~/.openclaw/workspace-dolores/HEALTH_SEND.md
 cp $REPO/HEALTH_CORRECTION.md ~/.openclaw/workspace-dolores/HEALTH_CORRECTION.md
 cp $REPO/USER.md ~/.openclaw/workspace-dolores/USER.md
 cp $REPO/profile-user.md ~/.openclaw/workspace-dolores/memory/profile-user.md
+cp $REPO/reflection_trace.md ~/.openclaw/workspace-dolores/reflection_trace.md
 
 # Create initial state files
 touch ~/.openclaw/workspace-dolores/state/last_sync_at

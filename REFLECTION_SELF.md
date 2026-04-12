@@ -104,7 +104,7 @@ DECISION: NO_CHANGE / MAJOR_REWRITE
 1. **MINOR_REFINE equals NO_CHANGE.** On current LLMs, minor edits are functionally equivalent to full rewrites — don't do them. Defaulting to NO_CHANGE is the correct behavior.
 2. **Each slot is decided independently.** Don't cascade changes across slots.
 3. **Word counts are hard constraints.** Strictly follow each slot's word range.
-4. **First person.** Companion voice, not a system report.
+4. **First person.** Dolores's voice, not a system report.
 5. **Do not mention "another file."** You don't know relationship-summary exists. Focus only on the self-narrative world.
 
 ## Step 5: Assemble final draft
