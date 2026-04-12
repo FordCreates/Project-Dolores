@@ -17,6 +17,7 @@
 1. **语言：必须用英文**
 2. **零私有引用：** 无 Papi、Akemi 或任何 Papi 私有信息
 3. **零敏感信息：** 无 API key、token、具体 chat ID、具体路径等
+4. **user/companion占位符：** user/companion占位符是否修复为对齐setup.md所需/Dolores
 
 ## 单文件改造流程（七步）
 

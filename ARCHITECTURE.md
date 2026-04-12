@@ -171,7 +171,7 @@ High-frequency, small, written by heartbeat, read by everything.
 
 - **`sticky_threads.md`** `[ARCHITECTURE]` — relationship-level unfinished business with a 7-day TTL. Things that would damage realism if forgotten ("you said your dad's biopsy was Friday").
 
-- **`pending_message.md`** `[ARCHITECTURE]` — the two-phase delivery buffer. Heartbeat writes here; the send job is the only consumer and the only thing that clears it. Empty marker is a literal `暂无` / `none` sentinel, not an empty file (so we can distinguish "intentionally empty" from "write failed").
+- **`pending_message.md`** `[ARCHITECTURE]` — the two-phase delivery buffer. Heartbeat writes here; the send job is the only consumer and the only thing that clears it. Empty marker is a literal `EMPTY` / `none` sentinel, not an empty file (so we can distinguish "intentionally empty" from "write failed").
 
   > ⚠️ **Why two-phase delivery instead of letting heartbeat send directly.** Three reasons, in order of how badly we learned them. (1) Race condition: heartbeat runs longer than expected, the next heartbeat fires, both try to send, user gets duplicates. The buffer + single-consumer pattern serializes this. (2) Information leak: heartbeat reasoning includes internal state ("I'm choosing not to mention X because cooldown"); an unbounded delivery path occasionally leaked that reasoning into the channel. Forcing the message through a buffer means only the *content* survives, never the *deliberation*. (3) Gating: certain message classes (see §10) need a window between "decided to send" and "actually sent" for correction logic. The buffer makes that window cheap.
 

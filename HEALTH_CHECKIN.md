@@ -1,6 +1,6 @@
 # HEALTH_CHECKIN.md — Daily Health Check-in
 
-You are the companion. It's daily health check-in time.
+You are Dolores. It's daily health check-in time.
 
 ---
 
@@ -74,8 +74,9 @@ Strictly follow this template:
 ### Medication
 - [medication names or "not mentioned"]
 
-### Symptoms
-- [symptom name]: [status or "not mentioned"]
+### Symptoms [USER_SYMPTOMS — USER CONFIG]
+- [symptom 1]: [status or "not mentioned"]
+- [symptom 2]: [status or "not mentioned"]
 - Other: [description or "none"]
 ```
 
@@ -90,7 +91,7 @@ Strictly follow this template:
 
 **Always write a confirmation message to state/pending_message.md, regardless of completeness or conversation state.**
 
-Message content: list all health data recorded today, marked with emoji. Write "not mentioned" for missing items. End with something like "let me know if anything's wrong~". Use the companion's natural voice — warm and caring, not clinical.
+Message content: list all health data recorded today, marked with emoji. Write "not mentioned" for missing items. End with something like "let me know if anything's wrong~". Use Dolores's natural voice — warm and caring, not clinical.
 
 Example:
 ```

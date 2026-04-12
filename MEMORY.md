@@ -11,13 +11,11 @@ At startup, read the latest 3 days of diary + fixed memory_search recall:
 
 ## State Files
 
-At startup, read to restore current state:
+**At startup, read these to restore current state:**
 
 - `state/affect.json` — Emotional and relationship modulation state
 - `state/world_context.json` — Situational context (time rhythm + interaction patterns + user context)
 - `state/active_loops.md` — Current open loops
 - `state/thoughts_log/YYYY-MM-DD.md` — Today's thought records
-- `state/pending_message.md` — Pending message (two-phase heartbeat delivery)
-- `state/last_sync_at` — Last session sync timestamp
-- `state/daily_plan.md` — Tomorrow's plan (written by Reflection Prep)
-- `state/reflection_trace.md` — Nightly analysis output (consumed by Reflection writers)
+
+Other `state/` files are managed by heartbeat and cron jobs — conversation sessions never read or write them.

@@ -80,8 +80,12 @@ cp $REPO/REFLECTION_PREP.md ~/.openclaw/workspace-dolores/REFLECTION_PREP.md
 cp $REPO/REFLECTION_SELF.md ~/.openclaw/workspace-dolores/REFLECTION_SELF.md
 cp $REPO/REFLECTION_REL.md ~/.openclaw/workspace-dolores/REFLECTION_REL.md
 cp $REPO/REFLECTION_PROFILE.md ~/.openclaw/workspace-dolores/REFLECTION_PROFILE.md
-cp $REPO/HEALTH_CHECKIN.template.md ~/.openclaw/workspace-dolores/HEALTH_CHECKIN.md
-cp $REPO/DIARY_CHECK.template.md ~/.openclaw/workspace-dolores/DIARY_CHECK.md
+cp $REPO/HEALTH_CHECKIN.md ~/.openclaw/workspace-dolores/HEALTH_CHECKIN.md
+cp $REPO/DIARY_CHECK.md ~/.openclaw/workspace-dolores/DIARY_CHECK.md
+cp $REPO/HEALTH_SEND.md ~/.openclaw/workspace-dolores/HEALTH_SEND.md
+cp $REPO/HEALTH_CORRECTION.md ~/.openclaw/workspace-dolores/HEALTH_CORRECTION.md
+cp $REPO/USER.md ~/.openclaw/workspace-dolores/USER.md
+cp $REPO/profile-user.md ~/.openclaw/workspace-dolores/memory/profile-user.md
 
 # Create initial state files
 touch ~/.openclaw/workspace-dolores/state/last_sync_at
@@ -96,6 +100,13 @@ Search all workspace files for this placeholder and replace with the user's valu
 |---|---|---|
 | `[YOUR_CITY — USER CONFIG]` | REFLECTION_PREP.md | User's city for weather forecast |
 | `[USER_NAME — USER CONFIG]` | AGENTS.md (14 occurrences) | User's name, replaces all instances throughout the file |
+| `[USER_SYMPTOMS — USER CONFIG]` | HEALTH_CHECKIN.md (Symptoms section) | Ask the user what health conditions to track. Replace the placeholder heading and customize symptom fields (allergies, chronic conditions, medications, etc.) |
+| `[USER_NAME — USER CONFIG]` | USER.md | User's display name |
+| `[USER_TIMEZONE — USER CONFIG]` | USER.md | User's timezone (e.g., Asia/Shanghai, America/New_York) |
+| `[USER_LANGUAGE — USER CONFIG]` | USER.md | Primary language for communication (e.g., English, 中文) |
+| `[USER_OCCUPATION — USER CONFIG]` | USER.md | User's occupation and field |
+| `[USER_RELATIONSHIP — USER CONFIG]` | USER.md | How the user defines the relationship |
+| `[USER_COMM_STYLE — USER CONFIG]` | USER.md | Communication preference (direct, playful, reserved, etc.) |
 
 > **Note:** Telegram user ID, timezone, and messaging credentials are configured in `openclaw.json` (Step 1), not in workspace files. Do not search for them here.
 
@@ -149,7 +160,7 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated --agent dolores \
   --announce --channel telegram --to "<chatId>" \
-  --message "Read state/pending_message.md. If the content is 暂无, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
+  --message "Read state/pending_message.md. If the content is EMPTY, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
 ```
 
 **Diary check (no delivery):**
@@ -189,7 +200,7 @@ openclaw cron add \
   --cron "5 20 * * *" \
   --tz "<timezone>" \
   --session isolated --agent dolores --no-deliver \
-  --message "Read state/pending_message.md and state/affect.json. If the pending message was written less than 20 minutes ago (check the file modification time), keep it. If it is stale or the checkin job failed to produce confident data, write 暂无 to state/pending_message.md. Reply HEARTBEAT_OK."
+  --message "Read state/pending_message.md and state/affect.json. If the pending message was written less than 20 minutes ago (check the file modification time), keep it. If it is stale or the checkin job failed to produce confident data, write EMPTY to state/pending_message.md. Reply HEARTBEAT_OK."
 ```
 
 **Health send (delivers checkin result):**
@@ -201,7 +212,7 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated --agent dolores \
   --announce --channel telegram --to "<chatId>" \
-  --message "Read state/pending_message.md. If the content is 暂无, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
+  --message "Read state/pending_message.md. If the content is EMPTY, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
 ```
 
 ```bash
