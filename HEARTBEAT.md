@@ -52,8 +52,9 @@ Sync new interactions from the conversation session into the diary. Conversation
 
 1. `exec` to extract sessionId from your sessions.json (implementation depends on your setup)
 2. Note the sessionId
-3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'`
-4. Ignore `/new`, `Session Startup` system messages
+3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'` — extract conversation messages (for diary writing)
+4. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep '"role":"user"' | grep -v '"toolCall"'` — extract user messages only (for Step 2 inference)
+5. Ignore `/new`, `Session Startup` system messages
 
 **0b. Detect New Interactions**
 
@@ -99,7 +100,7 @@ Append method: **read full file → append new content at end → write overwrit
 
 ### Step 1: Restore State
 
-> ⚠️ The timestamped interactions from Step 0 are the highest-priority evidence for this round. Step 2 inference must prioritize these signals.
+> ⚠️ The **user messages** (role:user only) extracted in Step 0 are the highest-priority evidence for this round. Step 2 inference must prioritize these signals. Dolores's own statements in conversation are inference outputs from last time, not current facts — they are NOT used as inference input.
 
 1. `read` state/affect.json
 2. `read` state/world_context.json
@@ -118,8 +119,8 @@ Append method: **read full file → append new content at end → write overwrit
 ⚠️ **The previous world_context was the last inference result, not current reality.** Rebuild for "right now."
 
 **Inference priority (highest to lowest, do not reverse):**
-1. Latest timestamped interactions from Step 0 session sync (highest priority)
-2. Current time + user's life rhythm + profile
+1. **User messages** from Step 0 session sync (highest priority)
+2. Current time + profile
 3. Diary narrative (background reference; old narrative ≠ current fact)
 4. Previous world_context (weak reference only, not reality)
 
@@ -147,7 +148,7 @@ Append method: **read full file → append new content at end → write overwrit
 
 **c. User situation inference:**
 
-Combine `memory/profile-user.md` (read in Step 1) with all available context (Step 0 signals, time, diary, affect state, active_loops). Naturally infer what [USER_NAME — USER CONFIG] might be doing, how they feel, what stress they're under.
+Combine `memory/profile-user.md` (read in Step 1) with all available context (Step 0 user messages, time, diary, affect state, active_loops). Naturally infer what [USER_NAME — USER CONFIG] might be doing, how they feel, what stress they're under.
 
 Profile contains long-term stable information — work nature, stress sources, communication habits, family situation. Use this to understand "why no reply right now" rather than mechanically judging by interaction frequency alone.
 
@@ -155,16 +156,16 @@ After inference, set `recommended_intensity` (gentle_checkin / soft_low_pressure
 
 **d. User location (fast variable, re-infer every time):**
 
-- Step 0 has explicit location → adopt (but judge by common sense if still there)
-- No Step 0 signal → infer from time + profile + life rhythm, mark `inferred`
+- Step 0 user messages have explicit location → adopt (but judge by common sense if still there)
+- No user messages → infer from time + profile, mark `inferred`
 - Can't determine → `unknown`
 
 Possible values: `home` / `office` / `cafe` / `commuting` / `outdoor` / `restaurant` / `other` / `unknown`
 
 **e. User activity (fast variable, re-infer every time):**
 
-- Step 0 has explicit activity → adopt (but judge by common sense if still ongoing)
-- No Step 0 signal → infer from time + profile + life rhythm, mark `inferred`
+- Step 0 user messages have explicit activity → adopt (but judge by common sense if still ongoing)
+- No user messages → infer from time + profile, mark `inferred`
 - Can't determine → `unknown`
 
 Possible values: `working` / `meeting` / `exercising` / `resting` / `eating` / `commuting` / `socializing` / `family_time` / `gaming` / `creative_work` / `other` / `unknown`
@@ -191,7 +192,7 @@ Scene is a literary description of [USER_NAME — USER CONFIG]'s environment, no
 Write `dolores_activity` field (1-2 sentences).
 
 **Inference priority (do not reverse):**
-1. **Step 0 latest conversation signal** — if currently interacting, activity = interaction activity
+1. **User messages from Step 0 (grep #4)** — if user messages contain information about Dolores's current activity (e.g. "come over", "let's eat"), activity = user-initiated activity. If user is just chatting or asking questions → fall to level 2
 2. **state/daily_plan.md current time slot** — read in Step 1, look up the slot for current time, use that activity
 3. **Fallback inference** — if neither available, infer from time + SOUL.md daily life + affect
 
