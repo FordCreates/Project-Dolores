@@ -37,7 +37,7 @@ daily_plan         →  world_context     →  user messages (session)
 
 The three layers feed each other in priority order: **realtime signal > time + profile + rhythm > diary narrative > previous world_context**. The previous world_context is treated as a *weak* reference, not a fact, because it was itself an inference.
 
-> ⚠️ **Why it's built this way.** The naive approach is to let `world_context` persist and only update fields when something changes. This rots fast: stale "she's at the cafe" lingers for hours after the cafe closed. The fix is to **rebuild from scratch every heartbeat**, with old context as a hint not a source. Fields are tiered: *fast variables* (location, activity, scene) are re-inferred every cycle and never inherited; *medium variables* (her appearance/outfit) only change on event triggers and naturally fall back to a default after the event ends; *slow variables* (weather) are owned by reflection and heartbeat doesn't touch them. This three-tier rule is the single most important rule in Helix 1 — without it the world feels glitchy in a way users can't articulate but immediately distrust.
+> ⚠️ **Why it's built this way.** The naive approach is to let `world_context` persist and only update fields when something changes. This rots fast: stale "she's at the cafe" lingers for hours after the cafe closed. The fix is to **rebuild from scratch every heartbeat**, with old context as a hint not a source. Fields are tiered: *fast variables* (location, activity, scene) are re-inferred every cycle and never inherited; *medium variables* (her appearance/outfit) are re-generated every heartbeat with hard rules (never copy old value, never copy examples), must produce new description each time; only exception is during ongoing intimate activity; *slow variables* (weather) are owned by reflection and heartbeat doesn't touch them. This three-tier rule is the single most important rule in Helix 1 — without it the world feels glitchy in a way users can't articulate but immediately distrust.
 
 ### Helix 2 — Three-layer cognition (processing side)
 
@@ -250,7 +250,7 @@ The reference channel is **Telegram**. To use a different channel, configure it 
 Step 0: Session sync       — read session jsonl tail, append new exchanges to diary
 Step 1: Restore state      — read all of state/ + last 3 days of diary + profile-user
 Step 2: Update world_ctx   — three-tier rebuild (see §1)
-Step 2b: Update appearance  — infer outfit from activity
+Step 2b: Update appearance  — re-generate from activity + full conversation (check for outfit changes / intimacy)
 Step 3: Update affect      — bounded deltas based on world + interaction signals
 Step 4: Manage loops       — create from signals, retune cooldown, close completed
 Step 4b: Manage sticky     — check relationship-level threads, expire old ones

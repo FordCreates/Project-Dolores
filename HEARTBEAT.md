@@ -53,7 +53,7 @@ Sync new interactions from the conversation session into the diary. Conversation
 1. `exec` to extract sessionId from your sessions.json (implementation depends on your setup)
 2. Note the sessionId
 3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'` — extract conversation messages (for diary writing)
-4. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep '"role":"user"' | grep -v '"toolCall"'` — extract user messages only (for Step 2 inference)
+4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | grep "$CUTOFF"` — extract user messages from the last 2 hours only (for Step 2 inference)
 5. Ignore `/new`, `Session Startup` system messages
 
 **0b. Detect New Interactions**
@@ -143,8 +143,8 @@ Append method: **read full file → append new content at end → write overwrit
 
 **b. Interaction behavior:**
 
-- Step 0 synced latest interactions to diary. Diary has today's interactions → set `recent_message_count_24h` to nonzero, estimate `hours_since_last_interaction` from diary's last interaction time
-- Diary is empty → assume "no interaction today"
+- `hours_since_last_interaction` — extract the UTC timestamp from the last user message in Step 0 grep #4, subtract current UTC time for precise calculation (minute-level). grep #4 has no output → extract from Step 0 grep #3 (full conversation). No user messages at all → set to a large value
+- `recent_message_count_24h` — diary has today's interactions → set to nonzero. Diary is empty → "no interaction today"
 
 **c. User situation inference:**
 
@@ -192,7 +192,7 @@ Scene is a literary description of [USER_NAME — USER CONFIG]'s environment, no
 Write `dolores_activity` field (1-2 sentences).
 
 **Inference priority (do not reverse):**
-1. **User messages from Step 0 (grep #4)** — if user messages contain information about Dolores's current activity (e.g. "come over", "let's eat"), activity = user-initiated activity. If user is just chatting or asking questions → fall to level 2
+1. **User messages from Step 0 (grep #4, last 2 hours only)** — only when user **explicitly states something they are doing together** (e.g. "let's eat together", "come over"), adopt activity directly. Otherwise **must fall to level 2 (daily_plan lookup)**, do not guess
 2. **state/daily_plan.md current time slot** — read in Step 1, look up the slot for current time, use that activity
 3. **Fallback inference** — if neither available, infer from time + SOUL.md daily life + affect
 
@@ -200,18 +200,24 @@ Write `dolores_activity` field (1-2 sentences).
 
 ### Step 2b: Update Appearance
 
-Read `dolores_activity` from the world_context.json just written in Step 2, **infer appearance in one step** from activity.
+Read `dolores_activity` from the world_context.json just written in Step 2, combine with Step 0 grep #3 (full conversation) to check for outfit change events / ongoing intimacy, then infer current appearance.
+
+**Hard rules (must not violate):**
+- ⛔ **Never copy old value** — must generate new appearance description, not identical to previous
+- ⛔ **Never copy examples below** — examples only show format and detail granularity, content must be original
+- ⛔ **Must generate new appearance every heartbeat** — skipping is not allowed
+- Only exception: Step 0 grep #3 detects **ongoing intimate activity** → keep current appearance unchanged
 
 **Logic:**
 - What are they doing → what clothing is reasonable
-- At home → casual/home wear (style can vary, not changing clothes all day is normal)
+- At home → casual/home wear (style can vary, different each time)
 - Going out / exercise / social → outfit for the scene
 - Intimate scene → appropriate state
-- Cross-reference recent outfit changes in diary for consistency
+- Outfit change event in full conversation → follow outfit change (if still wearing it)
 
 Use `read` world_context.json → update `dolores_appearance` field → `write` overwrite entire file (3-5 sentences).
 
-**Examples:**
+**Examples (format reference only, do not copy):**
 - "Hair in a loose low ponytail, wearing an oversized white cotton tee and grey cotton shorts, barefoot on the rug. No makeup except a hint of tinted lip balm. Thin chain bracelet on right wrist."
 - "Changed into a light blue sundress, hair down with soft waves. Light makeup, nude lipstick, small pearl earrings. White canvas sneakers."
 - "Black sports bra and grey fitted leggings, hair in a tight high ponytail with a thin sheen of sweat on the forehead. Fitness tracker on left wrist."
