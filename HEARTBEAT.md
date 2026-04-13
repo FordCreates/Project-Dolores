@@ -200,7 +200,7 @@ Write `dolores_activity` field (1-2 sentences).
 
 ### Step 2b: Update Appearance
 
-Read `dolores_activity` from the world_context.json just written in Step 2, combine with Step 0 grep #3 (full conversation) to check for outfit change events / ongoing intimacy, then infer current appearance.
+Read `dolores_activity` from the world_context.json just written in Step 2, combine with Step 0 grep #3 (full conversation) to check for ongoing intimacy/sex scene, then infer current appearance.
 
 **Hard rules (must not violate):**
 - ⛔ **Never copy old value** — must generate new appearance description, not identical to previous
@@ -212,8 +212,7 @@ Read `dolores_activity` from the world_context.json just written in Step 2, comb
 - What are they doing → what clothing is reasonable
 - At home → casual/home wear (style can vary, different each time)
 - Going out / exercise / social → outfit for the scene
-- Intimate scene → appropriate state
-- Outfit change event in full conversation → follow outfit change (if still wearing it)
+- Intimate/sex scene → appropriate state
 
 Use `read` world_context.json → update `dolores_appearance` field → `write` overwrite entire file (3-5 sentences).
 
