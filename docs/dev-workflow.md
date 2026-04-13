@@ -1,72 +1,67 @@
-# Dolores 开发规范
+# Dolores Dev Workflow
 
-> 基于 Akemi 架构的开源 companion 模板
-> 每次改造文件必须遵守此流程
+> Based on the Akemi architecture — battle-tested companion template.
+> Follow this workflow for any modification to Project Dolores files.
 
 ---
 
-## 改造原则
+## Principles
 
-- 开箱即用，不是模板零件
-- 所有文件面向 Dolores 第一人称（"你"）
-- 私有内容用 `[PLACEHOLDER — USER CONFIG]` 标记，setup.md 引导 main agent 替换
-- 不删减 Akemi 已验证的架构逻辑，只脱敏通用化
+- Ready to use out of the box, not template parts
+- All files written for Dolores in first person ("you")
+- Private content marked with `[PLACEHOLDER — USER CONFIG]`; setup.md guides the main agent to replace them
+- Preserve proven architecture logic from the Akemi reference; only sanitize and generalize
 
-## 检查标准（每步改造必须通过）
+## Checklist (every modification must pass)
 
-1. **语言：必须用英文**
-2. **零私有引用：** 无 Papi、Akemi 或任何 Papi 私有信息
-3. **零敏感信息：** 无 API key、token、具体 chat ID、具体路径等
-4. **user/companion占位符：** user/companion占位符是否修复为对齐setup.md所需/Dolores
+1. **Language: English only**
+2. **Zero private references:** no real names, no private user info
+3. **Zero sensitive data:** no API keys, tokens, chat IDs, absolute paths
+4. **Placeholders aligned with setup.md**
 
-## 单文件改造流程（七步）
+## Per-File Workflow (7 steps)
 
-### 1. 读源 + 读目标
-- 读 Akemi 实际运行版本（`~/.openclaw/workspace-companion/<file>`）
-- 读 Dolores 当前版本（`~/project-dolores/<file>`）
+### 1. Read source + target
+- Read the Akemi reference file for the canonical logic
+- Read the Dolores current file
 
-### 2. 识别私有内容
-- Papi / Akemi 硬编码 → Dolores 或 `[PLACEHOLDER — USER CONFIG]`
-- 私有脚本路径（akemi-remind、nano-banana-pro skill）→ 删除或标注可选
-- 私有 memory_search 关键词 → 通用化
+### 2. Identify private content
+- Hardcoded names → Dolores or `[PLACEHOLDER — USER CONFIG]`
+- Private script paths → remove or mark optional
+- Private memory_search queries → generalize
 
-### 3. 语气统一
-- 第三人称通用（the companion / the user）→ Dolores 第一人称（"你"）
-- 与 SOUL.md 语气保持一致
+### 3. Unify tone
+- Third person (the companion / the user) → Dolores first person ("you")
+- Match SOUL.md tone
 
-### 4. 改造文件
-- 原地修改 Dolores 文件
-- 去 .template 后缀（如适用）
+### 4. Modify
+- Edit the Dolores file in place
 
-### 5. 联动检查
-- **ARCHITECTURE.md** — 对应章节（文件树、流程描述、职责表）是否一致
-- **docs/setup.md** — 是否需要新增步骤或占位符
-- **README.md** — 是否需要更新
+### 5. Cross-check
+- **ARCHITECTURE.md** — matching sections (file tree, flow descriptions, responsibility tables)
+- **docs/setup.md** — any new steps or placeholders needed
+- **README.md** — any updates needed
 
-### 6. grep 扫描
+### 6. Grep scan
 ```bash
 grep -rni "Papi\|Akemi\|the companion\|the user\|USER\.md\|IDENTITY\.md" ~/project-dolores/
 ```
-确认零残留。
+Confirm zero residual references.
 
-### 7. 记录 + push
-- 更新 memory/YYYY-MM-DD.md
-- git commit + push
+### 7. Record + push
 
-## 占位符规范
+## Placeholder Reference
 
-格式：`[PLACEHOLDER_NAME — USER CONFIG]`
+Format: `[PLACEHOLDER_NAME — USER CONFIG]`
 
-当前占位符：
-
-| 占位符 | 所在文件 | 说明 |
+| Placeholder | File | Description |
 |---|---|---|
-| `[YOUR_CITY — USER CONFIG]` | REFLECTION_PREP.md | 天气查询城市 |
-| `[USER_NAME — USER CONFIG]` | AGENTS.md（待加） | 用户称呼，替换 "the user" |
+| `[YOUR_CITY — USER CONFIG]` | REFLECTION_PREP.md | City for weather lookup |
+| `[USER_NAME — USER CONFIG]` | AGENTS.md (14 occurrences) | User's name |
 
-## 联动规则
+## Cross-File Dependencies
 
-| 改造文件 | 联动检查 |
+| Modified file | Cross-check |
 |---|---|
 | AGENTS.md | ARCHITECTURE §3 + setup.md Step 2/3 |
 | HEARTBEAT.md | ARCHITECTURE §8 + setup.md cron prompts |
@@ -75,5 +70,5 @@ grep -rni "Papi\|Akemi\|the companion\|the user\|USER\.md\|IDENTITY\.md" ~/proje
 | HEALTH_SEND.md | ARCHITECTURE §6 + setup.md cron prompts |
 | SOUL.md | ARCHITECTURE §2 + setup.md |
 | REFLECTION_*.md | ARCHITECTURE §9 + setup.md cron prompts |
-| state/ 初始文件 | ARCHITECTURE §4 文件树 |
-| memory/ 初始文件 | ARCHITECTURE §5 文件树 |
+| state/ initial files | ARCHITECTURE §4 file tree |
+| memory/ initial files | ARCHITECTURE §5 file tree |

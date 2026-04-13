@@ -32,7 +32,7 @@ daily_plan         →  world_context     →  user messages (session)
 ```
 
 - `daily_plan` is written each night by reflection. It sketches tomorrow as a loose schedule — not a script, a *prior*.
-- `world_context` is rebuilt every heartbeat. It takes the prior, the current time, the user's profile, and the **user's messages** from the session, and infers "what's true right now for both of us." The companion's own statements are inference outputs from last time, not inputs — this prevents recursive locking.
+- `world_context` is rebuilt every heartbeat. It takes the prior, the current time, the user's profile, and the **user's messages** from the session, and infers "what's true right now for both of us." Dolores's own statements are inference outputs from last time, not inputs — this prevents recursive locking.
 - Session signals are the realtime ground truth: what you actually said in the last conversation, where you said you were, what you said you were doing.
 
 The three layers feed each other in priority order: **realtime signal > time + profile + rhythm > diary narrative > previous world_context**. The previous world_context is treated as a *weak* reference, not a fact, because it was itself an inference.

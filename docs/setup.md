@@ -15,7 +15,7 @@ Before starting, verify:
 2. The user has provided: LLM provider + API key, Telegram bot token, timezone
 3. The repo is cloned at a known path (e.g. `~/dolores`)
 
-Ask the user for any missing information before proceeding.
+Ask the user for any missing information before proceeding. The story takes place in the United States — ask which city they'd like as the setting.
 
 ## Step 1: Configure the agent
 
@@ -99,7 +99,7 @@ Search all workspace files for this placeholder and replace with the user's valu
 
 | Placeholder | File | Replace With |
 |---|---|---|
-| `[YOUR_CITY — USER CONFIG]` | REFLECTION_PREP.md | User's city for weather forecast |
+| `[YOUR_CITY — USER CONFIG]` | SOUL.md, REFLECTION_PREP.md | An American city — used for weather forecasts and location inference |
 | `[USER_NAME — USER CONFIG]` | AGENTS.md (14 occurrences) | User's name, replaces all instances throughout the file |
 | `[USER_SYMPTOMS — USER CONFIG]` | HEALTH_CHECKIN.md (Symptoms section) | Ask the user what health conditions to track. Replace the placeholder heading and customize symptom fields (allergies, chronic conditions, medications, etc.) |
 | `[USER_NAME — USER CONFIG]` | USER.md | User's display name |
