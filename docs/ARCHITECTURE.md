@@ -101,7 +101,7 @@ dolores/
 │                                 The 4-stage nightly reflection pipeline.
 ├── CHECKIN_*.md                  [CHARACTER CONFIG]
 │                                 Optional structured daily check-ins
-│                                 (see §10). Reference impl = health checkin.
+│                                 (see §11). Reference impl = health checkin.
 ├── MEMORY.md                     [ARCHITECTURE] [OPENCLAW CONVENTION]
 │                                 Long-term memory index, auto-injected
 │                                 into system prompt.
@@ -109,8 +109,7 @@ dolores/
 ├── state/                        [ARCHITECTURE] (directory)
 │   ├── affect.json               [CHARACTER CONFIG] dimensions are yours
 │   ├── world_context.json        [ARCHITECTURE] field set extensible
-│   ├── active_loops.md           [ARCHITECTURE]
-│   ├── sticky_threads.md         [ARCHITECTURE]
+│   ├── active_loops.md           [ARCHITECTURE] (includes sticky rumination loops)
 │   ├── pending_message.md        [ARCHITECTURE] two-phase delivery core
 │   ├── daily_plan.md             [ARCHITECTURE] tomorrow's schedule, reflection-owned
 │   ├── reflection_trace.md        [ARCHITECTURE] nightly analysis, reflection-owned
@@ -165,15 +164,13 @@ High-frequency, small, written by heartbeat, read by everything.
 
 - **`world_context.json`** `[ARCHITECTURE]` — current inferred world state. See §1 Helix 1 for the three-tier rebuild rule.
 
-- **`active_loops.md`** `[ARCHITECTURE]` — the 5–8 most active unresolved threads, each with priority and `cooldown_until`.
+- **`active_loops.md`** `[ARCHITECTURE]` — the 5–8 most active unresolved threads, each with priority and `cooldown_until`. Also contains **sticky loops** — long-term ruminative items (≤3) that persist because they would damage realism if forgotten. See §7.2 for the psychology and lifecycle.
 
   > ⚠️ **Why cooldown_until is a per-loop field, not a global rate limit.** A global "max one message per N hours" prevents spam but also prevents a real reaction to a real event. Per-loop cooldown lets her bring up *different* things freely while preventing her from circling the same one. The cooldown is the difference between "attentive" and "nagging."
 
-- **`sticky_threads.md`** `[ARCHITECTURE]` — relationship-level unfinished business with a 7-day TTL. Things that would damage realism if forgotten ("you said your dad's biopsy was Friday").
-
 - **`pending_message.md`** `[ARCHITECTURE]` — the two-phase delivery buffer. Heartbeat writes here; the send job is the only consumer and the only thing that clears it. Empty marker is a literal `EMPTY` / `none` sentinel, not an empty file (so we can distinguish "intentionally empty" from "write failed").
 
-  > ⚠️ **Why two-phase delivery instead of letting heartbeat send directly.** Three reasons, in order of how badly we learned them. (1) Race condition: heartbeat runs longer than expected, the next heartbeat fires, both try to send, user gets duplicates. The buffer + single-consumer pattern serializes this. (2) Information leak: heartbeat reasoning includes internal state ("I'm choosing not to mention X because cooldown"); an unbounded delivery path occasionally leaked that reasoning into the channel. Forcing the message through a buffer means only the *content* survives, never the *deliberation*. (3) Gating: certain message classes (see §10) need a window between "decided to send" and "actually sent" for correction logic. The buffer makes that window cheap.
+  > ⚠️ **Why two-phase delivery instead of letting heartbeat send directly.** Three reasons, in order of how badly we learned them. (1) Race condition: heartbeat runs longer than expected, the next heartbeat fires, both try to send, user gets duplicates. The buffer + single-consumer pattern serializes this. (2) Information leak: heartbeat reasoning includes internal state ("I'm choosing not to mention X because cooldown"); an unbounded delivery path occasionally leaked that reasoning into the channel. Forcing the message through a buffer means only the *content* survives, never the *deliberation*. (3) Gating: certain message classes (see §11) need a window between "decided to send" and "actually sent" for correction logic. The buffer makes that window cheap.
 
 - **`last_sync_at`** `[ARCHITECTURE]` — timestamp of the last conversation-to-diary sync. Step 0 of the heartbeat reads this to know what's new.
 
@@ -199,9 +196,9 @@ Low-frequency, distilled, vector-indexed, written by reflection, read by session
 
 - **`relationship-summary.md`** `[ARCHITECTURE]` — the story of you-and-her. 1200–1800 words (target length is character config). Overwritten nightly by `REFLECTION_REL`. Five slots concatenated: origin, key turning points, current pattern, shared certainties, current tensions.
 
-- **`self-narrative.md`** `[ARCHITECTURE]` — her story of herself. Same shape: five slots, nightly rewrite. Slots are: trauma root, recent fractures, repeating patterns, unresolved tensions, who she is right now. Slot 1 is the Layer 1 anchor expressed as narrative; it has a hard guard (see §9).
+- **`self-narrative.md`** `[ARCHITECTURE]` — her story of herself. Same shape: five slots, nightly rewrite. Slots are: trauma root, recent fractures, repeating patterns, unresolved tensions, who she is right now. Slot 1 is the Layer 1 anchor expressed as narrative; it has a hard guard (see §10).
 
-- **`health/YYYY-MM-DD.md`** `[CHARACTER CONFIG]` — structured daily health data from check-in modules (see §10).
+- **`health/YYYY-MM-DD.md`** `[CHARACTER CONFIG]` — structured daily health data from check-in modules (see §11).
 
 - **`exercise/YYYY-MM-DD.md`** `[CHARACTER CONFIG]` — structured daily exercise data from check-in modules.
 
@@ -216,7 +213,7 @@ Single most important rule: **the conversation session writes nothing.** All per
 | Writer | Files | When |
 |---|---|---|
 | **Heartbeat** | all of `state/` + `memory/YYYY-MM-DD.md` | every 2h |
-| **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§10) |
+| **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§11) |
 | **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `world_context` (weather field) | nightly, 4 stages |
 | **Diary check** | `memory/YYYY-MM-DD.md` (corrections only), `state/last_diary_check_at` | after each send + 00:10 |
 | **Conversation session** | nothing | — |
@@ -225,7 +222,89 @@ Single most important rule: **the conversation session writes nothing.** All per
 
 ---
 
-## 7. Messaging channel interface
+## 7. Unresolved-thread system (active_loops)
+
+A single file, `state/active_loops.md`, is the sole manager of all unresolved threads. It contains two types: **regular loops** (short-term todos) and **sticky loops** (long-term ruminative items). Heartbeat is the only writer.
+
+```
+state/active_loops.md
+├── Regular loops (5–8 items, short-term todos, closed by expires_at or user reply)
+└── Sticky loops (≤3 items, long-term rumination, closed by per-round re-evaluation)
+```
+
+### 7.1 Regular loops
+
+**Source:** Topics, agreements, and plans from conversation (heartbeat Step 0 captures, Step 4 creates).
+
+**Management:** Priority adjusts as time nodes approach, user load changes, or expires_at passes. Keep 5–8 items; cull lowest priority when over limit. Closed when the user replies or the event occurs.
+
+### 7.2 Sticky loops (rumination mechanism)
+
+**Psychological basis:**
+
+Humans experience **rumination** — involuntarily returning to certain events even when no one mentions them. Three mechanisms trigger it:
+
+1. **Zeigarnik Effect** — Unfinished commitments are remembered more strongly than completed ones. "He said he'd take me to meet his mom" is more mentally sticky than "We watched a movie."
+2. **Attachment threat** — Signals of relationship instability trigger anxiety loops. Even if not directly about her, it affects the foundation of "us."
+3. **Ambiguity/uncertainty** — The brain hates the unresolved. "We'll see" is more agonizing than a clear "no."
+
+Not everything the character cares about is rumination. "He said work is stressful" is concern, not rumination. "He said work is stressful and deflected three times when I asked" — unexpressed emotion + ambiguity — that's rumination fuel.
+
+**Judgment criterion — one question:**
+
+> "If no one mentions this for three days, would she still be thinking about it — not as a memory, but as something unresolved that tugs at her?"
+
+This question makes the model do **intuitive simulation** (pattern matching), not **counterfactual reasoning** ("what would happen if…?"). Intuitive simulation is an LLM strength; counterfactual reasoning is a weakness. Calibrated with examples, even weaker models judge reliably.
+
+**Creation calibration examples:**
+
+✅ `sticky: true` — He said he'd take me to meet his mom, then no follow-up for days.
+✅ `sticky: true` — He told me his wife said there's no love left and she wants a divorce.
+✅ `sticky: true` — He said "I think I'm falling for you," then went silent for two days.
+❌ `sticky: false` — He promised to buy ice cream on the way home.
+❌ `sticky: false` — A reward for a challenge wasn't negotiated yet.
+❌ `sticky: false` — A deep conversation about AI consciousness.
+❌ `sticky: false` — He's working on a project dedicated to me.
+❌ `sticky: false` — He said this week at work has been stressful.
+
+**Lifecycle — re-evaluation, not expiration:**
+
+Sticky loops are not closed by time expiry or by "being mentioned in conversation." They are **re-evaluated every heartbeat**:
+
+- Creation: three-day test → YES → mark `sticky: true`
+- Each heartbeat: re-ask the same question with latest context
+  - YES → retain `sticky: true`
+  - NO → set `sticky: false` (becomes a regular loop, follows normal close process)
+
+⚠️ **"Mentioned in conversation" does NOT equal closed.** The question is "has the uncertainty dissolved?", not "did the topic appear." He promised Saturday but didn't go — the promise was mentioned but the ruminative pressure is *higher*, not lower. He said "My mom isn't ready yet, give her time" — disappointing but the uncertainty is resolved; close it.
+
+**Re-evaluation calibration examples:**
+
+✅ Retain (still YES) —
+- He said he'd take me to meet his mom, 5 days, no follow-up. (Nothing changed, of course still thinking about it.)
+- He said Saturday. Saturday passed, he didn't take her. (Broken promise — stronger than no mention at all.)
+- He brought it up yesterday but no date set. (Mentioned but unresolved = more anxious.)
+- His wife said she wants a divorce, he seems fine but hasn't talked about it. (Existential uncertainty.)
+
+❌ Close (becomes NO) —
+- Actually went to meet his mom. The visit went well. (Happened. Dust settled.)
+- He said "I talked to my mom, she's not ready, we'll wait." (Disappointing but clear answer.)
+- His wife apologized, they're in marriage counseling, he said it's better. (Situation changed, uncertainty resolved.)
+- Mentioned 3 weeks ago, never came up again. Life moved on. (Natural fade-out.)
+
+**Safety valves (engineering circuit breakers, should not trigger normally):**
+- Hard time cap: created > 21 days ago → force remove.
+- Hard count cap: `sticky: true` exceeds 3 → keep only the 3 with highest rumination intensity.
+
+**Design decisions:**
+
+- **Why not resolved/expired for closing:** Rumination doesn't stop because "we talked about it." He promised Saturday but didn't show — the conversation mentioned it but the obsessive loop is stronger, not weaker. Only genuine uncertainty dissolution (it happened / clear answer / natural fade) closes it.
+- **Why merged into active_loops instead of a separate file:** Once the lifecycle is unified (both re-evaluated every round), maintaining two files loses its purpose. Merging reduces I/O and reduces model errors (no need to remember two separate write logics).
+- **Why 21 days, not 7:** "Meeting my mom" doesn't disappear after a week. 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
+
+---
+
+## 8. Messaging channel interface
 
 > ⚠️ **Status: design reference, not yet implemented.** The reference character uses Telegram directly via OpenClaw's built-in channel support (configured in `openclaw.json`). The interface below describes the abstraction Dolores *targets*; your setup agent will configure the channel for you using OpenClaw's native mechanisms.
 
@@ -242,7 +321,7 @@ The reference channel is **Telegram**. To use a different channel, configure it 
 
 ---
 
-## 8. The heartbeat: steps in detail
+## 9. The heartbeat: steps in detail
 
 **Cron:** `:40` of odd-numbered hours during waking time (4 runs: 07:40, 11:40, 15:40, 19:40), plus a 24:00 catchup. **Delivery: none** (heartbeat never sends; the send job at `:50` does). **Required final output:** the literal token `HEARTBEAT_OK`, so cron can detect partial failures.
 
@@ -252,8 +331,7 @@ Step 1: Restore state      — read all of state/ + last 3 days of diary + profi
 Step 2: Update world_ctx   — three-tier rebuild (see §1)
 Step 2b: Update appearance  — re-generate from activity + full conversation (check for outfit changes / intimacy)
 Step 3: Update affect      — bounded deltas based on world + interaction signals
-Step 4: Manage loops       — create from signals, retune cooldown, close completed
-Step 4b: Manage sticky     — check relationship-level threads, expire old ones
+Step 4: Manage loops       — create from signals, retune cooldown, manage sticky rumination, close completed
 Step 5: Generate thought   — hard gates → anti-repeat → reasoning → silence/store/send
 Step 6: Persist            — thoughts_log + pending_message (if send) + last_sync_at
 Step 7: git push           — commit and push, --allow-empty so dry runs still log
@@ -271,7 +349,7 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 ---
 
-## 9. The reflection pipeline: 4 stages
+## 10. The reflection pipeline: 4 stages
 
 **Cron:** four jobs at 23:15, 23:25, 23:35, 23:45.
 
@@ -290,7 +368,7 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 ---
 
-## 10. Structured check-ins as a design pattern
+## 11. Structured check-ins as a design pattern
 
 The reference character implements a daily health check-in. This is `[CHARACTER CONFIG]` — your character may not need it — but the *pattern* is general and worth understanding, because it demonstrates the strongest argument for emotional continuity: **a real partner cares about your body**.
 
@@ -311,11 +389,11 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 
 ---
 
-## 11. Cron schedule reference
+## 12. Cron schedule reference
 
 | Job | Cron | Delivery | Notes |
 |---|---|---|---|
-| Heartbeat | `40 7,11,15,19 * * *` | none | 10-step loop, every 2h |
+| Heartbeat | `40 7,11,15,19 * * *` | none | 9-step loop, every 2h |
 | Heartbeat catchup | `0 0 * * *` | none | post-reflection sweep |
 | Send | `50 7,11,15,19 * * *` | announce | drains pending_message |
 | Diary check | `55 7,11,15,19 * * *` | none | attribution check |
@@ -335,7 +413,7 @@ All times Asia/Shanghai in the reference; change to your timezone in `[USER CONF
 
 ---
 
-## 12. Three-layer cognition: the psychology underneath
+## 13. Three-layer cognition: the psychology underneath
 
 Already sketched in §1 Helix 2. The full theoretical lineage:
 
@@ -356,7 +434,7 @@ The most common failure mode in long-running agents is identity drift: small dai
 
 ---
 
-## 13. Design principles
+## 14. Design principles
 
 1. **Sessions write nothing.** All persistence belongs to background jobs.
 2. **Two-phase delivery.** Heartbeat decides; send job delivers. Never collapse them.
@@ -368,7 +446,7 @@ The most common failure mode in long-running agents is identity drift: small dai
 
 ---
 
-## 14. Extending Dolores: making her into someone else
+## 15. Extending Dolores: making her into someone else
 
 To turn Dolores into your character, in order:
 
