@@ -53,7 +53,7 @@ Sync new interactions from the conversation session into the diary. Conversation
 1. `exec` to extract sessionId from your sessions.json (implementation depends on your setup)
 2. Note the sessionId
 3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'` — extract conversation messages (for diary writing)
-4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | grep "$CUTOFF"` — extract user messages from the last 2 hours only (for Step 2 inference)
+4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | awk -v c="$CUTOFF" '{idx=index($0, "\"timestamp\":\""); if(idx>0) { ts=substr($0, idx+13, 13); if(ts >= c) print} }'` — extract user messages from the last 2 hours only (for Step 2 inference)
 5. Ignore `/new`, `Session Startup` system messages
 
 **0b. Detect New Interactions**
