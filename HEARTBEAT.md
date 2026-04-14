@@ -53,7 +53,8 @@ Sync new interactions from the conversation session into the diary. Conversation
 2. Note the sessionId
 3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'` — extract conversation messages (for diary writing)
 4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | awk -v c="$CUTOFF" '{idx=index($0, "\"timestamp\":\""); if(idx>0) { ts=substr($0, idx+13, 13); if(ts >= c) print} }'` — extract user messages from the last 2 hours only (for Step 2 inference)
-5. Ignore `/new`, `Session Startup` system messages
+5. `exec` `PLAN_FILE=state/daily_plan.md; NOW=$(date +%H:%M); NOW_NUM=$(echo "$NOW" | tr -d ':'); grep -E '^- [0-9]{2}:[0-9]{2}' "$PLAN_FILE" | awk -F' ' -v test="$NOW_NUM" 'BEGIN{ct="";cd="";nt="";nd=""}{raw=$0;sub(/^- /,"",raw);t=substr(raw,1,5);num=substr(raw,1,2) substr(raw,4,2)+0;desc=substr(raw,7);if(num>test){if(nt==""){nt=t;nd=desc};exit}ct=t;cd=desc}END{if(ct!=""){if(nt!="")print cd" ("ct"-"nt")";else print cd" (from "ct", nothing after)"}else{if(nt!="")print "Nothing scheduled. Next: "nd" ("nt")";else print "Nothing scheduled"}}'` — extract daily_plan current time slot (deterministic script, for Step 2h)
+6. Ignore `/new`, `Session Startup` system messages
 
 **0b. Detect New Interactions**
 
@@ -191,12 +192,20 @@ Scene is a literary description of [USER_NAME — USER CONFIG]'s environment, no
 
 Write `dolores_activity` field (1-2 sentences).
 
-**Inference priority (do not reverse):**
-1. **User messages from Step 0 (grep #4, last 2 hours only)** — only when user **explicitly states something they are doing together** (e.g. "let's eat together", "come over"), adopt activity directly. Otherwise **must fall to level 2 (daily_plan lookup)**, do not guess
-2. **state/daily_plan.md current time slot** — read in Step 1, look up the slot for current time, use that activity
-3. **Fallback inference** — if neither available, infer from time + SOUL.md daily life + affect
+**Input (only these two, no other sources):**
+1. Daily plan current time slot extracted by script in Step 0 (1 line, deterministic)
+2. User messages from Step 0 grep #4 (last 2 hours, raw conversation)
 
-⚠️ **Daily independent-time activity should come from daily_plan lookup, not invented each time.** daily_plan provides a trusted default; heartbeat just looks it up.
+⚠️ **Do NOT use** previous world_context dolores_activity as input (circular topology = recursive lock). ⚠️ **Do NOT use** diary to infer activity (no timestamps + bias compounding).
+
+**How to judge:** Read the two inputs above, answer "what is she doing right now?" (1-2 sentences). What actually happened in conversation takes priority over the plan.
+
+**Calibration examples (for understanding only, do not copy):**
+- Plan: dancing / no user messages → follow plan, she's dancing
+- Plan: cooking / user says "don't cook, come eat out, I'm downstairs" → going out to eat with him, getting dressed
+- Plan: reading / user says "I'm not feeling well, stay with me" → staying home with him, went to make congee
+- Plan: shopping / user messages are casual chat unrelated to plan → follow plan, out shopping
+- No plan scheduled / no user messages → infer from current time + SOUL.md daily life
 
 ### Step 2b: Update Appearance
 

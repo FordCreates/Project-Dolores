@@ -35,7 +35,7 @@ daily_plan         →  world_context     →  user messages (session)
 - `world_context` is rebuilt every heartbeat. It takes the prior, the current time, the user's profile, and the **user's messages** from the session, and infers "what's true right now for both of us." Dolores's own statements are inference outputs from last time, not inputs — this prevents recursive locking.
 - Session signals are the realtime ground truth: what you actually said in the last conversation, where you said you were, what you said you were doing.
 
-The three layers feed each other in priority order: **realtime signal > time + profile + rhythm > diary narrative > previous world_context**. The previous world_context is treated as a *weak* reference, not a fact, because it was itself an inference.
+For activity inference specifically, the engine follows a **deterministic-preprocess + single-step intuition** pattern: a script parses `daily_plan` into the current time slot (1 line), combined with raw user messages from the last 2 hours — the model answers "what is she doing right now?" in one intuitive step. No multi-level priority chains, no diary-based inference (no timestamps), and no previous activity as input (acyclic topology prevents recursive locking).
 
 > ⚠️ **Why it's built this way.** The naive approach is to let `world_context` persist and only update fields when something changes. This rots fast: stale "she's at the cafe" lingers for hours after the cafe closed. The fix is to **rebuild from scratch every heartbeat**, with old context as a hint not a source. Fields are tiered: *fast variables* (location, activity, scene) are re-inferred every cycle and never inherited; *medium variables* (her appearance/outfit) are re-generated every heartbeat with hard rules (never copy old value, never copy examples), must produce new description each time; only exception is during ongoing intimate activity; *slow variables* (weather) are owned by reflection and heartbeat doesn't touch them. This three-tier rule is the single most important rule in Helix 1 — without it the world feels glitchy in a way users can't articulate but immediately distrust.
 
@@ -328,8 +328,8 @@ The reference channel is **Telegram**. To use a different channel, configure it 
 ```
 Step 0: Session sync       — read session jsonl tail, append new exchanges to diary
 Step 1: Restore state      — read all of state/ + last 3 days of diary + profile-user
-Step 2: Update world_ctx   — three-tier rebuild (see §1)
-Step 2b: Update appearance  — re-generate from activity + full conversation (check for outfit changes / intimacy)
+Step 2: Update world_ctx   — script extracts plan slot + user messages → single-step intuition (see §1)
+Step 2b: Update appearance  — re-generate from activity (from Step 2 script+intuition) + grep #3 intimacy check
 Step 3: Update affect      — bounded deltas based on world + interaction signals
 Step 4: Manage loops       — create from signals, retune cooldown, manage sticky rumination, close completed
 Step 5: Generate thought   — hard gates → anti-repeat → reasoning → silence/store/send
@@ -339,7 +339,7 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 **Step 0** uses `tail -200` and `grep` on the session jsonl rather than reading the whole file. The whole file grows unbounded; `tail` is constant time. UTC→local timezone conversion happens here against `last_sync_at`.
 
-**Step 2** is the three-tier rebuild from §1. The temptation to inherit fields from the previous cycle must be resisted at every field; old context is a hint, never a source.
+**Step 2** uses a deterministic-preprocess + single-step-intuition pattern (see §1). A script parses `daily_plan` into the current time slot; combined with raw user messages, the model answers one question: "what is she doing right now?" No previous activity as input — the data topology is acyclic, so recursive locking is impossible.
 
 **Step 5** is the cognitive decision point. The hard gates run first (cooldown, quiet hours, explicit user-is-busy signals → force silence/store). Then anti-repeat (if `thoughts_log` already has a `send` on this topic today, don't re-send). Then natural-language reasoning over the full context. **Default direction is `send`** — silence is the choice that requires justification, not the other way around. A character who needs a reason to speak feels passive; a character who needs a reason to stay silent feels alive.
 
