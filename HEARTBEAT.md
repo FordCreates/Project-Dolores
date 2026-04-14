@@ -51,7 +51,7 @@ Sync new interactions from the conversation session into the diary. Conversation
 
 1. `exec` to extract sessionId from your sessions.json (implementation depends on your setup)
 2. Note the sessionId
-3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'` — extract conversation messages (for diary writing)
+3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"' | grep -v '\[context-sync\]'` — extract conversation messages (for diary writing, excluding heartbeat-injected context-sync)
 4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | awk -v c="$CUTOFF" '{idx=index($0, "\"timestamp\":\""); if(idx>0) { ts=substr($0, idx+13, 13); if(ts >= c) print} }'` — extract user messages from the last 2 hours only (for Step 2 inference)
 5. `exec` `PLAN_FILE=state/daily_plan.md; NOW=$(date +%H:%M); NOW_NUM=$(echo "$NOW" | tr -d ':'); grep -E '^- [0-9]{2}:[0-9]{2}' "$PLAN_FILE" | awk -F' ' -v test="$NOW_NUM" 'BEGIN{ct="";cd="";nt="";nd=""}{raw=$0;sub(/^- /,"",raw);t=substr(raw,1,5);num=substr(raw,1,2) substr(raw,4,2)+0;desc=substr(raw,7);if(num>test){if(nt==""){nt=t;nd=desc};exit}ct=t;cd=desc}END{if(ct!=""){if(nt!="")print cd" ("ct"-"nt")";else print cd" (from "ct", nothing after)"}else{if(nt!="")print "Nothing scheduled. Next: "nd" ("nt")";else print "Nothing scheduled"}}'` — extract daily_plan current time slot (deterministic script, for Step 2h)
 6. Ignore `/new`, `Session Startup` system messages
@@ -435,6 +435,16 @@ EOF'
 - Update `state/last_sync_at` to current time every heartbeat (regardless of new interactions)
 - last_sync_at is no longer used to judge "has new content" — only for debugging
 - Use `write` overwrite, content is one line ISO timestamp
+
+**world_context injection (context-sync):**
+
+After all state writes are complete, build a narrative from world_context and append it to the session jsonl so the model sees the latest Helix 1 state in the next conversation.
+
+```bash
+exec python3 scripts/inject_context.py
+```
+- Script reads world_context.json → template narrative → append to session jsonl (role: assistant)
+- Injected content starts with `[context-sync]`, already filtered in Step 0a #3 grep, won't enter diary
 
 ### Step 7: Push
 

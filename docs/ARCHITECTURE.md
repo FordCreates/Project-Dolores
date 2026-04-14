@@ -35,6 +35,26 @@ daily_plan         →  world_context     →  user messages (session)
 - `world_context` is rebuilt every heartbeat. It takes the prior, the current time, the user's profile, and the **user's messages** from the session, and infers "what's true right now for both of us." Dolores's own statements are inference outputs from last time, not inputs — this prevents recursive locking.
 - Session signals are the realtime ground truth: what you actually said in the last conversation, where you said you were, what you said you were doing.
 
+**Helix 1 injection into the conversation session** (bridging to Helix 2):
+
+There are two paths for world_context to reach the model's context:
+
+```
+Path A: Session startup (/new or new session)
+  AGENTS.md startup sequence → read state/world_context.json
+  → model gets current snapshot
+  → only runs on /new, not refreshed afterward
+
+Path B: Heartbeat context-sync (every 2h, Step 6)
+  Heartbeat writes world_context.json
+  → exec inject_context.py
+  → script reads world_context.json → template narrative → append to session jsonl (role: assistant)
+  → model sees latest state in history on next message
+  → no /new needed to refresh
+```
+
+Path A is initialization; Path B is incremental update. Together they ensure the model always has current context, whether the session just started or has been running for hours. Injected content is tagged `[context-sync]` and filtered out during diary sync to prevent duplication.
+
 For activity inference specifically, the engine follows a **deterministic-preprocess + single-step intuition** pattern: a script parses `daily_plan` into the current time slot (1 line), combined with raw user messages from the last 2 hours — the model answers "what is she doing right now?" in one intuitive step. No multi-level priority chains, no diary-based inference (no timestamps), and no previous activity as input (acyclic topology prevents recursive locking).
 
 > ⚠️ **Why it's built this way.** The naive approach is to let `world_context` persist and only update fields when something changes. This rots fast: stale "she's at the cafe" lingers for hours after the cafe closed. The fix is to **rebuild from scratch every heartbeat**, with old context as a hint not a source. Fields are tiered: *fast variables* (location, activity, scene) are re-inferred every cycle and never inherited; *medium variables* (her appearance/outfit) are re-generated every heartbeat with hard rules (never copy old value, never copy examples), must produce new description each time; only exception is during ongoing intimate activity; *slow variables* (weather) are owned by reflection and heartbeat doesn't touch them. This three-tier rule is the single most important rule in Helix 1 — without it the world feels glitchy in a way users can't articulate but immediately distrust.
@@ -130,6 +150,11 @@ dolores/
 │
 └── channels/                     [ARCHITECTURE] (directory, future)
     └── interface.md              [ARCHITECTURE] the target contract (§7)
+
+scripts/                        [ARCHITECTURE] (directory)
+├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
+└── lib/
+    └── session_append.py        [ARCHITECTURE] shared jsonl append utility
 ```
 
 **Read these first, in this order, to understand the codebase:** `README.md` → this document §1 → `SOUL.md` → `HEARTBEAT.md` → `state/world_context.json` (look at a real one) → `REFLECTION_PREP.md`. Everything else is reachable from those six.
