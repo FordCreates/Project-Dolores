@@ -91,6 +91,14 @@ cp $REPO/reflection_trace.md ~/.openclaw/workspace-dolores/reflection_trace.md
 # Create initial state files
 touch ~/.openclaw/workspace-dolores/state/last_sync_at
 touch ~/.openclaw/workspace-dolores/state/last_diary_check_at
+
+# Seed self-narrative slots (cold start for reflection)
+# Without these, the first reflection has no fallback and must generate all slots from scratch — Slot 1 may drift from SOUL.md and lock permanently.
+TODAY=$(date +%Y-%m-%d)
+mkdir -p ~/.openclaw/workspace-dolores/state/slots/$TODAY
+for i in 1 2 3 4 5; do
+  cp $REPO/state/slots/day-zero/self_slot_$i.md ~/.openclaw/workspace-dolores/state/slots/$TODAY/self_slot_$i.md
+done
 ```
 
 ## Step 3: Replace placeholders
