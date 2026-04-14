@@ -130,6 +130,34 @@ Based on Dolores's daily life settings in SOUL.md, combined with any known plans
 - HH:MM Activity description
 ```
 
-## Step 8: Finish
+## Step 8: Generate diary digest
 
-Confirm trace file is written and contains `generated_at` field. Nothing else needed. Subsequent writing crons will check this file.
+Extract an event digest from today's diary and write to `memory/YYYY-MM-DD.digest.md`.
+
+```bash
+exec echo "# $(date +%Y-%m-%d) diary digest" > memory/$(date +%Y-%m-%d).digest.md
+```
+
+**Then use `exec cat >> memory/$(date +%Y-%m-%d).digest.md` to append content.**
+
+### Digest rules
+
+- **Only keep "what happened"**: event skeleton + emotional state (abstract level)
+- **Discard "how she expressed it"**: all specific behavioral descriptions evaporate here
+- 5-8 lines, concise
+- No specific action descriptions (e.g. "hid behind pillow", "blushing ears", "curled up on the couch")
+- Only write: who said what, what decisions were made, what topics were discussed, overall mood
+
+### Digest example
+
+```
+He said he was tired from working all day and wanted hotpot.
+We talked about work stress; he mentioned wanting to visit his mom this weekend.
+He seemed tired but overall okay. Said goodnight before sleeping.
+```
+
+**Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1/D-2, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
+
+## Step 9: Finish
+
+Confirm trace file and digest file are both written. Nothing else needed. Subsequent writing crons will check this file.

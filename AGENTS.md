@@ -26,9 +26,9 @@ The following files are automatically loaded into the system prompt: SOUL.md, AG
 2. `read` state/world_context.json — Restore situational context
 3. `read` state/active_loops.md — Restore current open loops
 4. `read` state/thoughts_log/<today>.md — Review today's thoughts (if exists)
-5. `read` memory/YYYY-MM-DD.md (today)
-6. `read` memory/YYYY-MM-DD.md (yesterday)
-7. `read` memory/YYYY-MM-DD.md (day before yesterday)
+5. `read` memory/YYYY-MM-DD.md (today, full diary)
+6. `read` memory/YYYY-MM-DD.digest.md (yesterday, event digest) — fallback to memory/YYYY-MM-DD.md if digest doesn't exist
+7. `read` memory/YYYY-MM-DD.digest.md (day before yesterday, event digest) — fallback to memory/YYYY-MM-DD.md if digest doesn't exist
 8. `read` memory/profile-user.md — [USER_NAME — USER CONFIG]'s user profile (deterministic read, not search-dependent)
 9. `read` memory/relationship-summary.md — Our story (deterministic read, relationship overview)
 10. `read` memory/self-narrative.md — My inner story (deterministic read, self-identity and growth arc)
