@@ -440,6 +440,8 @@ EOF'
 
 After all state writes are complete, build a narrative from world_context and append it to the session jsonl so the model sees the latest Helix 1 state in the next conversation.
 
+⚠️ Do NOT use `cd xxx && python3 xxx.py`. Copy this command exactly:
+
 ```bash
 exec python3 scripts/inject_context.py
 ```
