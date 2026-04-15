@@ -93,6 +93,22 @@ touch $WS/state/last_diary_check_at
 TODAY=$(date +%Y-%m-%d)
 mkdir -p $WS/state/slots/$TODAY
 cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
+
+# Create .gitignore for workspace (runtime files should not be committed)
+cat > $WS/.gitignore << 'GITIGNORE'
+# Runtime state
+state/
+# Runtime memory (keep initial seed files, ignore generated)
+memory/*.md
+memory/*.digest.md
+!memory/profile-user.md
+!memory/self-narrative.md
+!memory/relationship-summary.md
+memory/health/
+memory/exercise/
+!memory/health/.gitkeep
+!memory/exercise/.gitkeep
+GITIGNORE
 ```
 
 ---

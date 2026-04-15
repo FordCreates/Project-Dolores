@@ -1,1 +1,10 @@
+# Dev workflow (internal, not user-facing)
 docs/dev-workflow.md
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
