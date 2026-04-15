@@ -48,7 +48,6 @@ Ask all of these, then fill USER.md:
 - **Language** — Primary language (e.g., English, 中文)
 - **Occupation** — What does the user do?
 - **Relationship** — How does the user define the relationship with Dolores? (e.g., girlfriend, partner, friend)
-- **Communication style** — Direct? Playful? Reserved?
 
 ### 1e. Health Checkin
 > "Dolores can track your health data daily (symptoms, medications, exercise). Want to enable this?"
@@ -216,7 +215,6 @@ Search all workspace files for these placeholders and replace with the user's va
 | `[USER_LANGUAGE — USER CONFIG]` | USER.md | Language from Step 1d |
 | `[USER_OCCUPATION — USER CONFIG]` | USER.md | Occupation from Step 1d |
 | `[USER_RELATIONSHIP — USER CONFIG]` | USER.md | Relationship from Step 1d |
-| `[USER_COMM_STYLE — USER CONFIG]` | USER.md | Communication style from Step 1d |
 | `[USER_SYMPTOMS — USER CONFIG]` | HEALTH_CHECKIN.md | Symptom fields (only if health enabled in Step 1e) |
 | `[WORKSPACE_PATH — USER CONFIG]` | scripts/*.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
 | `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Absolute path to sessions directory |
