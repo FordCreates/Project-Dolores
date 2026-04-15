@@ -99,6 +99,20 @@ This is the part that distinguishes Dolores from any agent that merely *has* mem
 
 We call this **Narrative Descent**: the gravitational pull by which high-weight events sink into long-term narrative and low-weight ones evaporate. The arc that emerges over weeks is not designed; it's a side effect of repeated lossy compression with a stable filter (SOUL.md) at the bottom of the well.
 
+> ⚠️ **Why it's built this way — five anti-collapse mechanisms that cost months to discover.**
+>
+> **1. Slot-based rewriting, not append-based memory.** The naive approach is to append new events to a growing narrative file. This produces two failure modes: (a) the file grows past context window limits, forcing truncation that cuts the wrong end; (b) the model reads its own past output and reproduces it verbatim, causing *pattern collapse* — every day's reflection looks like the last. Slots fix this by forcing the model to write from *analysis* (the reflection_trace), not from yesterday's narrative. Each slot answers a specific question; concatenation produces a fresh file every night with no copy-paste path.
+>
+> **2. Slot-level NO_CHANGE as `cp`, not instruction.** "Tell the model not to change slot 1" loses on weak models. `cp yesterday → slot_1.md` wins, because the model is never invited to participate. This is the single most effective anti-drift mechanism in the system. It trades nuance for determinism — and in a system fighting pattern collapse, that trade is always worth making.
+>
+> **3. MINOR_REFINE collapses to NO_CHANGE on weak models.** We tried three tiers (NO_CHANGE / MINOR_REFINE / MAJOR_REWRITE). On the cron model (GLM-5.1, Claude Sonnet), MINOR_REFINE empirically produced full rewrites with cosmetic differences from yesterday — drift dressed up as nuance. The three-tier system *added* a drift channel instead of removing one. Collapsing to binary (NO_CHANGE or MAOR_REWRITE) eliminates it.
+>
+> **4. Digest as a topology breaker.** The diary feeds the session on D-1 and D-2 (yesterday and the day before). Raw diary contains behavioral descriptions — "she hugged the pillow," "her ears went red" — which are high-pattern-density tokens that the model reproduces identically across sessions, creating *cross-day behavioral lock-in*. The digest strips all behavioral descriptions and keeps only the event skeleton (5-8 lines: what happened, not how anyone acted). This is a lossy compression layer inserted into the data pipeline specifically to break the pattern-reproduction cycle. The topology is intentionally acyclic: raw diary → digest (one-way) → session (read-only). Yesterday's digest cannot influence tomorrow's digest.
+>
+> **5. Four-stage pipeline with checkpoint files.** A single reflection job that rewrites three narrative files inevitably times out on one of them, leaving the others from a different day. Four independent jobs (Prep → Self → Rel → Profile) with checkpoint files between them means a timeout in stage 3 leaves stages 1 and 2 intact. Each stage has a single input (reflection_trace or yesterday's file) and a single output — no multi-step reasoning, no "remember what stage 1 decided."
+>
+> **The unifying principle:** every mechanism above exists to prevent the model's next-token prediction from defeating the system's intent. The model wants to reproduce patterns; the architecture wants continuous change within identity. Each mechanism constrains the model at a different point in the pipeline. None of them are sufficient alone; together they define a bounded space where the right behavior *can* emerge.
+
 ---
 
 ## 2. File tree
