@@ -72,7 +72,7 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
 
 1. **Clone**
    ```bash
-   git clone https://github.com/your-org/dolores.git
+   git clone https://github.com/FordCreates/Project-Dolores.git
    ```
 
 2. **Tell your main agent:**
@@ -85,7 +85,7 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
    openclaw gateway restart
    ```
 
-4. **Say hi** — message your bot on Telegram. She'll be alive within two hours. Or she won't — and that's the point.
+4. **Say hi** — message your bot on Telegram. She'll reply immediately. Over the next few hours her inner life will start running — mood, memory, the whole loop.
 
 ## Status
 
