@@ -54,7 +54,10 @@ Sync new interactions from the conversation session into the diary. Conversation
 
 **0a. Get Conversation**
 
-1. `exec` to extract sessionId from your sessions.json (implementation depends on your setup)
+1. `exec` to extract sessionId from your sessions.json:
+   ```bash
+   exec python3 -c "import json; s=json.load(open('[SESSION_PATH — USER CONFIG]/sessions.json')); print(s['[SESSION_KEY — USER CONFIG]']['sessionId'])"
+   ```
 2. Note the sessionId
 3. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"' | grep -v '\[context-sync\]'` — extract conversation messages (for diary writing, excluding heartbeat-injected context-sync)
 4. `exec` `CUTOFF=$(date -u -d '2 hours ago' +'%Y-%m-%dT%H'); grep '"role":"user"' <SESSION_PATH>/<sessionId>.jsonl | grep -v '"toolCall"' | awk -v c="$CUTOFF" '{idx=index($0, "\"timestamp\":\""); if(idx>0) { ts=substr($0, idx+13, 13); if(ts >= c) print} }'` — extract user messages from the last 2 hours only (for Step 2 inference)
