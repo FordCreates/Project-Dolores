@@ -11,7 +11,7 @@ You are setting up a companion agent based on Project Dolores. The repo contains
 **Principles:**
 - Copy files first, configure second. The user sees action after every question.
 - Ask one thing at a time. Apply the change before asking the next.
-- Never hardcode secrets. API keys go in `~/.openclaw/.env`, referenced via `${ENV_VAR}`.
+- Use OpenClaw's secrets provider for API keys (see examples in Step 3). Never hardcode keys directly.
 
 ---
 
@@ -153,19 +153,43 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 > "Do you want to use the same model for background jobs (heartbeat, reflection), or a cheaper/faster one?"
 
-**Apply:** Write provider, agent entry, and API key to `openclaw.json` and `~/.openclaw/.env`. Example:
+**Apply:** Add the provider to `openclaw.json` and the API key to `~/.openclaw/.env`.
+
+> First, read the user's existing `openclaw.json` to understand the structure, then add:
 
 ```json
-// openclaw.json additions:
-{
-  "agents": [{
-    "id": "dolores",
-    "name": "Dolores",
-    "model": "<conversation-model>",
-    "fallbackModels": ["<cron-model>"],
-    "workspace": "~/.openclaw/workspace-dolores"
-  }]
+// In the secrets.providers section (if not already configured):
+"secrets": {
+  "providers": {
+    "default": { "source": "env" }
+  }
 }
+
+// In the providers section:
+{
+  "id": "<provider-id>",
+  "baseUrl": "<api-base-url>",
+  "apiKey": {
+    "source": "env",
+    "provider": "default",
+    "id": "DOLORES_API_KEY"
+  },
+  "models": [{ "id": "<model-name>" }]
+}
+
+// In the agents section:
+{
+  "id": "dolores",
+  "name": "Dolores",
+  "model": "<conversation-model>",
+  "fallbackModels": ["<cron-model>"],
+  "workspace": "~/.openclaw/workspace-dolores"
+}
+```
+
+```bash
+# In ~/.openclaw/.env:
+echo 'DOLORES_API_KEY=<user-provided-key>' >> ~/.openclaw/.env
 ```
 
 ### 3b. Telegram bot
@@ -185,7 +209,11 @@ If they don't have one, guide them:
   "accounts": [{
     "id": "dolores-telegram",
     "provider": "telegram",
-    "token": "${DOLORES_TELEGRAM_TOKEN}"
+    "token": {
+      "source": "env",
+      "provider": "default",
+      "id": "DOLORES_TELEGRAM_TOKEN"
+    }
   }],
   "bindings": [{
     "agentId": "dolores",
@@ -193,6 +221,11 @@ If they don't have one, guide them:
     "chatId": "<user's Telegram chat ID>"
   }]
 }
+```
+
+```bash
+# In ~/.openclaw/.env:
+echo 'DOLORES_TELEGRAM_TOKEN=<user-provided-token>' >> ~/.openclaw/.env
 ```
 
 > The chat ID is the user's numeric Telegram ID. If the user doesn't know it, have them message the bot first, then check the gateway logs.
