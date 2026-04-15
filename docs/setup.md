@@ -188,10 +188,10 @@ cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
   "time": "",
   "weather": "",
   "scene": "",
-  "akemi_activity": "",
-  "akemi_appearance": "",
-  "papi_location": "",
-  "papi_activity": "",
+  "dolores_activity": "",
+  "dolores_appearance": "",
+  "user_location": "",
+  "user_activity": "",
   "interaction_context": "",
   "context_note": ""
 }

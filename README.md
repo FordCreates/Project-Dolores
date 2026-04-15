@@ -76,7 +76,7 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
    ```
 
 2. **Tell your main agent:**
-   > Set up Dolores from ~/dolores
+   > Set up Dolores from ~/Project-Dolores
 
    That's it. Your agent reads [docs/setup.md](./docs/setup.md) and walks you through everything — model choice, workspace creation, all cron jobs. You just answer a few questions.
 
