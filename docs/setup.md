@@ -152,37 +152,45 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 > "Do you want to use the same model for background jobs (heartbeat, reflection), or a cheaper/faster one?"
 
-**Apply:** Add the provider to `openclaw.json` and the API key to `~/.openclaw/.env`.
-
-> First, read the user's existing `openclaw.json` to understand the structure, then add:
+**Apply:** Read the user's existing `openclaw.json` to understand the structure, then add:
 
 ```json
-// In the secrets.providers section (if not already configured):
+// In secrets.providers (if not already configured):
 "secrets": {
   "providers": {
     "default": { "source": "env" }
   }
 }
 
-// In the providers section:
-{
-  "id": "<provider-id>",
+// In models.providers — add the LLM provider:
+"<provider-id>": {
   "baseUrl": "<api-base-url>",
   "apiKey": {
     "source": "env",
     "provider": "default",
     "id": "DOLORES_API_KEY"
   },
-  "models": [{ "id": "<model-name>" }]
+  "api": "openai-completions",
+  "models": [{
+    "id": "<model-name>",
+    "name": "<display-name>",
+    "reasoning": false,
+    "input": ["text"],
+    "contextWindow": 200000,
+    "maxTokens": 8192
+  }]
 }
 
-// In the agents section:
+// In agents.list — add the companion agent:
 {
   "id": "dolores",
   "name": "Dolores",
-  "model": "<conversation-model>",
-  "fallbackModels": ["<cron-model>"],
-  "workspace": "~/.openclaw/workspace-dolores"
+  "workspace": "/home/<user>/.openclaw/workspace-dolores",
+  "model": {
+    "primary": "<provider-id>/<model-name>",
+    "fallbacks": ["<cron-provider>/<cron-model>"]
+  },
+  "memorySearch": { "provider": "local" }
 }
 ```
 
@@ -190,6 +198,8 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 # In ~/.openclaw/.env:
 echo 'DOLORES_API_KEY=<user-provided-key>' >> ~/.openclaw/.env
 ```
+
+> **Note:** The `workspace` path must be absolute, not `~/`. The main agent should resolve it.
 
 ### 3b. Telegram bot
 
@@ -201,24 +211,30 @@ If they don't have one, guide them:
 3. Follow the prompts — pick a name and username
 4. Copy the token
 
-**Apply:** Write account and binding to `openclaw.json`:
+**Apply:** Add the Telegram account and binding to `openclaw.json`:
 
 ```json
+// In channels.telegram.accounts:
+"dolores": {
+  "name": "Dolores",
+  "dmPolicy": "pairing",
+  "botToken": {
+    "source": "env",
+    "provider": "default",
+    "id": "DOLORES_TELEGRAM_TOKEN"
+  },
+  "groupPolicy": "allowlist",
+  "streaming": "partial"
+}
+
+// In bindings array:
 {
-  "accounts": [{
-    "id": "dolores-telegram",
-    "provider": "telegram",
-    "token": {
-      "source": "env",
-      "provider": "default",
-      "id": "DOLORES_TELEGRAM_TOKEN"
-    }
-  }],
-  "bindings": [{
-    "agentId": "dolores",
-    "accountId": "dolores-telegram",
-    "chatId": "<user's Telegram chat ID>"
-  }]
+  "type": "route",
+  "agentId": "dolores",
+  "match": {
+    "channel": "telegram",
+    "accountId": "dolores"
+  }
 }
 ```
 
