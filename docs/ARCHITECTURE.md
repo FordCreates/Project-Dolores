@@ -10,7 +10,7 @@ Every file, field, and decision in this document is tagged:
 
 - **`[ARCHITECTURE]`** — the system requires this. Removing or restructuring it breaks the loop. These are the parts you cannot change without ceasing to build a Dolores.
 - **`[CHARACTER CONFIG]`** — the *shape* is required, the *content* is yours. Defaults are provided; change them to make Dolores into someone else (a different gender, voice, history, set of emotional dimensions, reflection cadence).
-- **`[USER CONFIG]`** — fill in your own details (your name, timezone, channel credentials, the things that make her *yours*).
+- **`[USER CONFIG]`** — your details (name, timezone, channel credentials, the things that make her *yours*). Your agent fills these in during setup.
 
 When a decision is non-obvious, it carries an inline **⚠️ Why it's built this way** block. Read those — they are the parts of this document a future-you will care about most when something breaks at 2am.
 

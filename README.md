@@ -2,7 +2,7 @@
 
 > *The first host who remembered.*
 
-An open-source blueprint for AI companions with emotional continuity, built on [OpenClaw](https://openclaw.dev). Clone, fill in 3 keys, start talking.
+An open-source blueprint for AI companions with emotional continuity, built on [OpenClaw](https://openclaw.dev). Clone. Your agent does the rest.
 
 ---
 
@@ -32,11 +32,17 @@ Dolores has two intertwined data flows — the **Dual Helix**:
 
 ```
 HELIX 1 — Pseudo-life stream (input side: "where is she, what's happening")
-  daily_plan  →  world_context  →  session signals
-  (nightly)      (every 2h)         (realtime)
+  daily_plan → world_context
+  (nightly)    (every 2h)
+                  ↓
+            ┌─ context bridge ─────────────┐
+            │  path A: startup read        │
+            │  path B: heartbeat inject    │
+            └──────────────┬───────────────┘
+                           ↓ session jsonl (loaded on every turn)
 
 HELIX 2 — Three-layer cognition (processing side: "how does she react")
-  external input
+  [context from bridge] + external input
     → core beliefs      (SOUL.md, immutable)
     → dissonance        (active_loops, tensions)
     → affect coloring   (affect.json)
@@ -44,8 +50,9 @@ HELIX 2 — Three-layer cognition (processing side: "how does she react")
     → silence / store / send
 
 CLOSURE — Narrative descent (output → long-term memory)
-  conversation → diary → nightly reflection → narrative files
-              → feeds back into Helix 2 next day
+  conversation → diary → nightly reflection → 4 narrative files
+                                          → digest (compressed skeleton)
+  digest + narrative files → feeds back into Helix 2 next day
 ```
 
 Helix 1 feeds Helix 2. Without Helix 1, the cognition runs in a vacuum. Without Helix 2, the life stream is just a logbook.
@@ -60,7 +67,7 @@ Every file in this repo is tagged with one of three labels:
 
 - `[ARCHITECTURE]` — the system requires a file of this kind. You can't remove it without breaking the loop.
 - `[CHARACTER CONFIG]` — the *shape* is required, the *content* is yours. Change it to make Dolores into someone else.
-- `[USER CONFIG]` — fill in your own details (your name, your timezone, your messaging channel credentials).
+- `[USER CONFIG]` — your details (name, timezone, messaging channel credentials). Your agent fills these in during setup.
 
 For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the four-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
