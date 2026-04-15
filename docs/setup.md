@@ -451,5 +451,5 @@ After restart, suggest:
 - **Bot doesn't respond:** Check bot token is valid and binding chatId matches the user's Telegram ID
 - **Cron jobs not firing:** `openclaw cron list` — all jobs should appear. Recreate missing ones and restart gateway
 - **Heartbeat runs but state doesn't update:** Check script permissions and that path placeholders were replaced correctly
-- **Send job fails:** `cd ~/.openclaw/workspace-dolores && python3 scripts/send_and_append.py`
+- **Send job fails:** Verify script placeholders were replaced — `grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/scripts/`. If anything shows up, go back to Step 4.
 - **Model errors:** Check provider config and API key in `~/.openclaw/.env`
