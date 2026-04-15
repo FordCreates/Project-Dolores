@@ -4,6 +4,35 @@
 
 ---
 
+## Step 0: Risk Disclosure
+
+Before anything else, scan the project structure and present these risks to the user. Let them decide whether to continue.
+
+### Risks to disclose
+
+1. **Experimental prototype** — This is an early-stage research prototype based on the author's Dual-Helix Cognition model and narrative descent theory. It is rough, actively iterating, and has known bugs. It is not a polished product.
+
+2. **API costs** — 34 cron jobs run daily plus ongoing conversations. This generates continuous token usage and cost.
+
+3. **NSFW account ban risk** — If the relationship includes sexual content, Claude will permanently ban your account. Use open-source models (DeepSeek, Qwen, GLM) for NSFW scenarios.
+
+4. **Privacy** — All conversation logs, diaries, health data, and emotional states are stored as plain text files on your machine. No encryption.
+
+5. **Single-user only** — Designed for one person. Not multi-tenant.
+
+6. **Requires OpenClaw running** — If your machine is off or OpenClaw stops, she stops. No cloud fallback.
+
+7. **Known model limitations** — GLM-family models have weak constraint following on long-form generation (reflection slot bloat, persona drift). Claude is recommended but carries the NSFW risk above.
+
+8. **Basic technical literacy needed** — Your main agent handles most setup, but troubleshooting requires reading logs and running commands.
+
+> After presenting these, ask: "Still want to proceed?"
+>
+> If no — stop here, no harm done.
+> If yes — continue to Step 1.
+
+---
+
 ## Context
 
 You are setting up a companion agent based on Project Dolores. The repo contains ready-to-use files — not templates. Your job is to copy them into the OpenClaw workspace, then configure everything step by step by asking the user questions and applying changes immediately.
