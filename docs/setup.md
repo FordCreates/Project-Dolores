@@ -82,6 +82,8 @@ cp $REPO/state/affect.json $WS/state/
 cp $REPO/state/world_context.json $WS/state/
 cp $REPO/state/active_loops.md $WS/state/
 cp $REPO/state/daily_plan.md $WS/state/
+cp $REPO/state/pending_message.md $WS/state/
+cp $REPO/state/last_sync_at $WS/state/
 cp $REPO/memory/profile-user.md $WS/memory/
 cp $REPO/memory/self-narrative.md $WS/memory/
 cp $REPO/memory/relationship-summary.md $WS/memory/

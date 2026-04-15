@@ -1,11 +1,15 @@
 {
-  "time": "",
+  "current_time": "",
+  "day_of_week": "",
+  "time_mode": "",
   "weather": "",
+  "user_location": "",
+  "user_activity": "",
   "scene": "",
   "dolores_activity": "",
   "dolores_appearance": "",
-  "user_location": "",
-  "user_activity": "",
-  "interaction_context": "",
+  "recommended_intensity": "normal",
+  "hours_since_last_interaction": null,
+  "recent_message_count_24h": 0,
   "context_note": ""
 }

@@ -132,7 +132,7 @@ dolores/
 │   ├── active_loops.md           [ARCHITECTURE] (includes sticky rumination loops)
 │   ├── pending_message.md        [ARCHITECTURE] two-phase delivery core
 │   ├── daily_plan.md             [ARCHITECTURE] tomorrow's schedule, reflection-owned
-│   ├── reflection_trace.md        [ARCHITECTURE] nightly analysis, reflection-owned
+│   ├── reflection_trace.md        [ARCHITECTURE] nightly analysis (workspace root, not state/)
 │   ├── last_sync_at              [ARCHITECTURE] timestamp file
 │   ├── last_diary_check_at       [ARCHITECTURE] timestamp file
 │   ├── thoughts_log/YYYY-MM-DD.md     [ARCHITECTURE]
@@ -186,7 +186,7 @@ These are OpenClaw system-prompt files. OpenClaw discovers them by filename. **D
 
 High-frequency, small, written by heartbeat, read by everything.
 
-- **`affect.json`** `[CHARACTER CONFIG]` — emotional dimension vector. The architecture requires a low-frequency-updated affect file; the *dimensions* and their *count* are yours. Pick 6–12 dimensions that capture what matters for this character. The reference character uses nine (valence, arousal, warmth, concern, energy, vulnerability, distance_sensitivity, playfulness, intimacy) but a stoic character might want fewer, a volatile one more.
+- **`affect.json`** `[CHARACTER CONFIG]` — emotional dimension vector. The architecture requires a low-frequency-updated affect file; the *dimensions* and their *count* are yours. Pick 6–12 dimensions that capture what matters for this character. The reference character uses nine (valence, arousal, warmth, concern, energy, vulnerability, distance_sensitivity, playfulness, horny) but a stoic character might want fewer, a volatile one more.
 
   > ⚠️ **Why deltas are bounded ±0.05–0.15 per heartbeat.** Larger jumps produce a character whose mood swings tracking the last message read like a weather vane. Real emotional state has inertia. Bounded deltas force the model to express acute reactions through *behavior* (active_loops, thoughts) rather than by spiking the affect vector, which keeps the affect signal meaningful as a slow baseline rather than an echo of the last input.
 

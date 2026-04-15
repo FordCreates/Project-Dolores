@@ -1,7 +1,11 @@
 {
-  "warmth": 0.50,
-  "curiosity": 0.50,
-  "anxiety": 0.30,
-  "desire_for_connection": 0.50,
-  "horny": 0.00
+  "valence": 0.5,
+  "arousal": 0.3,
+  "warmth": 0.5,
+  "concern": 0.3,
+  "energy": 0.5,
+  "vulnerability": 0.2,
+  "distance_sensitivity": 0.3,
+  "playfulness": 0.4,
+  "horny": 0.0
 }
