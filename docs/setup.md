@@ -19,7 +19,7 @@ Before starting, verify:
 Ask the following questions **one at a time**, in this order. Explain briefly why each is needed.
 
 ### 1a. City
-> "Dolores's story is set in the American South. Which city should she be in? (e.g., Savannah, Nashville, Austin)"
+> "Dolores's story is set in the United States. Which city should she be in? (e.g., Savannah, New York, Austin, Portland)"
 
 Used for weather forecasts and scene inference in SOUL.md and REFLECTION_PREP.md.
 
