@@ -56,11 +56,8 @@ cp $REPO/memory/relationship-summary.md $WS/memory/
 
 # Create initial state files
 touch $WS/state/last_diary_check_at
-```
 
-### Seed day-zero reflection slots
-
-```bash
+# Seed day-zero reflection slots (prevents first-night drift)
 TODAY=$(date +%Y-%m-%d)
 mkdir -p $WS/state/slots/$TODAY
 cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
