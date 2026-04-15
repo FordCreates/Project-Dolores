@@ -111,7 +111,7 @@ Ask these questions one at a time. After each answer, apply the change immediate
 
 > "What should Dolores call you?"
 
-**Apply:** Replace all `[USER_NAME — USER CONFIG]` in `AGENTS.md` and `USER.md`.
+**Apply:** Replace all `[USER_NAME — USER CONFIG]` in `AGENTS.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `HEALTH_CORRECTION.md`, `DIARY_CHECK.md`, and `MEMORY.md`.
 
 > "What timezone are you in? (e.g., America/New_York)"
 
