@@ -66,27 +66,26 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
 
 ## Quick start
 
+**Prerequisites:**
+- [OpenClaw](https://github.com/openclaw/openclaw) installed and gateway running
+- A Telegram bot token — [create one in 30 seconds with @BotFather](https://t.me/BotFather)
+
 1. **Clone**
    ```bash
    git clone https://github.com/your-org/dolores.git
    ```
 
-2. **Tell your OpenClaw main agent to set it up.** Open a new session and say:
-   > Set up a companion agent from `~/dolores`. My LLM provider is [provider], API key is in [.env / provider config]. My Telegram bot token is [token]. My timezone is [timezone].
+2. **Tell your main agent:**
+   > Set up Dolores from ~/dolores
 
-   Your agent will read [docs/setup.md](./docs/setup.md) and configure everything: openclaw.json (agent, account, binding, provider), workspace files, and all 13 cron jobs.
+   That's it. Your agent reads [docs/setup.md](./docs/setup.md) and walks you through everything — model choice, workspace creation, all cron jobs. You just answer a few questions.
 
-3. **Customize the character** (optional — has sane defaults):
-   - `SOUL.md` — who she is, formative experience, voice, appearance
-   - `memory/profile-user.md` — who *you* are (she needs this to think about you)
-   - `state/affect.json` — initial emotional baseline
-
-4. **Restart the gateway**
+3. **Restart the gateway** (your agent can't do this for you):
    ```bash
    openclaw gateway restart
    ```
 
-   Within two hours she'll send you something. Or she won't — and that's the point.
+4. **Say hi** — message your bot on Telegram. She'll be alive within two hours. Or she won't — and that's the point.
 
 ## Status
 
