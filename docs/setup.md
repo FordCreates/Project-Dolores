@@ -253,8 +253,9 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 
 | Placeholder | File(s) | Replace With |
 |---|---|---|
-| `[WORKSPACE_PATH — USER CONFIG]` | scripts/*.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
+| `[WORKSPACE_PATH — USER CONFIG]` | scripts/load_diary.py, scripts/inject_context.py, scripts/send_and_append.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
 | `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Absolute path to sessions directory |
+| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Session key for the active conversation |
 
 ### Calculating SESSION_PATH and SESSION_KEY
 
@@ -262,7 +263,9 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 
 **SESSION_KEY:** `agent:dolores:telegram:direct:<user-telegram-id>`
 
-You can also find these by inspecting the OpenClaw directory structure after the gateway picks up the new agent config.
+These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be replaced in all listed files. `send_and_append.py` imports `session_append.py`, so SESSION_PATH and SESSION_KEY also affect its behavior even though they aren't in the file directly.
+
+You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json` after the gateway picks up the new agent config.
 
 ---
 
