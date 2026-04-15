@@ -6,123 +6,25 @@
 
 ## Context
 
-You are setting up a companion agent based on Project Dolores. The repo contains ready-to-use files — not templates. Your job is to guide the user through configuration and create everything they need.
+You are setting up a companion agent based on Project Dolores. The repo contains ready-to-use files — not templates. Your job is to copy them into the OpenClaw workspace, then configure everything step by step by asking the user questions and applying changes immediately.
 
-## Prerequisites
-
-Before starting, verify:
-1. OpenClaw is installed and gateway is running (`openclaw status`)
-2. The repo is cloned at a known path (e.g. `~/dolores`)
-
-## Step 1: Ask the user
-
-Ask the following questions **one at a time**, in this order. Explain briefly why each is needed.
-
-### 1a. City
-> "Dolores's story is set in the United States. Which city should she be in? (e.g., Savannah, New York, Austin, Portland)"
-
-Used for weather forecasts and scene inference in SOUL.md and REFLECTION_PREP.md.
-
-### 1b. Model
-> "What LLM do you want Dolores to use?"
-
-**Recommend Claude** (claude-sonnet-4-5 or claude-opus-4) — best overall quality for companion interactions.
-
-⚠️ **Important warning:** Claude has a zero-tolerance NSFW policy. If the companion relationship may include sexual content, Claude's account **will be banned**. In that case, recommend an open-source model with lighter content moderation: DeepSeek, Qwen (GLM), or similar.
-
-For cron jobs (heartbeat, reflection, etc.), a cheaper or faster model works fine. Ask the user if they want to use the same model for everything, or a cheaper one for background jobs.
-
-### 1c. Telegram bot token
-> "What's your Telegram bot token? (Create one with @BotFather if you haven't)"
-
-If they don't have one, guide them:
-1. Open Telegram, search `@BotFather`
-2. Send `/newbot`
-3. Follow the prompts — pick a name and username
-4. Copy the token
-
-### 1d. User details (for USER.md)
-Ask all of these, then fill USER.md:
-- **Name** — What should Dolores call the user?
-- **Timezone** — e.g., `America/New_York`
-- **Language** — Primary language (e.g., English, 中文)
-- **Occupation** — What does the user do?
-- **Relationship** — How does the user define the relationship with Dolores? (e.g., girlfriend, partner, friend)
-
-### 1e. Health Checkin
-> "Dolores can track your daily health data — sleep, exercise, diet, medication, and any symptoms you want monitored. Want to enable this?"
-
-- **Yes** → Ask what symptoms or conditions to track (e.g., allergies, chronic conditions, mental health). This customizes the Symptoms section in HEALTH_CHECKIN.md. All other categories (sleep, exercise, diet, medication) are tracked by default. Create Health Checkin + Health Send + Health Correction cron jobs.
-- **No** → Skip HEALTH_CHECKIN.md customization and health-related cron jobs entirely. The file can stay as-is; it just won't have a cron job triggering it.
+**Principles:**
+- Copy files first, configure second. The user sees action after every question.
+- Ask one thing at a time. Apply the change before asking the next.
+- Never hardcode secrets. API keys go in `~/.openclaw/.env`, referenced via `${ENV_VAR}`.
 
 ---
 
-## Step 2: Configure OpenClaw
-
-Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure. Then add:
-
-### Provider (if not already configured)
-
-```json
-{
-  "id": "<provider-id>",
-  "type": "openai-compatible",
-  "baseUrl": "<api-base-url>",
-  "apiKey": "${DOLORES_API_KEY}",
-  "models": ["<model-name>"]
-}
-```
-
-> **Important:** API keys go in `~/.openclaw/.env` and are referenced via `${ENV_VAR}` in openclaw.json. Never hardcode secrets.
-
-### Agent entry
-
-```json
-{
-  "id": "dolores",
-  "name": "Dolores",
-  "model": "<conversation-model>",
-  "fallbackModels": ["<cron-model>"],
-  "workspace": "~/.openclaw/workspace-dolores"
-}
-```
-
-> The `fallbackModels` should point to the cheaper/faster model if the user chose different models for conversation vs cron.
-
-### Account entry (Telegram)
-
-```json
-{
-  "id": "dolores-telegram",
-  "provider": "telegram",
-  "token": "${DOLORES_TELEGRAM_TOKEN}"
-}
-```
-
-### Binding
-
-```json
-{
-  "agentId": "dolores",
-  "accountId": "dolores-telegram",
-  "chatId": "<user's Telegram chat ID>"
-}
-```
-
-> The chat ID is the user's numeric Telegram ID. If the user doesn't know it, have them message the bot first, then check the gateway logs for the incoming chat ID.
-
----
-
-## Step 3: Prepare the workspace
+## Step 1: Copy files to workspace
 
 ```bash
 REPO=<repo-path>
 WS=~/.openclaw/workspace-dolores
 
 # Create workspace directory structure
-mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,scripts/lib,docs}
+mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,scripts/lib}
 
-# Copy all companion runtime files
+# Copy companion runtime files
 cp $REPO/SOUL.md $WS/
 cp $REPO/AGENTS.md $WS/
 cp $REPO/HEARTBEAT.md $WS/
@@ -158,19 +60,15 @@ touch $WS/state/last_diary_check_at
 
 ### Seed day-zero reflection slots
 
-Without these, the first reflection has no fallback and Slot 1 may drift from SOUL.md and lock permanently.
-
 ```bash
 TODAY=$(date +%Y-%m-%d)
 mkdir -p $WS/state/slots/$TODAY
 cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
 ```
 
-> **Note:** If the repo doesn't have `state/slots/day-zero/`, check ARCHITECTURE.md for how to create them from SOUL.md.
+### Create initial state files
 
-### Create initial state files that need values
-
-**affect.json** — Initial emotional baseline:
+**affect.json:**
 ```json
 {
   "warmth": 0.50,
@@ -181,7 +79,7 @@ cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
 }
 ```
 
-**world_context.json** — Initial state (model will overwrite on first heartbeat):
+**world_context.json** (heartbeat will overwrite on first run):
 ```json
 {
   "time": "",
@@ -196,40 +94,125 @@ cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
 }
 ```
 
-**active_loops.md** — Empty initially:
-```
-```
+**active_loops.md** — empty file.
 
 ---
 
-## Step 4: Replace placeholders
+## Step 2: Configure the character
 
-Search all workspace files for these placeholders and replace with the user's values:
+Ask these questions one at a time. After each answer, apply the change immediately.
+
+### 2a. City
+
+> "Dolores's story is set in the United States. Which city should she be in? (e.g., Savannah, New York, Austin, Portland)"
+
+**Apply:** Replace `[YOUR_CITY — USER CONFIG]` in `SOUL.md` and `REFLECTION_PREP.md`.
+
+### 2b. User details
+
+> "What should Dolores call you?"
+
+**Apply:** Replace all `[USER_NAME — USER CONFIG]` in `AGENTS.md` and `USER.md`.
+
+> "What timezone are you in? (e.g., America/New_York)"
+
+**Apply:** Replace `[USER_TIMEZONE — USER CONFIG]` in `USER.md`.
+
+> "What language do you prefer to communicate in?"
+
+**Apply:** Replace `[USER_LANGUAGE — USER CONFIG]` in `USER.md`.
+
+> "What do you do for work?"
+
+**Apply:** Replace `[USER_OCCUPATION — USER CONFIG]` in `USER.md`.
+
+> "How would you define your relationship with Dolores? (e.g., girlfriend, partner, friend)"
+
+**Apply:** Replace `[USER_RELATIONSHIP — USER CONFIG]` in `USER.md`.
+
+### 2c. Health checkin
+
+> "Dolores can track your daily health data — sleep, exercise, diet, medication, and any symptoms you want monitored. Want to enable this?"
+
+- **Yes** → Ask what symptoms or conditions to track (e.g., allergies, chronic conditions, mental health). Replace `[USER_SYMPTOMS — USER CONFIG]` in `HEALTH_CHECKIN.md` with the actual symptom fields. Remember to create the health cron jobs later (Step 5).
+- **No** → Skip. HEALTH_CHECKIN.md stays as-is, just won't have a cron job.
+
+---
+
+## Step 3: Configure OpenClaw
+
+Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure. Then ask:
+
+### 3a. Model
+
+> "What LLM do you want Dolores to use?"
+
+**Recommend Claude** (claude-sonnet-4-5 or claude-opus-4) — best overall quality for companion interactions.
+
+⚠️ **Important warning:** Claude has a zero-tolerance NSFW policy. If the companion relationship may include sexual content, Claude's account **will be banned**. In that case, recommend an open-source model with lighter content moderation: DeepSeek, Qwen (GLM), or similar.
+
+> "Do you want to use the same model for background jobs (heartbeat, reflection), or a cheaper/faster one?"
+
+**Apply:** Write provider, agent entry, and API key to `openclaw.json` and `~/.openclaw/.env`. Example:
+
+```json
+// openclaw.json additions:
+{
+  "agents": [{
+    "id": "dolores",
+    "name": "Dolores",
+    "model": "<conversation-model>",
+    "fallbackModels": ["<cron-model>"],
+    "workspace": "~/.openclaw/workspace-dolores"
+  }]
+}
+```
+
+### 3b. Telegram bot
+
+> "What's your Telegram bot token? (Create one with @BotFather if you haven't)"
+
+If they don't have one, guide them:
+1. Open Telegram, search `@BotFather`
+2. Send `/newbot`
+3. Follow the prompts — pick a name and username
+4. Copy the token
+
+**Apply:** Write account and binding to `openclaw.json`:
+
+```json
+{
+  "accounts": [{
+    "id": "dolores-telegram",
+    "provider": "telegram",
+    "token": "${DOLORES_TELEGRAM_TOKEN}"
+  }],
+  "bindings": [{
+    "agentId": "dolores",
+    "accountId": "dolores-telegram",
+    "chatId": "<user's Telegram chat ID>"
+  }]
+}
+```
+
+> The chat ID is the user's numeric Telegram ID. If the user doesn't know it, have them message the bot first, then check the gateway logs.
+
+---
+
+## Step 4: Replace script placeholders
+
+Scripts contain path placeholders that depend on the user's system. Replace them:
 
 | Placeholder | File(s) | Replace With |
 |---|---|---|
-| `[YOUR_CITY — USER CONFIG]` | SOUL.md, REFLECTION_PREP.md | City from Step 1a |
-| `[USER_NAME — USER CONFIG]` | AGENTS.md (14 occurrences) | Name from Step 1d |
-| `[USER_NAME — USER CONFIG]` | USER.md | Name from Step 1d |
-| `[USER_TIMEZONE — USER CONFIG]` | USER.md | Timezone from Step 1d |
-| `[USER_LANGUAGE — USER CONFIG]` | USER.md | Language from Step 1d |
-| `[USER_OCCUPATION — USER CONFIG]` | USER.md | Occupation from Step 1d |
-| `[USER_RELATIONSHIP — USER CONFIG]` | USER.md | Relationship from Step 1d |
-| `[USER_SYMPTOMS — USER CONFIG]` | HEALTH_CHECKIN.md | Symptom fields (only if health enabled in Step 1e) |
 | `[WORKSPACE_PATH — USER CONFIG]` | scripts/*.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
 | `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Absolute path to sessions directory |
 
 ### Calculating SESSION_PATH and SESSION_KEY
 
-**SESSION_PATH:** After the agent is registered in openclaw.json, the sessions directory is:
-```
-~/.openclaw/agents/dolores/sessions
-```
+**SESSION_PATH:** `~/.openclaw/agents/dolores/sessions`
 
-**SESSION_KEY:** Format is `agent:dolores:<channel>:<chat-type>:<chat-id>`. For Telegram direct chat:
-```
-agent:dolores:telegram:direct:<user-telegram-id>
-```
+**SESSION_KEY:** `agent:dolores:telegram:direct:<user-telegram-id>`
 
 You can also find these by inspecting the OpenClaw directory structure after the gateway picks up the new agent config.
 
@@ -237,7 +220,7 @@ You can also find these by inspecting the OpenClaw directory structure after the
 
 ## Step 5: Create cron jobs
 
-All times should be adjusted to the user's timezone. Add `--tz <timezone>` to each command.
+All times adjusted to the user's timezone. Add `--tz <timezone>` to each command.
 
 ### Command format
 
@@ -252,9 +235,7 @@ openclaw cron add \
   --message "<prompt>"
 ```
 
-### Heartbeat (no delivery — internal only)
-
-Runs 9 times: odd hours 7–21 + midnight. Each heartbeat updates world_context, affect, active_loops, writes diary, and optionally sets pending_message.
+### Heartbeat (no delivery — 9 times)
 
 ```bash
 openclaw cron add \
@@ -274,9 +255,7 @@ openclaw cron add \
   --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
-### Send (delivers pending_message to user via script)
-
-Runs 9 times, 10 minutes after each heartbeat. Uses `send_and_append.py` which has a built-in 20-minute activity gate — if the user was recently active, delivery is silently skipped.
+### Send (delivers pending_message — 9 times)
 
 ```bash
 openclaw cron add \
@@ -298,9 +277,7 @@ openclaw cron add \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
 
-### Diary check (no delivery — internal only)
-
-Runs after each send, verifies diary attribution accuracy.
+### Diary check (no delivery — 9 times)
 
 ```bash
 openclaw cron add \
@@ -320,9 +297,8 @@ openclaw cron add \
   --message "Read DIARY_CHECK.md and execute the diary attribution check."
 ```
 
-### Health (only if enabled in Step 1e)
+### Health (only if enabled in Step 2c — 3 jobs)
 
-**Health Checkin** — collects health data at 20:00:
 ```bash
 openclaw cron add \
   --name "Dolores Health Checkin" \
@@ -332,7 +308,6 @@ openclaw cron add \
   --message "Read HEALTH_CHECKIN.md and execute the daily health check-in."
 ```
 
-**Health Send** — delivers checkin result at 20:05:
 ```bash
 openclaw cron add \
   --name "Dolores Health Send" \
@@ -343,7 +318,6 @@ openclaw cron add \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
 
-**Health Correction** — corrects any user pushback on health data at 23:10:
 ```bash
 openclaw cron add \
   --name "Dolores Health Correction" \
@@ -353,9 +327,7 @@ openclaw cron add \
   --message "Read HEALTH_CORRECTION.md and execute the health data correction step."
 ```
 
-### Reflection (no delivery — internal only)
-
-Four staged jobs between 23:15–23:45. Each builds on the previous.
+### Reflection (no delivery — 4 jobs)
 
 ```bash
 openclaw cron add \
@@ -404,28 +376,28 @@ openclaw cron add \
 | Reflection | 4 | Nightly memory consolidation |
 | **Total** | **34** (31 without health) | |
 
-> Verify with `openclaw cron list` after creation. All jobs should appear.
+> Verify with `openclaw cron list` after creation.
 
 ---
 
 ## Step 6: Tell the user to restart
 
-After all configuration is done, instruct the user:
-```bash
-openclaw gateway restart
-```
+> "All done! One last thing — restart the gateway to pick up the new agent and cron jobs:"
+> ```bash
+> openclaw gateway restart
+> ```
 
-> **Do not run this command yourself.** The user must restart the gateway manually for the new agent and cron configuration to take effect.
+> **Do not run this command yourself.** The user must restart manually.
 
 ---
 
 ## Step 7: Verify
 
-After restart, suggest the user verify by:
+After restart, suggest:
+
 1. **Start a conversation** — message the bot on Telegram. Dolores should respond in character.
-2. **Manual heartbeat test** — `openclaw cron run <heartbeat-cron-id>`, then check that `state/world_context.json` and `state/affect.json` get populated.
-3. **Check diary** — after a heartbeat, `memory/YYYY-MM-DD.md` should have a diary entry.
-4. **Wait** — within two hours, she may or may not send something. Both outcomes are normal.
+2. **Manual heartbeat test** — `openclaw cron run <heartbeat-cron-id>`, then check `state/world_context.json` and `state/affect.json`.
+3. **Check diary** — after a heartbeat, `memory/YYYY-MM-DD.md` should have an entry.
 
 ---
 
@@ -433,6 +405,6 @@ After restart, suggest the user verify by:
 
 - **Bot doesn't respond:** Check bot token is valid and binding chatId matches the user's Telegram ID
 - **Cron jobs not firing:** `openclaw cron list` — all jobs should appear. Recreate missing ones and restart gateway
-- **Heartbeat runs but state doesn't update:** Check script permissions and that `[WORKSPACE_PATH]` / `[SESSION_PATH]` placeholders were replaced correctly
-- **Send job fails:** Check that `send_and_append.py` runs correctly: `cd ~/.openclaw/workspace-dolores && python3 scripts/send_and_append.py`
-- **Model returns errors:** Check provider config and API key in `~/.openclaw/.env`
+- **Heartbeat runs but state doesn't update:** Check script permissions and that path placeholders were replaced correctly
+- **Send job fails:** `cd ~/.openclaw/workspace-dolores && python3 scripts/send_and_append.py`
+- **Model errors:** Check provider config and API key in `~/.openclaw/.env`
