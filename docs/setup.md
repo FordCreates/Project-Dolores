@@ -49,6 +49,9 @@ cp $REPO/scripts/lib/__init__.py $WS/scripts/lib/
 cp $REPO/scripts/lib/session_append.py $WS/scripts/lib/
 
 # Copy initial state and memory files
+cp $REPO/state/affect.json $WS/state/
+cp $REPO/state/world_context.json $WS/state/
+cp $REPO/state/active_loops.md $WS/state/
 cp $REPO/state/daily_plan.md $WS/state/
 cp $REPO/memory/profile-user.md $WS/memory/
 cp $REPO/memory/self-narrative.md $WS/memory/
@@ -62,36 +65,6 @@ TODAY=$(date +%Y-%m-%d)
 mkdir -p $WS/state/slots/$TODAY
 cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
 ```
-
-### Create initial state files
-
-**affect.json:**
-```json
-{
-  "warmth": 0.50,
-  "curiosity": 0.50,
-  "anxiety": 0.30,
-  "desire_for_connection": 0.50,
-  "horny": 0.00
-}
-```
-
-**world_context.json** (heartbeat will overwrite on first run):
-```json
-{
-  "time": "",
-  "weather": "",
-  "scene": "",
-  "dolores_activity": "",
-  "dolores_appearance": "",
-  "user_location": "",
-  "user_activity": "",
-  "interaction_context": "",
-  "context_note": ""
-}
-```
-
-**active_loops.md** — empty file.
 
 ---
 
