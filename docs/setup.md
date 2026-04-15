@@ -50,9 +50,9 @@ Ask all of these, then fill USER.md:
 - **Relationship** — How does the user define the relationship with Dolores? (e.g., girlfriend, partner, friend)
 
 ### 1e. Health Checkin
-> "Dolores can track your health data daily (symptoms, medications, exercise). Want to enable this?"
+> "Dolores can track your daily health data — sleep, exercise, diet, medication, and any symptoms you want monitored. Want to enable this?"
 
-- **Yes** → Ask what health conditions to track (allergies, chronic conditions, medications, etc.). Customize HEALTH_CHECKIN.md symptom fields. Create Health Checkin + Health Send + Health Correction cron jobs.
+- **Yes** → Ask what symptoms or conditions to track (e.g., allergies, chronic conditions, mental health). This customizes the Symptoms section in HEALTH_CHECKIN.md. All other categories (sleep, exercise, diet, medication) are tracked by default. Create Health Checkin + Health Send + Health Correction cron jobs.
 - **No** → Skip HEALTH_CHECKIN.md customization and health-related cron jobs entirely. The file can stay as-is; it just won't have a cron job triggering it.
 
 ---
