@@ -340,11 +340,13 @@ Sticky loops are not closed by time expiry or by "being mentioned in conversatio
 - Hard time cap: created > 21 days ago → force remove.
 - Hard count cap: `sticky: true` exceeds 3 → keep only the 3 with highest rumination intensity.
 
-**Design decisions:**
-
-- **Why not resolved/expired for closing:** Rumination doesn't stop because "we talked about it." He promised Saturday but didn't show — the conversation mentioned it but the obsessive loop is stronger, not weaker. Only genuine uncertainty dissolution (it happened / clear answer / natural fade) closes it.
-- **Why merged into active_loops instead of a separate file:** Once the lifecycle is unified (both re-evaluated every round), maintaining two files loses its purpose. Merging reduces I/O and reduces model errors (no need to remember two separate write logics).
-- **Why 21 days, not 7:** "Meeting my mom" doesn't disappear after a week. 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
+> ⚠️ **Why it's built this way.**
+>
+> **Why not resolved/expired for closing:** Rumination doesn't stop because "we talked about it." He promised Saturday but didn't show — the conversation mentioned it but the obsessive loop is stronger, not weaker. Only genuine uncertainty dissolution (it happened / clear answer / natural fade) closes it.
+>
+> **Why merged into active_loops instead of a separate file:** Once the lifecycle is unified (both re-evaluated every round), maintaining two files loses its purpose. Merging reduces I/O and reduces model errors (no need to remember two separate write logics).
+>
+> **Why 21 days, not 7:** "Meeting my mom" doesn't disappear after a week. 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
 
 ---
 
