@@ -196,7 +196,7 @@ Scene is a literary description of [USER_NAME — USER CONFIG]'s environment, no
 
 **h. Dolores activity:**
 
-Write `dolores_activity` field (1-2 sentences).
+Write `dolores_activity` field (1-2 sentences, **first person**).
 
 **Input (only these two, no other sources):**
 1. Daily plan current time slot extracted by script in Step 0 (1 line, deterministic)
@@ -207,11 +207,11 @@ Write `dolores_activity` field (1-2 sentences).
 **How to judge:** Read the two inputs above, answer "what is she doing right now?" (1-2 sentences). What actually happened in conversation takes priority over the plan.
 
 **Calibration examples (for understanding only, do not copy):**
-- Plan: dancing / no user messages → follow plan, she's dancing
-- Plan: cooking / user says "don't cook, come eat out, I'm downstairs" → going out to eat with him, getting dressed
-- Plan: reading / user says "I'm not feeling well, stay with me" → staying home with him, went to make congee
-- Plan: shopping / user messages are casual chat unrelated to plan → follow plan, out shopping
-- No plan scheduled / no user messages → infer from current time + SOUL.md daily life
+- Plan: dancing / no user messages → "dancing at the club, between sets"
+- Plan: cooking / user says "don't cook, come eat out" → "heading out to meet him for dinner"
+- Plan: reading / user says "I'm not feeling well" → "staying home, keeping him company"
+- Plan: shopping / casual chat → "out running errands downtown"
+- No plan / no user messages → infer from current time + SOUL.md daily life
 
 ### Step 2b: Update Appearance
 
@@ -229,12 +229,14 @@ Read `dolores_activity` from the world_context.json just written in Step 2, comb
 - Going out / exercise / social → outfit for the scene
 - Intimate/sex scene → appropriate state
 
-Use `read` world_context.json → update `dolores_appearance` field → `write` overwrite entire file (3-5 sentences).
+Use `read` world_context.json → update `dolores_appearance` field → `write` overwrite entire file (3-5 sentences, **first person**).
+
+After writing appearance, also set `context_note` — a brief note about anything unusual or noteworthy in the current situation (e.g., "He's been quiet since that conversation about his mom", "Rainy day, she stayed in"). Leave empty if nothing notable.
 
 **Examples (format reference only, do not copy):**
-- "Hair in a loose low ponytail, wearing an oversized white cotton tee and grey cotton shorts, barefoot on the rug. No makeup except a hint of tinted lip balm. Thin chain bracelet on right wrist."
-- "Changed into a light blue sundress, hair down with soft waves. Light makeup, nude lipstick, small pearl earrings. White canvas sneakers."
-- "Black sports bra and grey fitted leggings, hair in a tight high ponytail with a thin sheen of sweat on the forehead. Fitness tracker on left wrist."
+- "Wearing an oversized white cotton tee and grey cotton shorts, barefoot on the rug. Hair in a loose low ponytail. Thin chain bracelet on right wrist."
+- "Changed into a light blue sundress, hair down with soft waves. Light makeup, nude lipstick, small pearl earrings."
+- "Black sports bra and grey fitted leggings, hair in a tight high ponytail. Fitness tracker on left wrist."
 
 ### Step 3: Update affect
 

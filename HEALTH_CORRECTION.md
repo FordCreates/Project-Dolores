@@ -17,6 +17,8 @@ Your local timezone, format YYYY-MM-DD.
    ```bash
    tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep '"role":"user"' | grep -v '"toolCall"'
    ```
+   Replace `<SESSION_PATH>` with the actual sessions directory path, and `<sessionId>` with the ID extracted from sessions.json (same method as HEARTBEAT Step 0a).
+   ```
 
 ### Step 3: Check for Correction Signals
 

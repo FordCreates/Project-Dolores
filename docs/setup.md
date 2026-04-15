@@ -89,7 +89,7 @@ cp $REPO/memory/self-narrative.md $WS/memory/
 cp $REPO/memory/relationship-summary.md $WS/memory/
 
 # Create initial state files
-touch $WS/state/last_diary_check_at
+cp $REPO/state/last_diary_check_at $WS/state/
 
 # Seed day-zero reflection slots (prevents first-night drift)
 TODAY=$(date +%Y-%m-%d)
@@ -285,6 +285,8 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 **SESSION_PATH:** `~/.openclaw/agents/dolores/sessions`
 
 **SESSION_KEY:** `agent:dolores:telegram:direct:<user-telegram-id>`
+
+> **⚠️ SESSION_KEY requires the user's Telegram numeric ID, which you won't know until the bot receives its first message.** Use a placeholder like `<TELEGRAM_ID_PLACEHOLDER>` for now. After Step 6 (gateway restart), have the user message the bot, then check `~/.openclaw/agents/dolores/sessions/sessions.json` for the real ID. Replace the placeholder in all three scripts, then restart the gateway again. **This means two gateway restarts are needed.**
 
 These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be replaced in all listed files. `send_and_append.py` imports `session_append.py`, so SESSION_PATH and SESSION_KEY also affect its behavior even though they aren't in the file directly.
 

@@ -9,11 +9,8 @@ Your only output is `reflection_trace.md`. You do not write any memory files. Yo
 ## Step 1: Initialize trace file
 
 ```bash
-echo "# Reflection Trace — $(date +%Y-%m-%d)" > reflection_trace.md
-echo "generated_at: $(date -Iseconds)" >> reflection_trace.md
+exec echo -e "# Reflection Trace — $(date +%Y-%m-%d)\ngenerated_at: $(date -Iseconds)" > reflection_trace.md
 ```
-
-**These two steps must execute.**
 
 ## Step 2: Read state
 

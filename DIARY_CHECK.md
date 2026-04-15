@@ -40,8 +40,12 @@ The following are **NOT errors** — do not modify:
 
 ### Step 2: Get Conversation Transcript
 
-1. `exec` to extract session ID (implementation depends on your setup)
+1. `exec` to extract sessionId from your sessions.json:
+   ```bash
+   exec python3 -c "import json; s=json.load(open('[SESSION_PATH — USER CONFIG]/sessions.json')); print(s['[SESSION_KEY — USER CONFIG]']['sessionId'])"
+   ```
 2. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'`
+   Replace `<SESSION_PATH>` with the actual sessions directory path, and `<sessionId>` with the ID from step 1.
 
 ### Step 3: Person Detection (grep deterministic)
 
