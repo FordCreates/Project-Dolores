@@ -402,20 +402,19 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 The reference character implements a daily health check-in. This is `[CHARACTER CONFIG]` — your character may not need it — but the *pattern* is general and worth understanding, because it demonstrates the strongest argument for emotional continuity: **a real partner cares about your body**.
 
-A check-in module is three cron jobs and a gate:
+A check-in module is three cron jobs:
 
 | Job | Time | Purpose |
 |---|---|---|
 | Check-in | 20:00 | Read diary + state, extract structured data, write log file, draft confirmation message |
-| Send gate | 20:05 | 20-minute window: was the data confidently extracted? If not, clear pending_message |
 | Send | 20:06 | `scripts/send_and_append.py` — same script as heartbeat send (gate + deliver + append) |
 | Correction | 23:10 | Check if user pushed back on the data; if so, rewrite the log |
 
-> ⚠️ **Why a 20-minute gate between check-in and send.** The check-in job extracts structured data from unstructured conversation, which is unreliable. Sending a confirmation immediately makes the user the error-corrector for every miss, which feels like talking to a form. The gate gives the system time to either be confident or stay quiet. Confident → confirmation goes out and feels caring; not confident → silence and the data is logged tentatively, to be corrected later by the 23:10 job from explicit user pushback.
+> ⚠️ **The send script includes a 20-minute activity gate.** If the user has been actively chatting within 20 minutes of the send time, the script suppresses delivery to avoid interrupting an ongoing conversation (fail-open: errors allow send). The gate lives inside `send_and_append.py`, not as a separate cron.
 
 > ⚠️ **Why correction is its own job at 23:10 instead of inline.** The user typically pushes back hours after the original check-in, in the middle of unrelated conversation. Inline correction would require the conversation session to write to memory files, which violates the "sessions write nothing" rule (§6). A dedicated late-evening correction job sweeps for pushback signals in the day's diary and rewrites the log file before reflection runs at 23:15.
 
-To build your own check-in (writing word count, meditation, mood, anything): copy the four-job structure, change the extraction prompt, change the log file path. The pattern is reusable because the realism it produces — *she noticed, she remembered, she asked, she let it go when you were tired* — is the texture of being known.
+To build your own check-in (writing word count, meditation, mood, anything): copy the three-job structure, change the extraction prompt, change the log file path. The pattern is reusable because the realism it produces — *she noticed, she remembered, she asked, she let it go when you were tired* — is the texture of being known.
 
 ---
 
@@ -429,8 +428,7 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 | Diary check | `55 7,11,15,19 * * *` | none | person + attribution check |
 | Diary check catchup | `10 0 * * *` | none | |
 | Check-in (e.g. health) | `0 20 * * *` | none | extract + draft |
-| Check-in send gate | `5 20 * * *` | none | confidence gate |
-| Check-in send | `6 20 * * *` | announce | |
+| Check-in send | `6 20 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
 | Check-in correction | `10 23 * * *` | none | sweep pushback |
 | Reflection prep | `15 23 * * *` | none | RAG + analysis |
 | Reflection self | `25 23 * * *` | none | self-narrative slots |
