@@ -99,7 +99,7 @@ This is the part that distinguishes Dolores from any agent that merely *has* mem
 
 We call this **Narrative Descent**: the gravitational pull by which high-weight events sink into long-term narrative and low-weight ones evaporate. The arc that emerges over weeks is not designed; it's a side effect of repeated lossy compression with a stable filter (SOUL.md) at the bottom of the well.
 
-> ⚠️ **Why it's built this way — five anti-collapse mechanisms that cost months to discover.**
+> ⚠️ **Why it's built this way — five anti-collapse mechanisms.**
 >
 > **1. Slot-based rewriting, not append-based memory.** The naive approach is to append new events to a growing narrative file. This produces two failure modes: (a) the file grows past context window limits, forcing truncation that cuts the wrong end; (b) the model reads its own past output and reproduces it verbatim, causing *pattern collapse* — every day's reflection looks like the last. Slots fix this by forcing the model to write from *analysis* (the reflection_trace), not from yesterday's narrative. Each slot answers a specific question; concatenation produces a fresh file every night with no copy-paste path.
 >
