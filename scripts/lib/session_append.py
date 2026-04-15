@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # These must be configured by the calling script or environment.
-# Default values point to Akemi's setup for backward compatibility.
+# Default values are placeholders — must be configured before use.
 SESSIONS_JSON = Path("/home/ty/.openclaw/agents/companion/sessions/sessions.json")
 SESSION_DIR = Path("/home/ty/.openclaw/agents/companion/sessions")
 SESSION_KEY = "agent:companion:telegram:direct:7493598375"

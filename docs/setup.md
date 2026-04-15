@@ -116,7 +116,7 @@ Search all workspace files for this placeholder and replace with the user's valu
 | `[USER_OCCUPATION — USER CONFIG]` | USER.md | User's occupation and field |
 | `[USER_RELATIONSHIP — USER CONFIG]` | USER.md | How the user defines the relationship |
 | `[USER_COMM_STYLE — USER CONFIG]` | USER.md | Communication preference (direct, playful, reserved, etc.) |
-| `[WORKSPACE_PATH — USER CONFIG]` | scripts/inject_context.py | Path to the companion workspace (e.g., `/home/user/.openclaw/workspace-dolores`) |
+| `[WORKSPACE_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/load_diary.py | Path to the companion workspace (e.g., `/home/user/.openclaw/workspace-dolores`) |
 | `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py | Path to sessions directory (e.g., `/home/user/.openclaw/agents/dolores/sessions`) |
 | `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py | Session key (e.g., `agent:dolores:telegram:direct:123456789`) |
 

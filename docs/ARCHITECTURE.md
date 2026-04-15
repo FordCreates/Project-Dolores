@@ -154,6 +154,7 @@ dolores/
 
 scripts/                        [ARCHITECTURE] (directory)
 ├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
+└── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
 └── lib/
     └── session_append.py        [ARCHITECTURE] shared jsonl append utility
 ```
