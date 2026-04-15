@@ -51,7 +51,7 @@ Skip if file doesn't exist. No error if search returns nothing. These steps let 
 | **Health Checkin** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md + state/pending_message.md (always sends confirmation) | Daily 20:00 |
 | **Health Correction** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md (corrections only) | Daily 23:10 |
 | **Daily Reflection** | self-narrative (slots+concat), relationship-summary (slots+concat), profile-user (write), state/daily_plan.md, reflection_trace.md | 23:15-23:45 |
-| **Diary Check** | memory/YYYY-MM-DD.md (attribution correction), state/last_diary_check_at | After each Send + 00:10 |
+| **Diary Check** | memory/YYYY-MM-DD.md (person fix + attribution correction), state/last_diary_check_at | After each Send + 00:10 |
 | **Conversation session** | **None** | — |
 
 Heartbeat reads the session log and syncs to diary and state, so during conversation just focus on conversing — don't worry about writing files.

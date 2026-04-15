@@ -153,6 +153,7 @@ dolores/
     └── interface.md              [ARCHITECTURE] the target contract (§7)
 
 scripts/                        [ARCHITECTURE] (directory)
+├── send_and_append.py          [ARCHITECTURE] send job: gate + deliver + append session jsonl
 ├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
 └── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
 └── lib/
@@ -197,7 +198,7 @@ High-frequency, small, written by heartbeat, read by everything.
 
 - **`pending_message.md`** `[ARCHITECTURE]` — the two-phase delivery buffer. Heartbeat writes here; the send job is the only consumer and the only thing that clears it. Empty marker is a literal `EMPTY` / `none` sentinel, not an empty file (so we can distinguish "intentionally empty" from "write failed").
 
-  > ⚠️ **Why two-phase delivery instead of letting heartbeat send directly.** Three reasons, in order of how badly we learned them. (1) Race condition: heartbeat runs longer than expected, the next heartbeat fires, both try to send, user gets duplicates. The buffer + single-consumer pattern serializes this. (2) Information leak: heartbeat reasoning includes internal state ("I'm choosing not to mention X because cooldown"); an unbounded delivery path occasionally leaked that reasoning into the channel. Forcing the message through a buffer means only the *content* survives, never the *deliberation*. (3) Gating: certain message classes (see §11) need a window between "decided to send" and "actually sent" for correction logic. The buffer makes that window cheap.
+  > ⚠️ **Why two-phase delivery instead of letting heartbeat send directly.** Three reasons, in order of how badly we learned them. (1) Race condition: heartbeat runs longer than expected, the next heartbeat fires, both try to send, user gets duplicates. The buffer + single-consumer pattern serializes this. (2) Information leak: heartbeat reasoning includes internal state ("I'm choosing not to mention X because cooldown"); an unbounded delivery path occasionally leaked that reasoning into the channel. Forcing the message through a buffer means only the *content* survives, never the *deliberation*. (3) Gating: certain message classes (see §11) need a window between "decided to send" and "actually sent" for correction logic. The buffer makes that window cheap. The send job also appends the delivered message back to the session jsonl, so conversations retain a complete record of what was said (including proactive messages).
 
 - **`last_sync_at`** `[ARCHITECTURE]` — timestamp of the last conversation-to-diary sync. Step 0 of the heartbeat reads this to know what's new.
 
@@ -244,7 +245,7 @@ Single most important rule: **the conversation session writes nothing.** All per
 | **Heartbeat** | all of `state/` + `memory/YYYY-MM-DD.md` | every 2h |
 | **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§11) |
 | **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md` | nightly, 4 stages |
-| **Diary check** | `memory/YYYY-MM-DD.md` (corrections only), `state/last_diary_check_at` | after each send + 00:10 |
+| **Diary check** | `memory/YYYY-MM-DD.md` (person fix + attribution fix), `state/last_diary_check_at` | after each send + 00:10 |
 | **Conversation session** | nothing | — |
 
 > ⚠️ **Why conversations don't persist.** A conversation that persists must decide *what* to persist mid-conversation, which means reasoning about long-term significance while also being present in the moment. Models do this badly — they over-record (everything seems significant when you're in it) and they break immersion (the user feels watched). Letting heartbeat sync conversations to diary *after the fact* means significance is judged with distance, and the conversation itself stays unselfconscious.
@@ -407,7 +408,7 @@ A check-in module is three cron jobs and a gate:
 |---|---|---|
 | Check-in | 20:00 | Read diary + state, extract structured data, write log file, draft confirmation message |
 | Send gate | 20:05 | 20-minute window: was the data confidently extracted? If not, clear pending_message |
-| Send | 20:06 | Standard send job — push pending_message to channel |
+| Send | 20:06 | `scripts/send_and_append.py` — same script as heartbeat send (gate + deliver + append) |
 | Correction | 23:10 | Check if user pushed back on the data; if so, rewrite the log |
 
 > ⚠️ **Why a 20-minute gate between check-in and send.** The check-in job extracts structured data from unstructured conversation, which is unreliable. Sending a confirmation immediately makes the user the error-corrector for every miss, which feels like talking to a form. The gate gives the system time to either be confident or stay quiet. Confident → confirmation goes out and feels caring; not confident → silence and the data is logged tentatively, to be corrected later by the 23:10 job from explicit user pushback.
@@ -424,8 +425,8 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 |---|---|---|---|
 | Heartbeat | `40 7,11,15,19 * * *` | none | 9-step loop, every 2h |
 | Heartbeat catchup | `0 0 * * *` | none | post-reflection sweep |
-| Send | `50 7,11,15,19 * * *` | announce | drains pending_message |
-| Diary check | `55 7,11,15,19 * * *` | none | attribution check |
+| Send | `50 7,11,15,19 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
+| Diary check | `55 7,11,15,19 * * *` | none | person + attribution check |
 | Diary check catchup | `10 0 * * *` | none | |
 | Check-in (e.g. health) | `0 20 * * *` | none | extract + draft |
 | Check-in send gate | `5 20 * * *` | none | confidence gate |

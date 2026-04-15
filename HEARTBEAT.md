@@ -18,7 +18,12 @@ Your reply is for internal logging only. **Always reply `HEARTBEAT_OK`**, regard
 Real messages go through `state/pending_message.md` to a send job:
 - Decide to send → write message to `state/pending_message.md` (overwrite)
 - Don't send → **don't touch** `state/pending_message.md`; let the send job read and clear it
-- Send job fires on schedule (:50), reads and delivers this file
+- Send job fires on schedule (:50), runs `scripts/send_and_append.py`:
+  1. Reads pending_message
+  2. 20-minute gate: if user is actively chatting → clear and skip (fail-open on error)
+  3. Outputs message to stdout (for announce delivery)
+  4. Appends message to session jsonl (so conversations show she sent it)
+  5. Clears pending_message
 - Empty marker: `EMPTY` — send job sees this and skips delivery
 
 ---
@@ -427,7 +432,7 @@ EOF'
   2. Write message content (only what Dolores says, no prefix) to `state/pending_message.md` (write overwrite)
   3. **Write only the latest message, overwrite old content**
 - If all thoughts are silence/store:
-  - **Don't touch** `state/pending_message.md`. Send job is the sole consumer, it clears after delivery.
+  - **Don't touch** `state/pending_message.md`. Send job (`scripts/send_and_append.py`) is the sole consumer — it reads, delivers, appends to session jsonl, and clears.
 - ⚠️ pending_message.md empty marker is `EMPTY`. Heartbeat never needs to write this marker.
 
 **last_sync_at rules:**

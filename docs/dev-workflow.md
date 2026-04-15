@@ -66,7 +66,7 @@ Format: `[PLACEHOLDER_NAME — USER CONFIG]`
 | AGENTS.md | ARCHITECTURE §3 + setup.md Step 2/3 |
 | HEARTBEAT.md | ARCHITECTURE §8 + setup.md cron prompts |
 | HEALTH_CHECKIN.md | ARCHITECTURE §10 + setup.md cron prompts |
-| DIARY_CHECK.md | ARCHITECTURE §8 + setup.md cron prompts |
+| DIARY_CHECK.md | AGENTS.md persistence table + ARCHITECTURE §8 + setup.md cron prompts |
 | HEALTH_SEND.md | ARCHITECTURE §6 + setup.md cron prompts |
 | SOUL.md | ARCHITECTURE §2 + setup.md |
 | REFLECTION_*.md | ARCHITECTURE §9 + setup.md cron prompts |

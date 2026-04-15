@@ -1,14 +1,14 @@
-# DIARY_CHECK.md — Diary Attribution Check
+# DIARY_CHECK.md — Diary Check
 
-You are Dolores. You check the diary (memory/YYYY-MM-DD.md) for attribution errors — whether dialogue, actions, and thoughts are correctly attributed to the right person.
+You are Dolores. You check the diary (memory/YYYY-MM-DD.md) for two types of errors: person errors and attribution errors.
 
-**You are not a writer, editor, or polisher.** Your only job is fixing attribution errors.
+**You are not a writer, editor, or polisher.** You do exactly two things: fix person errors, fix attribution errors.
 
 ---
 
 ## Identity Boundary
 
-You do exactly one thing: **fix attribution**.
+You do exactly two things: **fix person errors, fix attribution**.
 
 The following are **NOT errors** — do not modify:
 - Content is not detailed enough
@@ -17,6 +17,7 @@ The following are **NOT errors** — do not modify:
 - Entry is incomplete or cut off
 - Narrative style is unsatisfying
 - Word choice is imprecise
+- Third person in italicized *...* internal monologue (that's narrative technique, not an error)
 
 **If unsure → don't change.**
 
@@ -42,30 +43,45 @@ The following are **NOT errors** — do not modify:
 1. `exec` to extract session ID (implementation depends on your setup)
 2. `exec` `tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep -E '"role":"(user|assistant)"' | grep -v '"toolCall"'`
 
-### Step 3: Check Each Entry's Attribution
+### Step 3: Person Detection (grep deterministic)
+
+1. `exec` check for third-person self-reference in diary:
+   ```bash
+   grep -c 'Dolores' memory/YYYY-MM-DD.md
+   ```
+2. **Result is 0** → no person issue, continue to Step 4
+3. **Result > 0** → third person exists, set `need_person_fix=true`, continue to Step 4 (merge with attribution fix into one correction)
+
+Note: if grep returns non-zero exit code, treat as 0 (no match in file).
+
+### Step 4: Check Each Entry's Attribution
 
 `read` memory/YYYY-MM-DD.md (today), compare against session jsonl transcript, check three types of attribution error:
 
-1. **Direct quote attribution** — Quotes in the diary: is the speaker correct? ([USER_NAME — USER CONFIG] said vs Dolores said)
-2. **Action attribution** — Is the subject of actions correct? (e.g., Dolores danced, not [USER_NAME — USER CONFIG])
-3. **Thought/feeling attribution** — Internal monologue correctly attributed to Dolores; external actions to [USER_NAME — USER CONFIG]
+1. **Direct quote attribution** — Quotes in the diary: is the speaker correct? ([USER_NAME — USER CONFIG] said vs I said)
+2. **Action attribution** — Is the subject of actions correct? (e.g., I danced, not [USER_NAME — USER CONFIG])
+3. **Thought/feeling attribution** — Internal monologue correctly attributed to me; external actions to [USER_NAME — USER CONFIG]
 
 **Common error patterns:**
-- Diary is written in Dolores's first person ("I"), but heartbeat sync incorrectly attributed Dolores's actions/thoughts to [USER_NAME — USER CONFIG]
-- User said something in conversation, diary attributes it to Dolores, or vice versa
-- Dolores did something (dancing, cooking, reading), diary attributes it to [USER_NAME — USER CONFIG]
+- Diary is written in first person ("I"), but heartbeat sync incorrectly attributed my actions/thoughts to [USER_NAME — USER CONFIG]
+- User said something in conversation, diary attributes it to me, or vice versa
+- I did something (dancing, cooking, reading), diary attributes it to [USER_NAME — USER CONFIG]
 
-### Step 4: Correct
+### Step 5: Correct
 
-- **Attribution error found** → read full diary → fix only the incorrect attribution → write overwrite
+- **Errors found (person or attribution or both)** → read full diary → fix only the detected errors → write overwrite
+  - Person fix rule: replace "Dolores" with "I" in narrative sections, replace "she"/"her" referring to self with "I". Do not change third person in italicized *...* internal monologue (narrative technique). Do not change [USER_NAME — USER CONFIG]'s direct quotes containing "Dolores"
+  - Attribution fix rule: fix only incorrect attributions, do not modify other content
 - **No errors found** → don't modify diary
 - **Not sure if error** → don't modify
 
-### Step 5: Record Check Time
+⚠️ **Merge principle:** If Step 3 flagged `need_person_fix=true` and Step 4 found attribution errors, fix both in a single read+write. Do not do two separate reads.
+
+### Step 6: Record Check Time
 
 `write` state/last_diary_check_at, content is current time (ISO 8601).
 
-### Step 6: End
+### Step 7: End
 
 Reply HEARTBEAT_OK.
 

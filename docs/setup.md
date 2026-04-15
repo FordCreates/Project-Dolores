@@ -82,11 +82,18 @@ cp $REPO/REFLECTION_REL.md ~/.openclaw/workspace-dolores/REFLECTION_REL.md
 cp $REPO/REFLECTION_PROFILE.md ~/.openclaw/workspace-dolores/REFLECTION_PROFILE.md
 cp $REPO/HEALTH_CHECKIN.md ~/.openclaw/workspace-dolores/HEALTH_CHECKIN.md
 cp $REPO/DIARY_CHECK.md ~/.openclaw/workspace-dolores/DIARY_CHECK.md
-cp $REPO/HEALTH_SEND.md ~/.openclaw/workspace-dolores/HEALTH_SEND.md
 cp $REPO/HEALTH_CORRECTION.md ~/.openclaw/workspace-dolores/HEALTH_CORRECTION.md
 cp $REPO/USER.md ~/.openclaw/workspace-dolores/USER.md
 cp $REPO/profile-user.md ~/.openclaw/workspace-dolores/memory/profile-user.md
 cp $REPO/reflection_trace.md ~/.openclaw/workspace-dolores/reflection_trace.md
+
+# Copy scripts
+mkdir -p ~/.openclaw/workspace-dolores/scripts/lib
+cp $REPO/scripts/send_and_append.py ~/.openclaw/workspace-dolores/scripts/send_and_append.py
+cp $REPO/scripts/inject_context.py ~/.openclaw/workspace-dolores/scripts/inject_context.py
+cp $REPO/scripts/load_diary.py ~/.openclaw/workspace-dolores/scripts/load_diary.py
+cp $REPO/scripts/lib/__init__.py ~/.openclaw/workspace-dolores/scripts/lib/__init__.py
+cp $REPO/scripts/lib/session_append.py ~/.openclaw/workspace-dolores/scripts/lib/session_append.py
 
 # Create initial state files
 touch ~/.openclaw/workspace-dolores/state/last_sync_at
@@ -116,9 +123,9 @@ Search all workspace files for this placeholder and replace with the user's valu
 | `[USER_OCCUPATION — USER CONFIG]` | USER.md | User's occupation and field |
 | `[USER_RELATIONSHIP — USER CONFIG]` | USER.md | How the user defines the relationship |
 | `[USER_COMM_STYLE — USER CONFIG]` | USER.md | Communication preference (direct, playful, reserved, etc.) |
-| `[WORKSPACE_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/load_diary.py | Path to the companion workspace (e.g., `/home/user/.openclaw/workspace-dolores`) |
-| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py | Path to sessions directory (e.g., `/home/user/.openclaw/agents/dolores/sessions`) |
-| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py | Session key (e.g., `agent:dolores:telegram:direct:123456789`) |
+| `[WORKSPACE_PATH — USER CONFIG]` | scripts/send_and_append.py, scripts/inject_context.py, scripts/load_diary.py | Path to the companion workspace (e.g., `/home/user/.openclaw/workspace-dolores`) |
+| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Path to sessions directory (e.g., `/home/user/.openclaw/agents/dolores/sessions`) |
+| `[SESSION_KEY — USER CONFIG]` | scripts/lib/session_append.py | Session key (e.g., `agent:dolores:telegram:direct:123456789`) |
 
 > **Note:** Telegram user ID, timezone, and messaging credentials are configured in `openclaw.json` (Step 1), not in workspace files. Do not search for them here.
 
@@ -163,7 +170,7 @@ openclaw cron add \
   --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
-**Send (delivers pending_message to user):**
+**Send (delivers pending_message to user via script):**
 
 ```bash
 openclaw cron add \
@@ -172,7 +179,7 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated --agent dolores \
   --announce --channel telegram --to "<chatId>" \
-  --message "Read state/pending_message.md. If the content is EMPTY, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
+  --message "用 exec 执行：python3 scripts/send_and_append.py。如果输出为空，回复 HEARTBEAT_OK。否则把内容原样作为你的回复输出。只输出消息文本或 HEARTBEAT_OK，不输出任何其他内容。"
 ```
 
 **Diary check (no delivery):**
@@ -206,16 +213,7 @@ openclaw cron add \
   --message "Read HEALTH_CHECKIN.md and execute the daily health check-in."
 ```
 
-```bash
-openclaw cron add \
-  --name "Dolores Health Checkin Gate" \
-  --cron "5 20 * * *" \
-  --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
-  --message "Read state/pending_message.md and state/affect.json. If the pending message was written less than 20 minutes ago (check the file modification time), keep it. If it is stale or the checkin job failed to produce confident data, write EMPTY to state/pending_message.md. Reply HEARTBEAT_OK."
-```
-
-**Health send (delivers checkin result):**
+**Health send (delivers checkin result via same send script — gate is built in):**
 
 ```bash
 openclaw cron add \
@@ -224,7 +222,7 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated --agent dolores \
   --announce --channel telegram --to "<chatId>" \
-  --message "Read state/pending_message.md. If the content is EMPTY, none, or empty, reply HEARTBEAT_OK. Otherwise deliver the content exactly as written to the user."
+  --message "用 exec 执行：python3 scripts/send_and_append.py。如果输出为空，回复 HEARTBEAT_OK。否则把内容原样作为你的回复输出。只输出消息文本或 HEARTBEAT_OK，不输出任何其他内容。"
 ```
 
 ```bash

@@ -14,9 +14,9 @@ from pathlib import Path
 
 # These must be configured by the calling script or environment.
 # Default values are placeholders — must be configured before use.
-SESSIONS_JSON = Path("/home/ty/.openclaw/agents/companion/sessions/sessions.json")
-SESSION_DIR = Path("/home/ty/.openclaw/agents/companion/sessions")
-SESSION_KEY = "agent:companion:telegram:direct:7493598375"
+SESSIONS_JSON = Path("[SESSION_PATH — USER CONFIG]/sessions.json")
+SESSION_DIR = Path("[SESSION_PATH — USER CONFIG]")
+SESSION_KEY = "[SESSION_KEY — USER CONFIG]"
 
 
 def append_to_session(text: str):
