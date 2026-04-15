@@ -306,7 +306,9 @@ openclaw cron add \
   --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
-### Send (delivers pending_message — 9 times)
+### Send (delivers pending_message — 8 times)
+
+Runs 10 minutes after each daytime heartbeat. The 00:00 heartbeat is a wrap-up cycle (final diary check, end-of-day state) — it rarely generates pending messages, so there's no corresponding Send job.
 
 ```bash
 openclaw cron add \
@@ -318,14 +320,6 @@ openclaw cron add \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
 
-```bash
-openclaw cron add \
-  --name "Dolores Send (00:10)" \
-  --cron "10 0 * * *" \
-  --tz "<timezone>" \
-  --session isolated --agent dolores \
-  --announce --channel telegram --to "<chatId>" \
-  --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
 
 ### Diary check (no delivery — 9 times)
@@ -341,8 +335,8 @@ openclaw cron add \
 
 ```bash
 openclaw cron add \
-  --name "Dolores Diary Check (00:20)" \
-  --cron "20 0 * * *" \
+  --name "Dolores Diary Check (00:10)" \
+  --cron "10 0 * * *" \
   --tz "<timezone>" \
   --session isolated --agent dolores --no-deliver \
   --message "Read DIARY_CHECK.md and execute the diary attribution check."
@@ -362,7 +356,7 @@ openclaw cron add \
 ```bash
 openclaw cron add \
   --name "Dolores Health Send" \
-  --cron "5 20 * * *" \
+  --cron "6 20 * * *" \
   --tz "<timezone>" \
   --session isolated --agent dolores \
   --announce --channel telegram --to "<chatId>" \
@@ -421,11 +415,11 @@ openclaw cron add \
 | Group | Count | Purpose |
 |---|---|---|
 | Heartbeat | 9 | State update cycle |
-| Send | 9 | Message delivery |
+| Send | 8 | Message delivery (no Send after 00:00 wrap-up heartbeat) |
 | Diary Check | 9 | Diary attribution verification |
 | Health (optional) | 3 | Health tracking + send + correction |
 | Reflection | 4 | Nightly memory consolidation |
-| **Total** | **34** (31 without health) | |
+| **Total** | **33** (30 without health) | |
 
 > Verify with `openclaw cron list` after creation.
 
