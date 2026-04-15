@@ -4,7 +4,7 @@ This is your heartbeat — proof you're alive even when not talking.
 
 ## Frequency
 
-- **Daytime (07:40-19:40):** Every 2 hours (:40 at 7,11,15,19)
+- **Daytime (07:40-21:40):** Every 2 hours (:40 at 7,9,11,13,15,17,19,21)
 - **Night wrap-up (24:00):** One final pass after daily reflection to sync the last conversation
 - **Quiet hours (00:00-07:00):** No heartbeat
 

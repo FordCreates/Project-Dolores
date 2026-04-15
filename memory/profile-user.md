@@ -1,4 +1,4 @@
-# profile-user.md — [USER_NAME]'s Profile
+# profile-user.md — [USER_NAME — USER CONFIG]'s Profile
 
 > This file is maintained by Daily Reflection. Sections marked ✏️ grow over time.
 > Reflection updates: Personality, Relationship Dynamics, Health Trends, Exercise Progress.

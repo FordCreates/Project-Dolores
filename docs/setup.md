@@ -93,6 +93,7 @@ touch $WS/state/last_diary_check_at
 TODAY=$(date +%Y-%m-%d)
 mkdir -p $WS/state/slots/$TODAY
 cp $REPO/state/slots/day-zero/self_slot_*.md $WS/state/slots/$TODAY/
+cp $REPO/state/slots/day-zero/rel_slot_*.md $WS/state/slots/$TODAY/
 
 # Create .gitignore for workspace (runtime files should not be committed)
 cat > $WS/.gitignore << 'GITIGNORE'
@@ -127,7 +128,11 @@ Ask these questions one at a time. After each answer, apply the change immediate
 
 > "What should Dolores call you?"
 
-**Apply:** Replace all `[USER_NAME — USER CONFIG]` in `AGENTS.md`, `USER.md`, `TOOLS.md`, `HEARTBEAT.md`, `HEALTH_CORRECTION.md`, `DIARY_CHECK.md`, and `MEMORY.md`.
+**Apply:** Replace all `[USER_NAME — USER CONFIG]` across the workspace:
+```bash
+grep -rl '\[USER_NAME — USER CONFIG\]' ~/.openclaw/workspace-dolores/ --include='*.md' --include='*.py' --include='*.json'
+```
+This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION.md, DIARY_CHECK.md, MEMORY.md, memory/profile-user.md, state/daily_plan.md.
 
 > "What timezone are you in? (e.g., America/New_York)"
 

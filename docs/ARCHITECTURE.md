@@ -353,7 +353,7 @@ The reference channel is **Telegram**. To use a different channel, configure it 
 
 ## 9. The heartbeat: steps in detail
 
-**Cron:** `:40` of odd-numbered hours during waking time (4 runs: 07:40, 11:40, 15:40, 19:40), plus a 24:00 catchup. **Delivery: none** (heartbeat never sends; the send job at `:50` does). **Required final output:** the literal token `HEARTBEAT_OK`, so cron can detect partial failures.
+**Cron:** `:40` of odd-numbered hours during waking time (8 runs: 07:40, 09:40, 11:40, 13:40, 15:40, 17:40, 19:40, 21:40), plus a 24:00 catchup. **Delivery: none** (heartbeat never sends; the send job at `:50` does). **Required final output:** the literal token `HEARTBEAT_OK`, so cron can detect partial failures.
 
 ```
 Step 0: Session sync       — read session jsonl tail, append new exchanges to diary
@@ -422,10 +422,10 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 
 | Job | Cron | Delivery | Notes |
 |---|---|---|---|
-| Heartbeat | `40 7,11,15,19 * * *` | none | 9-step loop, every 2h |
+| Heartbeat | `40 7,9,11,13,15,17,19,21 * * *` | none | 9-step loop, every 2h |
 | Heartbeat catchup | `0 0 * * *` | none | post-reflection sweep |
-| Send | `50 7,11,15,19 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
-| Diary check | `55 7,11,15,19 * * *` | none | person + attribution check |
+| Send | `50 7,9,11,13,15,17,19,21 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
+| Diary check | `55 7,9,11,13,15,17,19,21 * * *` | none | person + attribution check |
 | Diary check catchup | `10 0 * * *` | none | |
 | Check-in (e.g. health) | `0 20 * * *` | none | extract + draft |
 | Check-in send | `6 20 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
