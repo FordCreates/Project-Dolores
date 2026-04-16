@@ -165,16 +165,23 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 ## Step 3: Configure OpenClaw
 
-> **⚠️ CRITICAL — Do NOT overwrite existing configuration.**
+> **⚠️ CRITICAL — Do NOT delete or replace existing agents.**
 >
-> When modifying `openclaw.json`, you must **append** to existing arrays and **merge** into existing objects. Never replace the entire file or any top-level array (`agents.list`, `bindings`, etc.) with only the new entries.
+> The user's `openclaw.json` already has at least one agent (the main agent you're running on right now). Your job is to **add** the Dolores agent **alongside** the existing ones, not replace them.
 >
-> Before making any changes:
+> **Rules:**
+> - `agents.list` → add the Dolores entry to the array. Do NOT replace the array with only Dolores.
+> - `bindings` → add the Dolores binding to the array. Do NOT replace the array.
+> - `agents.defaults` → merge new fields into the existing object. Do NOT replace the object.
+> - `models.providers` → add the new provider. Do NOT touch existing providers.
+> - `channels.telegram.accounts` → add the Dolores account. Do NOT touch existing accounts.
+>
+> **Before making any changes, backup:**
 > ```bash
 > cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
 > ```
 >
-> If anything goes wrong, restore with:
+> **If anything goes wrong, restore:**
 > ```bash
 > cp ~/.openclaw/openclaw.json.bak ~/.openclaw/openclaw.json
 > ```
