@@ -26,6 +26,8 @@ Before anything else, scan the project structure and present these risks to the 
 
 8. **Basic technical literacy needed** — Your main agent handles most setup, but troubleshooting requires reading logs and running commands.
 
+9. **⚠️ Never run two gateway instances with the same Telegram bot** — If your bot's token is loaded on two machines simultaneously, both gateways will race to process incoming messages. The second instance may have an outdated or empty workspace, producing responses with wrong personality, stale memories, or no memories at all. This causes severe identity and memory corruption that is very hard to clean up. Always ensure only one gateway is connected to your bot at any time.
+
 > After presenting these, ask: "Still want to proceed?"
 >
 > If no — stop here, no harm done.
