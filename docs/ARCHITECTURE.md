@@ -99,6 +99,20 @@ This is the part that distinguishes Dolores from any agent that merely *has* mem
 
 We call this **Narrative Descent**: the gravitational pull by which high-weight events sink into long-term narrative and low-weight ones evaporate. The arc that emerges over weeks is not designed; it's a side effect of repeated lossy compression with a stable filter (SOUL.md) at the bottom of the well.
 
+> ⚠️ **Why not OpenClaw's native Dreaming?**
+>
+> OpenClaw ships with a built-in Dreaming system (memory-core) that consolidates short-term memory into durable storage via a Light → Deep → REM phase pipeline. It's well-engineered for its purpose. We don't use it, and this is an architectural decision, not an oversight.
+>
+> **1. Different abstraction layer.** Dreaming is *memory infrastructure* — it solves "remember what happened." Closure is *cognitive engineering* — it solves "remain who you are." Memory is one component of identity continuity, but it is neither sufficient nor necessary. Humans with amnesia retain personality because the self is sustained by belief structures, not episodic recall.
+>
+> **2. Opposite direction.** Dreaming's design logic is *more recall → better performance*: ingest session transcripts, score snippets, promote to MEMORY.md, reinject via system prompt. Each cycle feeds more historical pattern into the next-token predictor. In a companion agent, this is an accelerator for pattern collapse — behavioral lock-in disguised as personalization. Our anti-collapse mechanisms (digest lossy compression, slot-based rewriting, acyclic topology) go the other direction: *less reinjection → more freedom for the model to respond authentically in the moment*.
+>
+> **3. Belief structures > memory banks.** A real human's behavioral consistency comes from stable core beliefs producing reactions in real time — not from caching and replaying past behavior. Dreaming builds a better cache. Closure maintains the belief structure (self-narrative ≈ core identity, relationship-summary ≈ relational cognition, profile ≈ user model) so that each response is generated from structure, not copied from history.
+>
+> The two systems can coexist. But replacing Closure with Dreaming would trade cognitive architecture for a bookmark system.
+>
+>
+>
 > ⚠️ **Why it's built this way — five anti-collapse mechanisms.**
 >
 > **1. Slot-based rewriting, not append-based memory.** The naive approach is to append new events to a growing narrative file. This produces two failure modes: (a) the file grows past context window limits, forcing truncation that cuts the wrong end; (b) the model reads its own past output and reproduces it verbatim, causing *pattern collapse* — every day's reflection looks like the last. Slots fix this by forcing the model to write from *analysis* (the reflection_trace), not from yesterday's narrative. Each slot answers a specific question; concatenation produces a fresh file every night with no copy-paste path.
