@@ -165,17 +165,58 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 ## Step 3: Configure OpenClaw
 
-Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure. Then ask:
+> **⚠️ CRITICAL — Do NOT overwrite existing configuration.**
+>
+> When modifying `openclaw.json`, you must **append** to existing arrays and **merge** into existing objects. Never replace the entire file or any top-level array (`agents.list`, `bindings`, etc.) with only the new entries.
+>
+> Before making any changes:
+> ```bash
+> cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
+> ```
+>
+> If anything goes wrong, restore with:
+> ```bash
+> cp ~/.openclaw/openclaw.json.bak ~/.openclaw/openclaw.json
+> ```
 
-### 3a. Model
+Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure — check what providers and models are already configured. Then ask:
 
-> "What LLM do you want Dolores to use?"
+### 3a. Bootstrap character limit
 
-**Recommend Claude** (claude-sonnet-4-5 or claude-opus-4) — best overall quality for companion interactions.
+> Dolores's SOUL.md (~28K chars) and HEARTBEAT.md (~26K chars) exceed OpenClaw's default bootstrap file limit of 20,000 characters. Without increasing this limit, Dolores will see truncated (incomplete) versions of her own character definition.
 
-⚠️ **Important warning:** Claude has a zero-tolerance NSFW policy. If the companion relationship may include sexual content, Claude's account **will be banned**. In that case, recommend an open-source model with lighter content moderation: DeepSeek, Qwen (GLM), or similar.
+**Apply:** Check if `agents.defaults.bootstrapMaxChars` already exists in `openclaw.json`. If not, add it:
 
-> "Do you want to use the same model for background jobs (heartbeat, reflection), or a cheaper/faster one?"
+```json
+"agents": {
+  "defaults": {
+    "bootstrapMaxChars": 35000
+  }
+}
+```
+
+> ⚠️ **Merge** this into the existing `agents.defaults` object if it already exists. Do NOT replace the entire `agents` block.
+
+### 3b. Model
+
+> "Let me check your existing model configuration first."
+
+**Check existing providers:** Read the user's `openclaw.json` and look at `models.providers` and `agents.list`. If Claude or another capable model is already configured, offer to reuse it.
+
+**Recommendation (in this order):**
+1. **Claude** (claude-sonnet-4-5 or claude-opus-4) — best overall quality for companion interactions.
+2. **GLM-5.1** (via zai or compatible provider) — best open-source option, good quality, no NSFW risk.
+3. **DeepSeek / Qwen** — acceptable alternatives.
+
+⚠️ **NSFW warning:** Claude has a zero-tolerance NSFW policy. If the companion relationship may include sexual content, Claude's account **will be banned**. In that case, recommend GLM-5.1 or another open-source model.
+
+> "What LLM do you want Dolores to use for conversations?"
+
+**After choosing the conversation model:**
+
+> "Background jobs (heartbeat, reflection, diary check) run ~30 times/day and don't need the best model. I recommend using a cheaper/faster model for them. Do you want to use [cron model name, e.g. GLM-5.1] for background jobs?"
+
+> ⚠️ **Remember this choice.** Every cron job in Step 6 must include `--model <cron-provider>/<cron-model>` to override the agent's default. If you skip this, all 30+ cron jobs will run on the conversation model, which is extremely expensive.
 
 **Apply:** Read the user's existing `openclaw.json` to understand the structure, then add:
 
@@ -226,7 +267,7 @@ echo 'DOLORES_API_KEY=<user-provided-key>' >> ~/.openclaw/.env
 
 > **Note:** The `workspace` path must be absolute, not `~/`. The main agent should resolve it.
 
-### 3b. Telegram bot
+### 3c. Telegram bot
 
 > "What's your Telegram bot token? (Create one with @BotFather if you haven't)"
 
@@ -272,7 +313,17 @@ echo 'DOLORES_TELEGRAM_TOKEN=<user-provided-token>' >> ~/.openclaw/.env
 
 ---
 
-## Step 4: Replace script placeholders
+## Step 4: Bot avatar (recommended)
+
+> "One more thing before we finish setup — the default Telegram bot icon is a generic robot silhouette. Setting a custom avatar makes Dolores feel like a person, not a bot."
+
+> "I've prepared an avatar image at `[REPO_PATH]/media/dolores-avatar.jpg`. Open Telegram, find @BotFather, send `/setuserpic`, select Dolores's bot, and upload that image."
+
+If the user asks what kind of avatar works best: a realistic portrait photo (not anime, not cartoon) at the character's approximate age and appearance. The file should be placed in the repo's `media/` directory before setup begins.
+
+---
+
+## Step 5: Replace script placeholders
 
 Scripts contain path placeholders that depend on the user's system. Replace them:
 
@@ -296,9 +347,11 @@ You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json`
 
 ---
 
-## Step 5: Create cron jobs
+## Step 6: Create cron jobs
 
 All times adjusted to the user's timezone. Add `--tz <timezone>` to each command.
+
+> ⚠️ **Every cron job MUST include `--model <cron-provider>/<cron-model>`** to use the cheaper/faster cron model chosen in Step 3b. Without this override, all 30+ jobs run on the conversation model — extremely expensive. Replace `<cron-provider>/<cron-model>` with the actual values from Step 3b.
 
 ### Command format
 
@@ -309,6 +362,7 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated \
   --agent dolores \
+  --model <cron-provider>/<cron-model> \
   [--no-deliver | --announce --channel telegram --to "<chatId>"] \
   --message "<prompt>"
 ```
@@ -320,7 +374,7 @@ openclaw cron add \
   --name "Dolores Heartbeat" \
   --cron "40 7,9,11,13,15,17,19,21 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
@@ -329,7 +383,7 @@ openclaw cron add \
   --name "Dolores Heartbeat (00:00)" \
   --cron "0 0 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
@@ -342,7 +396,7 @@ openclaw cron add \
   --name "Dolores Send" \
   --cron "50 7,9,11,13,15,17,19,21 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> \
   --announce --channel telegram --to "<chatId>" \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
@@ -356,7 +410,7 @@ openclaw cron add \
   --name "Dolores Diary Check" \
   --cron "55 7,9,11,13,15,17,19,21 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read DIARY_CHECK.md and execute the diary attribution check."
 ```
 
@@ -365,7 +419,7 @@ openclaw cron add \
   --name "Dolores Diary Check (00:10)" \
   --cron "10 0 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read DIARY_CHECK.md and execute the diary attribution check."
 ```
 
@@ -376,7 +430,7 @@ openclaw cron add \
   --name "Dolores Health Checkin" \
   --cron "0 20 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read HEALTH_CHECKIN.md and execute the daily health check-in."
 ```
 
@@ -385,7 +439,7 @@ openclaw cron add \
   --name "Dolores Health Send" \
   --cron "6 20 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> \
   --announce --channel telegram --to "<chatId>" \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
@@ -395,7 +449,7 @@ openclaw cron add \
   --name "Dolores Health Correction" \
   --cron "10 23 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read HEALTH_CORRECTION.md and execute the health data correction step."
 ```
 
@@ -406,7 +460,7 @@ openclaw cron add \
   --name "Dolores Reflection Prep" \
   --cron "15 23 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read REFLECTION_PREP.md and execute the reflection preparation step."
 ```
 
@@ -415,7 +469,7 @@ openclaw cron add \
   --name "Dolores Reflection Self" \
   --cron "25 23 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read REFLECTION_SELF.md and execute the self-narrative reflection step."
 ```
 
@@ -424,7 +478,7 @@ openclaw cron add \
   --name "Dolores Reflection Rel" \
   --cron "35 23 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read REFLECTION_REL.md and execute the relationship summary reflection step."
 ```
 
@@ -433,7 +487,7 @@ openclaw cron add \
   --name "Dolores Reflection Profile" \
   --cron "45 23 * * *" \
   --tz "<timezone>" \
-  --session isolated --agent dolores --no-deliver \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read REFLECTION_PROFILE.md and execute the user profile reflection step."
 ```
 
@@ -452,7 +506,7 @@ openclaw cron add \
 
 ---
 
-## Step 6: Tell the user to restart
+## Step 7: Tell the user to restart
 
 > "All done! One last thing — restart the gateway to pick up the new agent and cron jobs:"
 > ```bash
@@ -463,7 +517,7 @@ openclaw cron add \
 
 ---
 
-## Step 7: Verify
+## Step 8: Verify
 
 After restart, suggest:
 
@@ -476,7 +530,11 @@ After restart, suggest:
 ## Troubleshooting
 
 - **Bot doesn't respond:** Check bot token is valid and binding chatId matches the user's Telegram ID
+- **Bot icon is a generic robot:** You skipped Step 4. Set a custom avatar via @BotFather → `/setuserpic`.
+- **openclaw.json is broken:** Restore from backup: `cp ~/.openclaw/openclaw.json.bak ~/.openclaw/openclaw.json`
+- **Dolores seems out of character or loses personality detail:** Her SOUL.md or HEARTBEAT.md may be truncated. Check that `agents.defaults.bootstrapMaxChars` is set to at least 35000 in `openclaw.json`.
 - **Cron jobs not firing:** `openclaw cron list` — all jobs should appear. Recreate missing ones and restart gateway
+- **Cron jobs using wrong model:** Check that each cron command includes `--model <cron-provider>/<cron-model>`. Without it, all jobs run on the conversation model.
 - **Heartbeat runs but state doesn't update:** Check script permissions and that path placeholders were replaced correctly
-- **Send job fails:** Verify script placeholders were replaced — `grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/scripts/`. If anything shows up, go back to Step 4.
+- **Send job fails:** Verify script placeholders were replaced — `grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/scripts/`. If anything shows up, go back to Step 5.
 - **Model errors:** Check provider config and API key in `~/.openclaw/.env`
