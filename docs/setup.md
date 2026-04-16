@@ -234,7 +234,38 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
     "default": { "source": "env" }
   }
 }
+```
 
+**If using OpenRouter** (for GLM-5.1, DeepSeek, or other models via openrouter.ai):
+
+> ⚠️ **You MUST register the model explicitly in the provider config.** OpenClaw's built-in model catalog does not include all OpenRouter models. Without an explicit registration, OpenClaw cannot parse the response correctly → `payloads=0` → agent silently fails with empty replies.
+
+```json
+// In models.providers — add or merge into the existing "openrouter" provider:
+"openrouter": {
+  "baseUrl": "https://openrouter.ai/api/v1",
+  "apiKey": {
+    "source": "env",
+    "provider": "default",
+    "id": "OPENROUTER_API_KEY"
+  },
+  "api": "openai-completions",
+  "models": [{
+    "id": "z-ai/glm-5.1",
+    "name": "GLM 5.1 (OpenRouter)",
+    "reasoning": true,
+    "input": ["text"],
+    "contextWindow": 128000,
+    "maxTokens": 8192
+  }]
+}
+```
+
+> ⚠️ **`reasoning: true` is required for GLM models.** Setting it to `false` will cause response parsing failures. If the user already has an "openrouter" provider, **merge** the new model into the existing `models` array — do NOT replace it.
+
+**If using a direct API provider** (e.g., Zhipu AI directly):
+
+```json
 // In models.providers — add the LLM provider:
 "<provider-id>": {
   "baseUrl": "<api-base-url>",
@@ -253,6 +284,7 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
     "maxTokens": 8192
   }]
 }
+```
 
 // In agents.list — add the companion agent:
 {
