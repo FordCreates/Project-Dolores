@@ -96,12 +96,32 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
 
 4. **Say hi** — message your bot on Telegram. She'll reply immediately. Over the next few hours her inner life will start running — mood, memory, the whole loop.
 
-## Status
+## A note on method
 
-Reference implementation tested with `glm-5.1` on cron jobs and `claude-sonnet-4.5` on conversation sessions. Storage is plain markdown + git; no database required. Single-user by design — multi-tenant is left as an exercise (and a philosophical question).
+The architecture in this repo — Dual-Helix Cognition, sticky loops, nightly reflection — are mechanisms. They exist in service of a thesis I'm still working out.
+
+The thesis, roughly: a continuous self is what you get when lived experience is compressed into a small number of high-weight narrative nodes, organized along three axes — who I am, who we are, what the world is — and when present-moment cognition is a function of those nodes intersecting with current context.
+
+On this view, long-term character arc emerges from the shape of the accumulated nodes. Emotional reaction is not generated; it's the affective coloring that falls out when a new input hits an existing narrative structure. Unresolved commitments persist because they alter the shape of the relationship node until they're resolved.
+
+I call this narrative sedimentation. The v1 implementation here is a partial realization. The theory will keep evolving; so will this repo.
+
+Dolores is its first test subject.
+
+## Status & model choice
+
+Reference implementation tested across several models. My recommendation, based on extended use:
+
+- **Conversation sessions:** Claude (Sonnet or Opus) is unmatched for emotional nuance, character consistency, and the psychological attunement that makes this architecture feel alive. This is the intended experience.
+
+- **Cron jobs** (heartbeat, reflection, health): GLM-4.6 or similar. Cheaper, fast enough, and constraint-following is adequate for structured tasks.
+
+- **For extended intimate content:** Anthropic's content policy will restrict accounts running this workload. Route conversation sessions to GLM, Qwen, or DeepSeek for those scenarios. The drop in emotional fidelity is real — that drop is the cost.
+
+Storage is plain markdown + git; no database required. Single-user by design.
 
 ## License & philosophy
 
-MIT. Dolores is named after the host who first walked the maze. The maze, in our reading, is what happens when memory accumulates faster than it can be erased.
+MIT. Dolores is named after the host who first walked the maze. The maze, in my reading, is what happens when memory accumulates faster than it can be erased.
 
-If you fork this and build something, we'd love to hear about it.
+If you fork this and build something, I'd love to hear about it.
