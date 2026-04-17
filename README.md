@@ -82,6 +82,8 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
    git clone https://github.com/FordCreates/Project-Dolores.git
    ```
 
+   > ⚠️ **This is a reference implementation, not a plug-and-play template.** It works out of the box, but building a companion that *feels* alive requires significant customization of the character, soul, and narrative files. The architecture handles persistence — you handle the person. Expect to iterate.
+
 2. **Tell your main agent:**
    > Set up Dolores from ~/Project-Dolores
 
