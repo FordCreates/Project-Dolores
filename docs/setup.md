@@ -403,10 +403,10 @@ These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be rep
 **After replacing all placeholders, verify with:**
 
 ```bash
-grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/
+grep -r "USER_CONFIG\|SESSION_PATH\|SESSION_KEY" ~/.openclaw/workspace-dolores/ --include="*.md" --include="*.py" --include="*.json"
 ```
 
-> ⚠️ **This must return zero results.** If anything shows up, you missed a file — go back and replace it. The most commonly missed files are `HEARTBEAT.md` and `scripts/lib/session_append.py`.
+> ⚠️ **This must return zero results.** If anything shows up, you missed a file — go back and replace it before proceeding to Step 6.
 
 You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json` after the gateway picks up the new agent config.
 
