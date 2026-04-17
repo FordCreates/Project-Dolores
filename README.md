@@ -114,7 +114,7 @@ Reference implementation tested across several models. My recommendation, based 
 
 - **Conversation sessions:** Claude (Sonnet or Opus) is unmatched for emotional nuance, character consistency, and the psychological attunement that makes this architecture feel alive. This is the intended experience.
 
-- **Cron jobs** (heartbeat, reflection, health): GLM-4.6 or similar. Cheaper, fast enough, and constraint-following is adequate for structured tasks.
+- **Cron jobs** (heartbeat, reflection, health): GLM-5.1 or similar. Cheaper than Claude, and adequate for structured tasks with the right guardrails.
 
 - **For extended intimate content:** Anthropic's content policy will restrict accounts running this workload. Route conversation sessions to GLM, Qwen, or DeepSeek for those scenarios. The drop in emotional fidelity is real — that drop is the cost.
 
