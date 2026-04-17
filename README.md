@@ -71,6 +71,10 @@ Every file in this repo is tagged with one of three labels:
 
 For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the four-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
+## Architecture overview
+
+<img src="docs/architecture-overview.jpg" alt="Dual-Helix Cognition architecture" width="700">
+
 ## Quick start
 
 **Prerequisites:**
