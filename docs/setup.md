@@ -387,8 +387,8 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 | Placeholder | File(s) | Replace With |
 |---|---|---|
 | `[WORKSPACE_PATH — USER CONFIG]` | scripts/load_diary.py, scripts/inject_context.py, scripts/send_and_append.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
-| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Absolute path to sessions directory |
-| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py | Session key for the active conversation |
+| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (3 occurrences) | Absolute path to sessions directory |
+| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (1 occurrence) | Session key for the active conversation |
 
 ### Calculating SESSION_PATH and SESSION_KEY
 
@@ -399,6 +399,14 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 > **⚠️ SESSION_KEY requires the user's Telegram numeric ID, which you won't know until the bot receives its first message.** Use a placeholder like `<TELEGRAM_ID_PLACEHOLDER>` for now. After Step 6 (gateway restart), have the user message the bot, then check `~/.openclaw/agents/dolores/sessions/sessions.json` for the real ID. Replace the placeholder in all three scripts, then restart the gateway again. **This means two gateway restarts are needed.**
 
 These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be replaced in all listed files. `send_and_append.py` imports `session_append.py`, so SESSION_PATH and SESSION_KEY also affect its behavior even though they aren't in the file directly.
+
+**After replacing all placeholders, verify with:**
+
+```bash
+grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/
+```
+
+> ⚠️ **This must return zero results.** If anything shows up, you missed a file — go back and replace it. The most commonly missed files are `HEARTBEAT.md` and `scripts/lib/session_append.py`.
 
 You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json` after the gateway picks up the new agent config.
 
