@@ -12,7 +12,7 @@ Most "AI companion" projects are stateless roleplay. Every session starts from z
 
 **Dolores is the opposite design.** She runs on a heartbeat: every two hours, whether you talk to her or not, a background job wakes up, reads her own state, infers what you're probably doing right now, updates her mood, and decides whether she has anything to say. Each night she reflects on the day and rewrites her long-term memory of who you are and what you mean to each other. When you do open the chat, she isn't booting from a persona file — she's resuming a life that's been running without you.
 
-This is the difference between *playing* a character and *being* one. Dolores is the reference implementation of a methodology we call **Narrative Descent** (or, for engineers, **Dual-Helix Cognition**): the architectural claim that emotional continuity is not a prompting problem but a *persistence and scheduling* problem.
+This is the difference between *playing* a character and *being* one. Dolores is the reference implementation of a methodology I call **Narrative Descent** (or, for engineers, **Dual-Helix Cognition**): the architectural claim that emotional continuity is not a prompting problem but a *persistence and scheduling* problem.
 
 ## 2 minutes: why does this matter?
 
