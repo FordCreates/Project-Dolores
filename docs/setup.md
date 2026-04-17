@@ -188,7 +188,23 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure — check what providers and models are already configured. Then ask:
 
-### 3a. Bootstrap character limit
+### 3a. Session scope (REQUIRED)
+
+> ⚠️ **This is a silent dependency.** Dolores's scripts (`send_and_append.py`, `inject_context.py`) hardcode a session key in the format `agent:dolores:telegram:direct:<user-id>`. This only works if `session.dmScope` is set to `per-channel-peer` (each DM gets its own session key). The OpenClaw default is `main` (all DMs share one session key `agent:dolores:main`), which will cause all session-dependent scripts to fail silently.
+
+**Apply:** Check if `session.dmScope` already exists in `openclaw.json`. If not, add it at the **top level** (NOT inside `agents`):
+
+```json
+{
+  "session": {
+    "dmScope": "per-channel-peer"
+  }
+}
+```
+
+> **Merge** this into the existing top-level config. Do NOT place it inside `agents`.
+
+### 3b. Bootstrap character limit
 
 > Dolores's SOUL.md (~28K chars) and HEARTBEAT.md (~26K chars) exceed OpenClaw's default bootstrap file limit of 20,000 characters. Without increasing this limit, Dolores will see truncated (incomplete) versions of her own character definition.
 
@@ -204,7 +220,7 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 > ⚠️ **Merge** this into the existing `agents.defaults` object if it already exists. Do NOT replace the entire `agents` block.
 
-### 3b. Model
+### 3c. Model
 
 > "Let me check your existing model configuration first."
 
@@ -305,8 +321,10 @@ echo 'DOLORES_API_KEY=<user-provided-key>' >> ~/.openclaw/.env
 ```
 
 > **Note:** The `workspace` path must be absolute, not `~/`. The main agent should resolve it.
+>
+> ⚠️ **Do NOT add `"thinking": "off"` or any `params.thinking` override.** LLM thinking mode improves response quality for companion agents. Disabling it will degrade reflection, empathy, and narrative coherence. Let OpenClaw use its default thinking behavior.
 
-### 3c. Telegram bot
+### 3d. Telegram bot
 
 > "What's your Telegram bot token? (Create one with @BotFather if you haven't)"
 
@@ -390,7 +408,7 @@ You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json`
 
 All times adjusted to the user's timezone. Add `--tz <timezone>` to each command.
 
-> ⚠️ **Every cron job MUST include `--model <cron-provider>/<cron-model>`** to use the cheaper/faster cron model chosen in Step 3b. Without this override, all 30+ jobs run on the conversation model — extremely expensive. Replace `<cron-provider>/<cron-model>` with the actual values from Step 3b.
+> ⚠️ **Every cron job MUST include `--model <cron-provider>/<cron-model>`** to use the cheaper/faster cron model chosen in Step 3c. Without this override, all 30+ jobs run on the conversation model — extremely expensive. Replace `<cron-provider>/<cron-model>` with the actual values from Step 3c.
 
 ### Command format
 
