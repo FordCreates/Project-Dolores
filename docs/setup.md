@@ -374,7 +374,7 @@ echo 'DOLORES_TELEGRAM_TOKEN=<user-provided-token>' >> ~/.openclaw/.env
 
 > "One more thing before we finish setup — the default Telegram bot icon is a generic robot silhouette. Setting a custom avatar makes Dolores feel like a person, not a bot."
 
-> "I've prepared an avatar image at `[REPO_PATH]/media/dolores-avatar.jpg`. Open Telegram, find @BotFather, send `/setuserpic`, select Dolores's bot, and upload that image."
+> "I've prepared an avatar image at `[REPO_PATH]/media/Dolores.jpeg`. Open Telegram, find @BotFather, send `/setuserpic`, select Dolores's bot, and upload that image."
 
 If the user asks what kind of avatar works best: a realistic portrait photo (not anime, not cartoon) at the character's approximate age and appearance. The file should be placed in the repo's `media/` directory before setup begins.
 
