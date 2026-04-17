@@ -387,8 +387,9 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 | Placeholder | File(s) | Replace With |
 |---|---|---|
 | `[WORKSPACE_PATH — USER CONFIG]` | scripts/load_diary.py, scripts/inject_context.py, scripts/send_and_append.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
-| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (3 occurrences) | Absolute path to sessions directory |
-| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (1 occurrence) | Session key for the active conversation |
+| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (3 occurrences), **DIARY_CHECK.md** (1 occurrence) | Absolute path to sessions directory |
+| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (1 occurrence), **DIARY_CHECK.md** (1 occurrence) | Session key for the active conversation |
+| `<SESSION_PATH>` | **HEALTH_CORRECTION.md** (1 occurrence, different format — use same value) | Same absolute sessions directory path |
 
 ### Calculating SESSION_PATH and SESSION_KEY
 
