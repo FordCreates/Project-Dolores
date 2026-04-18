@@ -42,7 +42,7 @@ You are setting up a companion agent based on Project Dolores. The repo contains
 **Principles:**
 - Copy files first, configure second. The user sees action after every question.
 - Ask one thing at a time. Apply the change before asking the next.
-- Use OpenClaw's secrets provider for API keys (see examples in Step 3). Never hardcode keys directly.
+- Use OpenClaw's secrets provider for API keys (see examples in Step 4). Never hardcode keys directly.
 
 ---
 
@@ -118,7 +118,32 @@ GITIGNORE
 
 ---
 
-## Step 2: Configure the character
+## Step 2: Disable session-memory hook
+
+> ⚠️ **Required.** OpenClaw ships with a built-in `session-memory` hook that automatically writes session summaries to `memory/` on `/new` or `/reset`. Dolores manages `memory/` herself (diaries, digests, narrative files) and has her own file naming conventions. The session-memory hook will:
+>
+> 1. **Pollute `memory/`** — creates `YYYY-MM-DD-slug.md` files that don't belong in Dolores's file structure
+> 2. **Waste tokens** — each summary requires an LLM call
+> 3. **Violate the core principle** — "conversation sessions write nothing"
+> 4. **Poison memory_search** — low-quality session summaries may be indexed and recalled during cognition
+
+**Apply:**
+
+```bash
+openclaw hooks disable session-memory
+```
+
+Verify it's disabled:
+
+```bash
+openclaw hooks list | grep session-memory
+```
+
+Should show `disabled` or no output.
+
+---
+
+## Step 3: Configure the character
 
 Ask these questions one at a time. After each answer, apply the change immediately.
 
@@ -158,12 +183,12 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 > "Dolores can track your daily health data — sleep, exercise, diet, medication, and any symptoms you want monitored. Want to enable this?"
 
-- **Yes** → Ask what symptoms or conditions to track (e.g., allergies, chronic conditions, mental health). Replace `[USER_SYMPTOMS — USER CONFIG]` in `HEALTH_CHECKIN.md` with the actual symptom fields. Remember to create the health cron jobs later (Step 5).
+- **Yes** → Ask what symptoms or conditions to track (e.g., allergies, chronic conditions, mental health). Replace `[USER_SYMPTOMS — USER CONFIG]` in `HEALTH_CHECKIN.md` with the actual symptom fields. Remember to create the health cron jobs later (Step 6).
 - **No** → Skip. HEALTH_CHECKIN.md stays as-is, just won't have a cron job.
 
 ---
 
-## Step 3: Configure OpenClaw
+## Step 4: Configure OpenClaw
 
 > **⚠️ CRITICAL — Do NOT delete or replace existing agents.**
 >
@@ -370,7 +395,7 @@ echo 'DOLORES_TELEGRAM_TOKEN=<user-provided-token>' >> ~/.openclaw/.env
 
 ---
 
-## Step 4: Bot avatar (recommended)
+## Step 5: Bot avatar (recommended)
 
 > "One more thing before we finish setup — the default Telegram bot icon is a generic robot silhouette. Setting a custom avatar makes Dolores feel like a person, not a bot."
 
@@ -380,7 +405,7 @@ If the user asks what kind of avatar works best: a realistic portrait photo (not
 
 ---
 
-## Step 5: Replace script placeholders
+## Step 6: Replace script placeholders
 
 Scripts contain path placeholders that depend on the user's system. Replace them:
 
@@ -397,7 +422,7 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 
 **SESSION_KEY:** `agent:dolores:telegram:direct:<user-telegram-id>`
 
-> **⚠️ SESSION_KEY requires the user's Telegram numeric ID, which you won't know until the bot receives its first message.** Use a placeholder like `<TELEGRAM_ID_PLACEHOLDER>` for now. After Step 6 (gateway restart), have the user message the bot, then check `~/.openclaw/agents/dolores/sessions/sessions.json` for the real ID. Replace the placeholder in all three scripts, then restart the gateway again. **This means two gateway restarts are needed.**
+> **⚠️ SESSION_KEY requires the user's Telegram numeric ID, which you won't know until the bot receives its first message.** Use a placeholder like `<TELEGRAM_ID_PLACEHOLDER>` for now. After Step 7 (gateway restart), have the user message the bot, then check `~/.openclaw/agents/dolores/sessions/sessions.json` for the real ID. Replace the placeholder in all three scripts, then restart the gateway again. **This means two gateway restarts are needed.**
 
 These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be replaced in all listed files. `send_and_append.py` imports `session_append.py`, so SESSION_PATH and SESSION_KEY also affect its behavior even though they aren't in the file directly.
 
@@ -407,17 +432,17 @@ These three placeholders (WORKSPACE_PATH, SESSION_PATH, SESSION_KEY) must be rep
 grep -r "USER_CONFIG\|SESSION_PATH\|SESSION_KEY" ~/.openclaw/workspace-dolores/ --include="*.md" --include="*.py" --include="*.json"
 ```
 
-> ⚠️ **This must return zero results.** If anything shows up, you missed a file — go back and replace it before proceeding to Step 6.
+> ⚠️ **This must return zero results.** If anything shows up, you missed a file — go back and replace it before proceeding to Step 7.
 
 You can verify by inspecting `~/.openclaw/agents/dolores/sessions/sessions.json` after the gateway picks up the new agent config.
 
 ---
 
-## Step 6: Create cron jobs
+## Step 7: Create cron jobs
 
 All times adjusted to the user's timezone. Add `--tz <timezone>` to each command.
 
-> ⚠️ **Every cron job MUST include `--model <cron-provider>/<cron-model>`** to use the cheaper/faster cron model chosen in Step 3c. Without this override, all 30+ jobs run on the conversation model — extremely expensive. Replace `<cron-provider>/<cron-model>` with the actual values from Step 3c.
+> ⚠️ **Every cron job MUST include `--model <cron-provider>/<cron-model>`** to use the cheaper/faster cron model chosen in Step 4c. Without this override, all 30+ jobs run on the conversation model — extremely expensive. Replace `<cron-provider>/<cron-model>` with the actual values from Step 4c.
 
 ### Command format
 
@@ -489,7 +514,7 @@ openclaw cron add \
   --message "Read DIARY_CHECK.md and execute the diary attribution check."
 ```
 
-### Health (only if enabled in Step 2c — 3 jobs)
+### Health (only if enabled in Step 3c — 3 jobs)
 
 ```bash
 openclaw cron add \
@@ -572,7 +597,7 @@ openclaw cron add \
 
 ---
 
-## Step 7: Tell the user to restart
+## Step 8: Tell the user to restart
 
 > "All done! One last thing — restart the gateway to pick up the new agent and cron jobs:"
 > ```bash
@@ -583,7 +608,7 @@ openclaw cron add \
 
 ---
 
-## Step 8: Verify
+## Step 9: Verify
 
 After restart, suggest:
 
@@ -596,11 +621,11 @@ After restart, suggest:
 ## Troubleshooting
 
 - **Bot doesn't respond:** Check bot token is valid and binding chatId matches the user's Telegram ID
-- **Bot icon is a generic robot:** You skipped Step 4. Set a custom avatar via @BotFather → `/setuserpic`.
+- **Bot icon is a generic robot:** You skipped Step 5. Set a custom avatar via @BotFather → `/setuserpic`.
 - **openclaw.json is broken:** Restore from backup: `cp ~/.openclaw/openclaw.json.bak ~/.openclaw/openclaw.json`
 - **Dolores seems out of character or loses personality detail:** Her SOUL.md or HEARTBEAT.md may be truncated. Check that `agents.defaults.bootstrapMaxChars` is set to at least 35000 in `openclaw.json`.
 - **Cron jobs not firing:** `openclaw cron list` — all jobs should appear. Recreate missing ones and restart gateway
 - **Cron jobs using wrong model:** Check that each cron command includes `--model <cron-provider>/<cron-model>`. Without it, all jobs run on the conversation model.
 - **Heartbeat runs but state doesn't update:** Check script permissions and that path placeholders were replaced correctly
-- **Send job fails:** Verify script placeholders were replaced — `grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/scripts/`. If anything shows up, go back to Step 5.
+- **Send job fails:** Verify script placeholders were replaced — `grep -r "USER_CONFIG" ~/.openclaw/workspace-dolores/scripts/`. If anything shows up, go back to Step 6.
 - **Model errors:** Check provider config and API key in `~/.openclaw/.env`
