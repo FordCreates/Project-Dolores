@@ -240,7 +240,9 @@ High-frequency, small, written by heartbeat, read by everything.
 
 > ⚠️ **Weather is stored inside `world_context.json`, not a separate file.** Reflection Prep writes the weather field directly into world_context.json. Heartbeat reads it from there but does not overwrite it (slow variable, §1).
 
-- **`reflection_trace.md`** `[ARCHITECTURE]` — nightly analysis and decision output, written by Reflection Prep and consumed by the three writing crons (Self, Rel, Profile). Contains event analysis, tension routing, and update directions. Each writing cron checks this file exists and is from today before proceeding; if missing, they skip.
+## Inter-stage files
+
+- **`reflection_trace.md`** `[ARCHITECTURE]` — nightly analysis and decision output, written by Reflection Prep and consumed by the three writing crons (Self, Rel, Profile). Located at workspace root, not inside `state/` (see file tree §2). Contains event analysis, tension routing, and update directions. Each writing cron checks this file exists and is from today before proceeding; if missing, they skip.
 
 ---
 
