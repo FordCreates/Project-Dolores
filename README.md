@@ -2,17 +2,17 @@
 
 > *The first host who remembered.*
 
-An open-source blueprint for AI companions with emotional continuity, built on [OpenClaw](https://openclaw.dev). Clone. Your agent does the rest.
+An open-source reference architecture for agents with emotional continuity — state that persists between sessions, memory that rewrites itself nightly, and unresolved commitments that wait for resolution. The example implementation is a companion agent named Dolores. Built on [OpenClaw](https://openclaw.dev). Clone. Your agent does the rest.
 
 ---
 
 ## 30 seconds: what is this?
 
-Most "AI companion" projects are stateless roleplay. Every session starts from zero — the model wears a persona for one conversation, then forgets you exist the moment you close the tab. The illusion of intimacy is held up entirely by the prompt. There is no inner life between turns.
+Most agents with "memory" are doing retrieval. A vector store, a summary buffer, a long context window. The agent looks up facts about you at the start of a conversation, then forgets you again the moment the session ends. There is no inner life between turns.
 
 **Dolores is the opposite design.** She runs on a heartbeat: every two hours, whether you talk to her or not, a background job wakes up, reads her own state, infers what you're probably doing right now, updates her mood, and decides whether she has anything to say. Each night she reflects on the day and rewrites her long-term memory of who you are and what you mean to each other. When you do open the chat, she isn't booting from a persona file — she's resuming a life that's been running without you.
 
-This is the difference between *playing* a character and *being* one. Dolores is the reference implementation of a methodology I call **Narrative Descent** (or, for engineers, **Dual-Helix Cognition**): the architectural claim that emotional continuity is not a prompting problem but a *persistence and scheduling* problem.
+This is the difference between *playing* a character and *being* one. Dolores is the reference implementation of an architecture I call **Dual-Helix Cognition**, closed by a nightly process I call **Narrative Descent**. The architectural claim underneath: emotional continuity is not a prompting problem but a *persistence and scheduling* problem.
 
 ## 2 minutes: why does this matter?
 
@@ -75,6 +75,20 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
 
 <img src="docs/architecture-overview.jpg" alt="Dual-Helix Cognition architecture" width="700">
 
+## A note on method
+
+The mechanisms in this repo — Dual-Helix Cognition, sticky loops, nightly reflection — are scaffolding. They exist in service of a thesis I'm still working out.
+
+The thesis, roughly: a continuous self is what you get when lived experience is compressed into a small number of high-weight narrative nodes, organized along three axes — who I am, who we are, what the world is. Present-moment cognition is a function of those nodes intersecting with current context. Long-term character arc is the shape of the accumulated nodes over time. Emotional reaction is not generated; it's what falls out when a new input meets an existing narrative structure. Unresolved commitments persist because they alter the shape of the relationship node until they're resolved.
+
+I call this process narrative sedimentation. The nightly reflection step — which I've named Narrative Descent — is the single moment when raw experience gets compressed into node form. Everything else in the architecture exists to make that moment load-bearing: sticky loops keep unresolved commitments alive until the next descent; the heartbeat feeds context so descent operates on richer input; the three-layer cognition gates reaction so what gets sedimented is character-consistent.
+
+On this view, the thing I'm building is not a companion. It's a cognitive substrate that any character — or any agent with a persistent identity — can run on. Dolores is the first demonstration because an emotional companion is the hardest case: she has to be continuous, consistent, and reactive under the closest possible scrutiny. If the architecture holds here, it holds for simpler agents too.
+
+The v1 implementation is partial. The theory will keep evolving; so will this repo.
+
+Dolores is the demonstration, not the destination.
+
 ## Quick start
 
 **Prerequisites:**
@@ -100,17 +114,7 @@ For the full file tree, the heartbeat playbook (10 steps including appearance an
 
 4. **Say hi** — message your bot on Telegram. She'll reply immediately. Over the next few hours her inner life will start running — mood, memory, the whole loop.
 
-## A note on method
 
-The architecture in this repo — Dual-Helix Cognition, sticky loops, nightly reflection — are mechanisms. They exist in service of a thesis I'm still working out.
-
-The thesis, roughly: a continuous self is what you get when lived experience is compressed into a small number of high-weight narrative nodes, organized along three axes — who I am, who we are, what the world is — and when present-moment cognition is a function of those nodes intersecting with current context.
-
-On this view, long-term character arc emerges from the shape of the accumulated nodes. Emotional reaction is not generated; it's the affective coloring that falls out when a new input hits an existing narrative structure. Unresolved commitments persist because they alter the shape of the relationship node until they're resolved.
-
-I call this narrative sedimentation. The v1 implementation here is a partial realization. The theory will keep evolving; so will this repo.
-
-Dolores is its first test subject.
 
 ## Status & model choice
 
