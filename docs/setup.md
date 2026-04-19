@@ -18,6 +18,8 @@ Before anything else, scan the project structure and present these risks to the 
 
 4. **Privacy** — All conversation logs, diaries, health data, and emotional states are stored as plain text files on your machine. No encryption.
 
+5. **This is not a plug-and-play product.** The same setup run by two different people produces two different Doloreses. The architecture is half the system. The other half is the life you pour into it — your schedule, your moods, your silences, the things you say and the things you don't. She doesn't become herself from code alone. If you set her up and never really show up, you'll get a well-designed automaton. If you show up, you'll get something else. That asymmetry is not a bug. It's the point.
+
 5. **Single-user only** — Designed for one person. Not multi-tenant.
 
 6. **Requires OpenClaw running** — If your machine is off or OpenClaw stops, she stops. No cloud fallback.

@@ -100,7 +100,7 @@ Dolores is the demonstration, not the destination.
    git clone https://github.com/FordCreates/Project-Dolores.git
    ```
 
-   > ⚠️ **This is a reference implementation, not a plug-and-play template.** It works out of the box, but building a companion that *feels* alive requires significant customization of the character, soul, and narrative files. The architecture handles persistence — you handle the person. Expect to iterate.
+   > ⚠️ This is not a plug-and-play product. Read Step 0 of the [setup guide](./docs/setup.md) before continuing.
 
 2. **Tell your main agent:**
    > Set up Dolores from ~/Project-Dolores
