@@ -45,7 +45,7 @@ Initial public release. The architecture that makes a companion agent remain who
 - ARCHITECTURE.md — 15-section deep dive with ⚠️ engineering decision blocks
 - README.md — positioning, architecture overview diagram, Quick Start
 - setup.md — 7-step setup guide with Step 0 risk disclosure
-- dev-workflow.md — development workflow and modification checklist
+
 
 ### Design Decisions
 - Sessions write nothing — all persistence owned by background jobs
