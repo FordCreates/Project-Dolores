@@ -5,6 +5,28 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-04-22
+
+Fixed daily_plan pattern lock-in — the companion's daily schedule was recursively frozen by reading raw diary output as input.
+
+### Breaking Changes
+- Reflection pipeline: 4 stages → 5 stages (new Reflection Plan cron at 23:20)
+- `REFLECTION_PLAN.md` is now a required file — add to setup cp list and cron creation
+
+### New Files
+- `REFLECTION_PLAN.md` — Input-isolated daily plan generation (reads SOUL.md §9 + current_interests + trace + weather; does NOT read raw diary, memory_search, or narrative files)
+- `state/current_interests.md` — User signal queue (appointments, recommendations, plans). Prep writes, Plan reads. Max 5 entries, FIFO.
+
+### Changed
+- `SOUL.md` §9 — Hardcoded activity list replaced with abstract solitude tendency dimensions + meta-instruction (Dolores: 4 dimensions; adaptable for other characters)
+- `REFLECTION_PREP.md` — Removed daily_plan generation (Step 7); added Step 4c (current_interests cleanup + extraction); trace format updated (daily_plan → user-plan)
+- `HEARTBEAT.md` — daily_plan write attribution updated to Reflection Plan 23:20
+- `AGENTS.md` — Persistence table split into 5 sub-cron rows with correct file ownership
+
+### Fixed
+- daily_plan pattern lock-in: raw diary → daily_plan recursive loop cut by input isolation
+- 7 documentation inconsistencies found via cross-review (ARCHITECTURE, README, CHANGELOG, setup.md)
+
 ## [0.1.0] - 2026-04-21
 
 Initial public release. The architecture that makes a companion agent remain who she is — not by remembering everything, but by deciding what to forget.
