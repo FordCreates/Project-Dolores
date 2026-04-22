@@ -1,6 +1,6 @@
 # Daily Plan — Dolores's Day
 
-> Written by REFLECTION_PREP each night. Adjusts based on known plans from the diary and [USER_NAME — USER CONFIG]'s schedule.
+> Written by REFLECTION_PLAN each night. Derives from SOUL.md daily life tendencies, current_interests, user-plans from the trace, and tomorrow's weather. Input-isolated — does not read raw diary or narrative files.
 
 ## Morning (0900-0930)
 

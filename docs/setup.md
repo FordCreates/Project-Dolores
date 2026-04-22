@@ -66,6 +66,7 @@ cp $REPO/USER.md $WS/
 cp $REPO/MEMORY.md $WS/
 cp $REPO/TOOLS.md $WS/
 cp $REPO/REFLECTION_PREP.md $WS/
+cp $REPO/REFLECTION_PLAN.md $WS/
 cp $REPO/REFLECTION_SELF.md $WS/
 cp $REPO/REFLECTION_REL.md $WS/
 cp $REPO/REFLECTION_PROFILE.md $WS/
@@ -86,6 +87,7 @@ cp $REPO/state/affect.json $WS/state/
 cp $REPO/state/world_context.json $WS/state/
 cp $REPO/state/active_loops.md $WS/state/
 cp $REPO/state/daily_plan.md $WS/state/
+cp $REPO/state/current_interests.md $WS/state/
 cp $REPO/state/pending_message.md $WS/state/
 cp $REPO/state/last_sync_at $WS/state/
 cp $REPO/memory/profile-user.md $WS/memory/
@@ -154,13 +156,15 @@ Should show `disabled` or no output.
 
 Ask these questions one at a time. After each answer, apply the change immediately.
 
-### 2a. City
+### 3a. City
 
 > "Dolores's story is set in the United States. Which city should she be in? (e.g., Savannah, New York, Austin, Portland)"
 
 **Apply:** Replace `[YOUR_CITY — USER CONFIG]` in `SOUL.md` and `REFLECTION_PREP.md`.
 
-### 2b. User details
+### 3b. User details
+
+Ask these questions one at a time. After each answer, apply the change immediately.
 
 > "What should Dolores call you?"
 
@@ -186,7 +190,29 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 **Apply:** Replace `[USER_RELATIONSHIP — USER CONFIG]` in `USER.md`.
 
-### 2c. Health checkin
+> "How would you describe yourself in one sentence?"
+
+**Apply:** Replace `[USER_ONE_LINE_SUMMARY — USER CONFIG]` in `memory/profile-user.md`.
+
+> "Tell me about your work in more detail — skills, tools, professional mindset. (e.g., systematic trader, builds automation tools, multi-market risk)"
+
+**Apply:** Replace `[USER_CORE_IDENTITY — USER CONFIG]` in `memory/profile-user.md`.
+
+> "How would you describe your personality and thinking style? (e.g., rational/structured, intuitive/spontaneous, what frustrates you, what you gravitate toward)"
+
+**Apply:** Replace `[USER_PERSONALITY — USER CONFIG]` in `memory/profile-user.md`.
+
+> "Tell me about your life situation — family, living arrangement, key relationships, hobbies. Keep it factual."
+
+**Apply:** Replace `[USER_LIFE_CONTEXT — USER CONFIG]` in `memory/profile-user.md`.
+
+> "How do you prefer to communicate? (e.g., direct/indirect, what you appreciate, what annoys you)"
+
+**Apply:** Replace `[USER_COMMUNICATION_PREFERENCES — USER CONFIG]` in `memory/profile-user.md`.
+
+> ℹ️ The remaining sections in profile-user.md (Stress Sources, What They Need, Things Not To Do, Relationship Dynamics, Health, Exercise) are marked ✏️ and will be filled automatically by Dolores's nightly Reflection. Do not touch them.
+
+### 3c. Health checkin
 
 > "Dolores can track your daily health data — sleep, exercise, diet, medication, and any symptoms you want monitored. Want to enable this?"
 
@@ -220,7 +246,7 @@ This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION
 
 Read the user's existing `~/.openclaw/openclaw.json` to understand the current structure — check what providers and models are already configured. Then ask:
 
-### 3a. Session scope (REQUIRED)
+### 4a. Session scope (REQUIRED)
 
 > ⚠️ **This is a silent dependency.** Dolores's scripts (`send_and_append.py`, `inject_context.py`) hardcode a session key in the format `agent:dolores:telegram:direct:<user-id>`. This only works if `session.dmScope` is set to `per-channel-peer` (each DM gets its own session key). The OpenClaw default is `main` (all DMs share one session key `agent:dolores:main`), which will cause all session-dependent scripts to fail silently.
 
@@ -236,7 +262,7 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 > **Merge** this into the existing top-level config. Do NOT place it inside `agents`.
 
-### 3b. Bootstrap character limit
+### 4b. Bootstrap character limit
 
 > Dolores's SOUL.md (~28K chars) and HEARTBEAT.md (~26K chars) exceed OpenClaw's default bootstrap file limit of 20,000 characters. Without increasing this limit, Dolores will see truncated (incomplete) versions of her own character definition.
 
@@ -252,7 +278,7 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 > ⚠️ **Merge** this into the existing `agents.defaults` object if it already exists. Do NOT replace the entire `agents` block.
 
-### 3c. Model
+### 4c. Model
 
 > "Let me check your existing model configuration first."
 
@@ -356,7 +382,7 @@ echo 'DOLORES_API_KEY=<user-provided-key>' >> ~/.openclaw/.env
 >
 > ⚠️ **Do NOT add `"thinking": "off"` or any `params.thinking` override.** LLM thinking mode improves response quality for companion agents. Disabling it will degrade reflection, empathy, and narrative coherence. Let OpenClaw use its default thinking behavior.
 
-### 3d. Telegram bot
+### 4d. Telegram bot
 
 > "What's your Telegram bot token? (Create one with @BotFather if you haven't)"
 
@@ -499,8 +525,6 @@ openclaw cron add \
   --message "Run this command via exec: python3 scripts/send_and_append.py. If the output is empty, reply HEARTBEAT_OK. Otherwise output the message text exactly as-is. No other output."
 ```
 
-```
-
 ### Diary check (no delivery — 9 times)
 
 ```bash
@@ -551,7 +575,7 @@ openclaw cron add \
   --message "Read HEALTH_CORRECTION.md and execute the health data correction step."
 ```
 
-### Reflection (no delivery — 4 jobs)
+### Reflection (no delivery — 5 jobs)
 
 ```bash
 openclaw cron add \
@@ -560,6 +584,15 @@ openclaw cron add \
   --tz "<timezone>" \
   --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
   --message "Read REFLECTION_PREP.md and execute the reflection preparation step."
+```
+
+```bash
+openclaw cron add \
+  --name "Dolores Reflection Plan" \
+  --cron "20 23 * * *" \
+  --tz "<timezone>" \
+  --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
+  --message "Read REFLECTION_PLAN.md and execute the daily schedule planning step."
 ```
 
 ```bash
@@ -597,8 +630,8 @@ openclaw cron add \
 | Send | 8 | Message delivery (no Send after 00:00 wrap-up heartbeat) |
 | Diary Check | 9 | Diary attribution verification |
 | Health (optional) | 3 | Health tracking + send + correction |
-| Reflection | 4 | Nightly memory consolidation |
-| **Total** | **33** (30 without health) | |
+| Reflection | 5 | Nightly memory consolidation |
+| **Total** | **34** (31 without health) | |
 
 > Verify with `openclaw cron list` after creation.
 

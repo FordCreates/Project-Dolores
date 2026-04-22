@@ -12,14 +12,14 @@ Initial public release. The architecture that makes a companion agent remain who
 ### Core Architecture
 - Dual Helix Cognition: Helix 1 (pseudo-life stream) + Helix 2 (three-layer cognition based on Beck's cognitive triangle)
 - Narrative Descent: nightly slot-based rewriting of self-narrative, relationship-summary, and user profile — not append, but rewrite
-- Four-stage nightly reflection pipeline: Prep → Self → Rel → Profile (independent jobs with checkpoint files)
-- Five anti-collapse mechanisms: slot-based rewriting, NO_CHANGE as `cp`, binary update tiers, digest topology breaker, four-stage pipeline
+- Five-stage nightly reflection pipeline: Prep → Plan → Self → Rel → Profile (independent jobs with checkpoint files)
+- Five anti-collapse mechanisms: slot-based rewriting, NO_CHANGE as `cp`, binary update tiers, digest topology breaker, five-stage pipeline with input isolation
 
 ### Companion Runtime
 - SOUL.md — Layer 1 core beliefs anchor (single formative wound)
 - HEARTBEAT.md — 8+1 heartbeat cycle with 7-step pipeline
 - AGENTS.md — cognitive runtime spec (sessions write nothing)
-- REFLECTION_PREP/SELF/REL/PROFILE.md — four-stage nightly reflection
+- REFLECTION_PREP/PLAN/SELF/REL/PROFILE.md — five-stage nightly reflection
 - HEALTH_CHECKIN.md + HEALTH_CORRECTION.md — structured daily health check-in with three-step close loop
 - DIARY_CHECK.md — post-send diary verification
 

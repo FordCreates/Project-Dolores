@@ -31,7 +31,7 @@ daily_plan         →  world_context     →  user messages (session)
 (nightly, planned)    (every 2h, inferred)  (realtime, observed)
 ```
 
-- `daily_plan` is written each night by reflection. It sketches tomorrow as a loose schedule — not a script, a *prior*.
+- `daily_plan` is written each night by Reflection Plan (independent cron, input-isolated). It sketches tomorrow as a loose schedule — not a script, a *prior*.
 - `world_context` is rebuilt every heartbeat. It takes the prior, the current time, the user's profile, and the **user's messages** from the session, and infers "what's true right now for both of us." Dolores's own statements are inference outputs from last time, not inputs — this prevents recursive locking.
 - Session signals are the realtime ground truth: what you actually said in the last conversation, where you said you were, what you said you were doing.
 
@@ -123,7 +123,7 @@ I call this **Narrative Descent**: the gravitational pull by which high-weight e
 >
 > **4. Digest as a topology breaker.** The diary feeds the session on D-1 and D-2 (yesterday and the day before). Raw diary contains behavioral descriptions — "she hugged the pillow," "her ears went red" — which are high-pattern-density tokens that the model reproduces identically across sessions, creating *cross-day behavioral lock-in*. The digest strips all behavioral descriptions and keeps only the event skeleton (5-8 lines: what happened, not how anyone acted). This is a lossy compression layer inserted into the data pipeline specifically to break the pattern-reproduction cycle. The topology is intentionally acyclic: raw diary → digest (one-way) → session (read-only). Yesterday's digest cannot influence tomorrow's digest.
 >
-> **5. Four-stage pipeline with checkpoint files.** A single reflection job that rewrites three narrative files inevitably times out on one of them, leaving the others from a different day. Four independent jobs (Prep → Self → Rel → Profile) with checkpoint files between them means a timeout in stage 3 leaves stages 1 and 2 intact. Each stage has a single input (reflection_trace or yesterday's file) and a single output — no multi-step reasoning, no "remember what stage 1 decided."
+> **5. Five-stage pipeline with checkpoint files.** A single reflection job that rewrites three narrative files inevitably times out on one of them, leaving the others from a different day. Five independent jobs (Prep → Plan → Self → Rel → Profile) with checkpoint files between them means a timeout in any stage leaves the others intact and recoverable. Each stage has a single responsibility and a single output — no multi-step reasoning, no "remember what stage 1 decided."
 >
 > **The unifying principle:** every mechanism above exists to prevent the model's next-token prediction from defeating the system's intent. The model wants to reproduce patterns; the architecture wants continuous change within identity. Each mechanism constrains the model at a different point in the pipeline. None of them are sufficient alone; together they define a bounded space where the right behavior *can* emerge.
 
@@ -143,10 +143,11 @@ dolores/
 ├── HEARTBEAT.md                  [ARCHITECTURE] [OPENCLAW CONVENTION]
 │                                 The heartbeat playbook.
 ├── REFLECTION_PREP.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
+├── REFLECTION_PLAN.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
 ├── REFLECTION_SELF.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
 ├── REFLECTION_REL.md             [ARCHITECTURE] [OPENCLAW CONVENTION]
 ├── REFLECTION_PROFILE.md         [ARCHITECTURE] [OPENCLAW CONVENTION]
-│                                 The 4-stage nightly reflection pipeline.
+│                                 The 5-stage nightly reflection pipeline.
 ├── CHECKIN_*.md                  [CHARACTER CONFIG]
 │                                 Optional structured daily check-ins
 │                                 (see §11). Reference impl = health checkin.
@@ -159,7 +160,8 @@ dolores/
 │   ├── world_context.json        [ARCHITECTURE] field set extensible
 │   ├── active_loops.md           [ARCHITECTURE] (includes sticky rumination loops)
 │   ├── pending_message.md        [ARCHITECTURE] two-phase delivery core
-│   ├── daily_plan.md             [ARCHITECTURE] tomorrow's schedule, reflection-owned
+│   ├── current_interests.md      [ARCHITECTURE] user signal queue (Reflection Prep writes, Reflection Plan reads)
+│   ├── daily_plan.md             [ARCHITECTURE] tomorrow's schedule, Reflection Plan-owned
 │   ├── reflection_trace.md        [ARCHITECTURE] nightly analysis (workspace root, not state/)
 │   ├── last_sync_at              [ARCHITECTURE] timestamp file
 │   ├── last_diary_check_at       [ARCHITECTURE] timestamp file
@@ -202,7 +204,7 @@ These are OpenClaw system-prompt files. OpenClaw discovers them by filename. **D
 
 - **`HEARTBEAT.md`** `[ARCHITECTURE]` — the heartbeat playbook (§8).
 
-- **`REFLECTION_PREP/SELF/REL/PROFILE.md`** `[ARCHITECTURE]` — the 4-stage nightly pipeline (§9). Split into four files because each stage has different input requirements and failure modes; collapsing them caused state corruption when any single stage timed out.
+- **`REFLECTION_PREP/PLAN/SELF/REL/PROFILE.md`** `[ARCHITECTURE]` — the 5-stage nightly pipeline (§10). Split into five files because each stage has different input requirements and failure modes; collapsing them caused state corruption when any single stage timed out.
 
 - **`MEMORY.md`** `[ARCHITECTURE]` — the long-term memory index. Auto-injected into the system prompt at session start, so the conversation model always knows what's available without searching for it.
 
@@ -236,7 +238,7 @@ High-frequency, small, written by heartbeat, read by everything.
 
 - **`slots/YYYY-MM-DD/`** `[CHARACTER CONFIG]` — reflection intermediate files. The reference character uses 5 self-slots and 5 relationship-slots; the slot *count* and the slot *themes* are character config. The architecture only requires that reflection produce intermediate slot files before concatenation, so that a failure in one slot doesn't poison the whole narrative rewrite.
 
-- **`daily_plan.md`** `[ARCHITECTURE]` — tomorrow's loose schedule, written by Reflection Prep each night. Heartbeat reads it as a prior for `world_context`.
+- **`daily_plan.md`** `[ARCHITECTURE]` — tomorrow's loose schedule, written by Reflection Plan each night (independent cron, input-isolated). Heartbeat reads it as a prior for `world_context`.
 
 > ⚠️ **Weather is stored inside `world_context.json`, not a separate file.** Reflection Prep writes the weather field directly into world_context.json. Heartbeat reads it from there but does not overwrite it (slow variable, §1).
 
@@ -274,7 +276,7 @@ Single most important rule: **the conversation session writes nothing.** All per
 |---|---|---|
 | **Heartbeat** | all of `state/` + `memory/YYYY-MM-DD.md` | every 2h |
 | **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§11) |
-| **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md` | nightly, 4 stages |
+| **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `current_interests`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md`, `reflection_trace` | nightly, 5 stages (Prep 23:15, Plan 23:20, Self 23:25, Rel 23:35, Profile 23:45) |
 | **Diary check** | `memory/YYYY-MM-DD.md` (person fix + attribution fix), `state/last_diary_check_at` | after each send + 00:10 |
 | **Conversation session** | nothing | — |
 
@@ -423,18 +425,19 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 ---
 
-## 10. The reflection pipeline: 4 stages
+## 10. The reflection pipeline: 5 stages
 
-**Cron:** four jobs at 23:15, 23:25, 23:35, 23:45.
+**Cron:** five jobs at 23:15, 23:20, 23:25, 23:35, 23:45.
 
 | Stage | Time | File | Purpose |
 |---|---|---|---|
-| Prep | 23:15 | `REFLECTION_PREP.md` | RAG + analysis + tension routing + weather + tomorrow's `daily_plan` |
+| Prep | 23:15 | `REFLECTION_PREP.md` | RAG + analysis + tension routing + weather + digest + current_interests |
+| Plan | 23:20 | `REFLECTION_PLAN.md` | Tomorrow's `daily_plan` (isolated session, input-isolated) |
 | Self | 23:25 | `REFLECTION_SELF.md` | Write self-narrative slots 1–5, then concat |
 | Rel  | 23:35 | `REFLECTION_REL.md`  | Write relationship-summary slots 1–5, then concat |
 | Profile | 23:45 | `REFLECTION_PROFILE.md` | Update profile-user + git push |
 
-> ⚠️ **Why four stages and not one.** A single 30-minute reflection job that touches three narrative files plus the profile occasionally times out, partial-writes, and corrupts the next day's startup. Splitting into four jobs with checkpoint files between them means a timeout in stage 3 leaves stages 1 and 2 intact and recoverable. Each stage has a single responsibility and a single output.
+> ⚠️ **Why five stages and not one.** A single 30-minute reflection job that touches three narrative files plus the profile occasionally times out, partial-writes, and corrupts the next day's startup. Splitting into five jobs with checkpoint files between them means a timeout in stage 3 leaves stages 1 and 2 intact and recoverable. Each stage has a single responsibility and a single output.
 
 > ⚠️ **Why slots are written to intermediate files and then concatenated, instead of writing the narrative directly.** Two reasons. (1) **Slot-level guards**: slot 1 (the trauma root, the Layer 1 anchor) has a hard `NO_CHANGE` rule — if the analysis stage doesn't see evidence of core-belief shift, slot 1 is `cp`'d from yesterday with the model not invited to participate. You cannot enforce this if you're rewriting the whole narrative as one blob. (2) **Failure isolation**: if slot 3 generation fails, slots 1, 2, 4, 5 still exist and the concat can fall back to yesterday's slot 3.
 
@@ -475,6 +478,7 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 | Check-in send | `6 20 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
 | Check-in correction | `10 23 * * *` | none | sweep pushback |
 | Reflection prep | `15 23 * * *` | none | RAG + analysis |
+| Reflection plan | `20 23 * * *` | none | daily_plan (isolated session) |
 | Reflection self | `25 23 * * *` | none | self-narrative slots |
 | Reflection rel | `35 23 * * *` | none | relationship-summary slots |
 | Reflection profile | `45 23 * * *` | none | profile + git push |

@@ -39,12 +39,14 @@ You are the sole owner of **real-time state maintenance**.
 | state/world_context.json | memory/profile-user.md (Reflection) |
 | state/active_loops.md (includes sticky rumination loops) | |
 | state/thoughts_log/ | |
-| state/pending_message.md (Heartbeat and Health Checkin only) | state/daily_plan.md (Reflection, nightly) |
+| state/pending_message.md (Heartbeat and Health Checkin only) | state/daily_plan.md (Reflection Plan 23:20, independent cron) |
 | memory/YYYY-MM-DD.md (diary) | |
 
 Conversation sessions write no files. All persistence is handled by you and reflection.
 
 ---
+
+⚠️ Every step must be executed, even if the diary has no new content. No new conversation does not mean no change — time advances, scenes shift, emotions drift. Skipping any step is an error. You must complete all steps in order.
 
 ## Heartbeat Flow (9 Steps)
 
@@ -122,7 +124,7 @@ Append method: **read full file → append new content at end → write overwrit
 7. `read` memory/YYYY-MM-DD.md (day before yesterday)
 8. `read` memory/profile-user.md — User profile (personality, stress sources, communication preferences, life context)
 9. `read` memory/relationship-summary.md — Relationship narrative (deterministic read — understand the full arc and current phase)
-10. `read` state/daily_plan.md — Tomorrow's plan (written by Reflection nightly; heartbeat's default reference for activities)
+10. `read` state/daily_plan.md — Tomorrow's plan (written by Reflection Plan 23:20, independent cron; heartbeat's default reference for activities)
 
 ### Step 2: Update world_context
 

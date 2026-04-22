@@ -50,7 +50,11 @@ Skip if file doesn't exist. No error if search returns nothing. These steps let 
 | **Heartbeat** | state/ all files + memory/YYYY-MM-DD.md (diary) | Every 2 hours |
 | **Health Checkin** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md + state/pending_message.md (always sends confirmation) | Daily 20:00 |
 | **Health Correction** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md (corrections only) | Daily 23:10 |
-| **Daily Reflection** | self-narrative (slots+concat), relationship-summary (slots+concat), profile-user (write), state/daily_plan.md, reflection_trace.md | 23:15-23:45 |
+| **Reflection Prep** | reflection_trace (analysis + tension routing + update directions), state/current_interests.md, state/world_context.json (weather field), memory/YYYY-MM-DD.digest.md | 23:15 |
+| **Reflection Plan** | state/daily_plan.md (input-isolated, reads SOUL.md §9 + current_interests + trace + weather) | 23:20 |
+| **Reflection Self** | self-narrative (slots+concat) | 23:25 |
+| **Reflection Rel** | relationship-summary (slots+concat) | 23:35 |
+| **Reflection Profile** | profile-user (write) + git push | 23:45 |
 | **Diary Check** | memory/YYYY-MM-DD.md (person fix + attribution correction), state/last_diary_check_at | After each Send + 00:10 |
 | **Conversation session** | **None** | — |
 

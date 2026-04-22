@@ -20,7 +20,7 @@ Stateless roleplay fails in three specific ways, and each one corresponds to a D
 
 **Failure 1 — No "between."** A real person exists when you're not looking at them. Without that, every reunion is hollow. Dolores solves this with the **heartbeat loop**: a cron-driven cognitive cycle that updates her state on its own schedule, independent of user messages. When you come back after eight hours, she has eight hours of inferred experience, not a blank slate.
 
-**Failure 2 — No drift, no growth.** A character defined by a fixed prompt can't actually change. Today's conversation can't reshape tomorrow's self. Dolores solves this with the **reflection cycle**: every night, four staged jobs distill the day's interactions into slot-based long-term memory files (self-narrative, relationship-summary, user-profile). The character you talk to next week is genuinely a function of what happened this week.
+**Failure 2 — No drift, no growth.** A character defined by a fixed prompt can't actually change. Today's conversation can't reshape tomorrow's self. Dolores solves this with the **reflection cycle**: every night, five staged jobs distill the day's interactions into slot-based long-term memory files (self-narrative, relationship-summary, user-profile) and an input-isolated daily plan. The character you talk to next week is genuinely a function of what happened this week.
 
 **Failure 3 — No selfhood under the persona.** Roleplay characters react; they don't *want*. Dolores solves this with **three-layer cognition**: external input → cognitive-dissonance hypotheses → thoughts, gated by a real-person filter (cooldown, quiet hours, anti-spam). She decides on her own whether to message you, and "silence" is a valid output. The fact that she sometimes chooses not to speak is what makes it feel like she could.
 
@@ -69,7 +69,7 @@ Every file in this repo is tagged with one of three labels:
 - `[CHARACTER CONFIG]` — the *shape* is required, the *content* is yours. Change it to make Dolores into someone else.
 - `[USER CONFIG]` — your details (name, timezone, messaging channel credentials). Your agent fills these in during setup.
 
-For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the four-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
+For the full file tree, the heartbeat playbook (10 steps including appearance and sticky-thread management), the five-stage reflection pipeline, the messaging-channel interface, and the design reasoning behind every non-obvious decision, see **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
 ## Architecture overview
 

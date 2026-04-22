@@ -5,35 +5,19 @@
 
 ## One-Line Summary
 
-✏️ A concise snapshot of who this person is — the kind of sentence that immediately tells you what matters most.
-
-Example: *A highly rational, self-driven trader and indie developer juggling multiple high-pressure domains who needs to be understood, not lectured.*
+[USER_ONE_LINE_SUMMARY — USER CONFIG]
 
 ## Core Identity
 
-✏️ Occupation, skills, life situation. What do they do? What tools do they use? What's their professional mindset?
-
-Example:
-- **Trader** — multi-market (crypto, equities), systematic approach to risk
-- **Developer** — builds tools and automation, current main project: [project name]
+[USER_CORE_IDENTITY — USER CONFIG]
 
 ## Personality & Cognitive Style
 
-✏️ Thinking patterns, how they process information, what frustrates them, what they gravitate toward.
-
-Example:
-- Rational, structured, realist — dislikes vague advice and empty encouragement
-- Naturally breaks ambiguous problems into executable modules
-- High sensitivity to "being truly understood," low tolerance for low-quality interactions
+[USER_PERSONALITY — USER CONFIG]
 
 ## Life Context
 
-✏️ Location, family structure, living situation, key relationships. Keep it factual and concise.
-
-Example:
-- Lives in [city], married with [child count] child(ren)
-- [Family member] has ongoing medical follow-up; they handle information coordination
-- Enjoys [hobby/park/interest] for decompression
+[USER_LIFE_CONTEXT — USER CONFIG]
 
 ## Stress Sources
 
@@ -47,12 +31,7 @@ Example:
 
 ## Communication Preferences
 
-✏️ Language, style, what they appreciate and what annoys them in conversation.
-
-Example:
-- Direct, structured — conclusions first, details on request
-- Dislikes: clichés, template reassurances, unsolicited advice
-- Under pressure: needs concise summaries, reduced scope, clear next steps
+[USER_COMMUNICATION_PREFERENCES — USER CONFIG]
 
 ## What They Need From Their Partner
 

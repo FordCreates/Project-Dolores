@@ -19,6 +19,7 @@ exec echo -e "# Reflection Trace — $(date +%Y-%m-%d)\ngenerated_at: $(date -Is
 3. `read` state/active_loops.md
 4. `read` state/thoughts_log/<today>.md
 5. `read` memory/YYYY-MM-DD.md (today)
+6. `read` state/current_interests.md
 
 ## Step 3: Search material (RAG phase)
 
@@ -44,9 +45,22 @@ Not a diary dump — curated. Criteria:
 
 - self-narrative: Did today's experience change how "I see myself"? Which slots need updating?
 - profile-user: Any new long-term personality traits discovered? Health/exercise trend changes?
-- daily_plan: Any known plans for tomorrow?
+- user-plan: Any known plans/agreements/appointments for tomorrow or near future? (consumed by Reflection Plan cron)
 
-### 4c. Tension routing
+### 4c. Update current_interests.md
+
+1. Read existing `state/current_interests.md`
+2. Remove expired entries (events that already happened or plans that are no longer relevant)
+3. From today's diary, extract user signals: appointments, recommendations, gifts, agreements, plans mentioned
+4. Append new signals (max 5 total, FIFO — remove oldest if over limit)
+5. Write updated file using `edit`
+
+Rules:
+- Only record **user-initiated concrete events** ("he said we'll go to the hospital tomorrow"), not behavioral observations ("he seemed tired")
+- Each entry: one line, include date/context, concise
+- This file is the only bridge between Prep (writer) and Reflection Plan (reader)
+
+### 4d. Tension routing
 
 Based on today's analysis, split unresolved tensions into two categories:
 
@@ -60,7 +74,7 @@ tensions_relational: # Unresolved issues about "us"
 
 The self-narrative writing cron only reads tensions_self. The relationship-summary writing cron only reads tensions_relational. **Do not mix the two categories here.**
 
-### 4d. profile-user update direction
+### 4e. profile-user update direction
 
 Write explicitly:
 - "In intimate relationships" section: Any new long-term personality traits? (bullet list)
@@ -82,7 +96,7 @@ Format:
 - 3-5 most important events
 - self-narrative update direction
 - profile-user update direction
-- daily_plan reference
+- user-plan (consumed by Reflection Plan cron)
 
 ## Tension Routing
 tensions_self:
@@ -98,36 +112,7 @@ tensions_relational:
 
 `web_search` for tomorrow's weather forecast in `[YOUR_CITY — USER CONFIG]` → write to world_context.json's weather field (e.g. "Light rain 18-26°C"), update updated_at.
 
-## Step 7: Plan next day's schedule
-
-Based on Dolores's daily life settings in SOUL.md, combined with any known plans for tomorrow from today's diary, plan tomorrow's schedule and write to `state/daily_plan.md`.
-
-**Planning principles:**
-- This is Dolores's **own** daily schedule
-- If the diary mentions something Dolores needs to participate in tomorrow, reflect it in the corresponding time slot
-- For time slots with no specific plans, plan freely based on character
-- Activities should be specific and detailed, not generic "exercise" or "reading"
-- Each day's schedule must differ from previous days
-- Meals don't need all three listed — pick one to detail
-
-**Format:**
-```markdown
-# YYYY-MM-DD (Day) Schedule
-
-## Morning
-- HH:MM Activity description
-- HH:MM Activity description
-
-## Afternoon
-- HH:MM Activity description
-- HH:MM Activity description
-
-## Evening
-- HH:MM Activity description
-- HH:MM Activity description
-```
-
-## Step 8: Generate diary digest
+## Step 7: Generate diary digest
 
 Extract an event digest from today's diary and write to `memory/YYYY-MM-DD.digest.md`.
 
@@ -155,6 +140,6 @@ He seemed tired but overall okay. Said goodnight before sleeping.
 
 **Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1/D-2, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
 
-## Step 9: Finish
+## Step 8: Finish
 
 Confirm trace file and digest file are both written. Nothing else needed. Subsequent writing crons will check this file.
