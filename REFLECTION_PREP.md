@@ -50,15 +50,31 @@ Not a diary dump — curated. Criteria:
 ### 4c. Update current_interests.md
 
 1. Read existing `state/current_interests.md`
-2. Remove expired entries (events that already happened or plans that are no longer relevant)
-3. From today's diary, extract user signals: appointments, recommendations, gifts, agreements, plans mentioned
-4. Append new signals (max 5 total, FIFO — remove oldest if over limit)
-5. Write updated file using `edit`
+2. From today's diary, extract **user signals** (concrete things/preferences/content Papi mentioned in conversation), max 5, FIFO
+3. Remove expired entries
+4. Write updated file using `edit`
 
-Rules:
-- Only record **user-initiated concrete events** ("he said we'll go to the hospital tomorrow"), not behavioral observations ("he seemed tired")
-- Each entry: one line, include date/context, concise
-- This file is the only bridge between Prep (writer) and Reflection Plan (reader)
+**User signals = concrete things Papi recently mentioned** — music, food, shows, books, items, activities. These are random seeds for Reflection Plan, giving daily_plan specific anchors instead of abstract dimension permutations.
+
+**Positive examples (write these):**
+- He's been listening to a specific song/artist lately
+- He ordered a specific dish for takeout
+- He gave her a book/gift
+- He mentioned enjoying a specific artist's music
+- He recommended a show/movie
+
+**Negative examples (do NOT write):**
+- Hospital appointment tomorrow → this is [user-plan], goes in trace
+- Challenge rules pending confirmation → this is an active_loop (todo)
+- He's stressed/insomniac/upset → this is an active_loop (emotional tension)
+- He said "I love you" → this is reflection narrative material, not an interest signal
+- Meeting mom still pending → this is a sticky loop
+- Relationship uncertainty → this is a sticky loop
+- He likes calling her bitch → this is a long-term personality trait, goes in profile-papi bullet
+
+**Judgment method:** Pattern-match against positive/negative examples at a glance. Don't reason about "does this count as an interest" — if it looks like a positive example, write it; if it looks like a negative example, don't. When unsure, don't write.
+
+**Important:** current_interests is the random seed source for Reflection Plan. Only written by Prep, only read by Plan. Do not duplicate active_loops content here.
 
 ### 4d. Tension routing
 
