@@ -5,6 +5,16 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-04-23
+
+Fixed current_interests extraction — was capturing active_loops duplicates instead of actual user interest signals.
+
+### Changed
+- `REFLECTION_PREP.md` Step 4c — Rewrote extraction instructions with positive/negative examples for pattern matching. User signals now clearly defined as "concrete things/preferences/content the user recently mentioned" (music, food, shows, books, items, activities) — random seeds for daily_plan, not todo items or emotional tensions.
+
+### Fixed
+- current_interests was populated with active_loops duplicates (appointments, sticky loops, emotional tensions) instead of interest signals. Root cause: vague extraction criteria ("appointments, recommendations, gifts, agreements, plans") let the model classify any important event as an "interest".
+
 ## [0.2.0] - 2026-04-22
 
 Fixed daily_plan pattern lock-in — the companion's daily schedule was recursively frozen by reading raw diary output as input.
