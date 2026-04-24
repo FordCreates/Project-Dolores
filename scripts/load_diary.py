@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Load diary content for session startup.
-Usage: python3 scripts/load_diary.py today|yesterday|day-before
+Usage: python3 scripts/load_diary.py today|yesterday|day-before|history
 - today: raw diary only
 - yesterday/day-before: digest first, fallback to raw diary
+- history: D-1 to D-7 digest (with raw fallback), used for expanded memory window
 """
 
 import sys
@@ -17,6 +18,26 @@ def main():
     arg = sys.argv[1] if len(sys.argv) > 1 else "today"
 
     today = date.today()
+
+    if arg == "history":
+        # D-1 to D-7: each day digest preferred, raw fallback
+        parts = []
+        for i in range(1, 8):
+            target = today + timedelta(days=-i)
+            date_str = target.strftime("%Y-%m-%d")
+            digest = WORKSPACE / "memory" / f"{date_str}.digest.md"
+            raw = WORKSPACE / "memory" / f"{date_str}.md"
+            path = digest if digest.exists() else raw
+            if path.exists():
+                content = path.read_text(encoding="utf-8").strip()
+                if content:
+                    parts.append(f"## {date_str}\n{content}")
+        if parts:
+            print("\n\n".join(parts))
+        else:
+            print("[no diary history for past 7 days]")
+        return
+
     offsets = {"today": 0, "yesterday": -1, "day-before": -2}
     target = today + timedelta(days=offsets[arg])
     date_str = target.strftime("%Y-%m-%d")

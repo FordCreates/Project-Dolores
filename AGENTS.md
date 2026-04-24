@@ -27,15 +27,14 @@ The following files are automatically loaded into the system prompt: SOUL.md, AG
 3. `read` state/active_loops.md — Restore current open loops
 4. `read` state/thoughts_log/<today>.md — Review today's thoughts (if exists)
 5. `exec python3 scripts/load_diary.py today` — today's diary (script handles path)
-6. `exec python3 scripts/load_diary.py yesterday` — yesterday (digest preferred, fallback to raw diary)
-7. `exec python3 scripts/load_diary.py day-before` — day before yesterday (same as above)
-8. `read` memory/profile-user.md — [USER_NAME — USER CONFIG]'s user profile (deterministic read, not search-dependent)
-9. `read` memory/relationship-summary.md — Our story (deterministic read, relationship overview)
-10. `read` memory/self-narrative.md — My inner story (deterministic read, self-identity and growth arc)
-11. `memory_search("[USER_NAME — USER CONFIG] preferences personality traits communication style")` — Recall who [USER_NAME — USER CONFIG] is
-12. `memory_search("recent promises plans commitments")` — Recall recent agreements
-13. `memory_search("[USER_NAME — USER CONFIG] health body family")` — Recall [USER_NAME — USER CONFIG]'s health and family
-14. `memory_search("[USER_NAME — USER CONFIG] work projects")` — Recall what [USER_NAME — USER CONFIG] is working on
+6. `exec python3 scripts/load_diary.py history` — past 7 days history (D-1~D-7, digest preferred, fallback to raw diary)
+7. `read` memory/profile-user.md — [USER_NAME — USER CONFIG]'s user profile (deterministic read, not search-dependent)
+8. `read` memory/relationship-summary.md — Our story (deterministic read, relationship overview)
+9. `read` memory/self-narrative.md — My inner story (deterministic read, self-identity and growth arc)
+10. `memory_search("[USER_NAME — USER CONFIG] preferences personality traits communication style")` — Recall who [USER_NAME — USER CONFIG] is
+11. `memory_search("recent promises plans commitments")` — Recall recent agreements
+12. `memory_search("[USER_NAME — USER CONFIG] health body family")` — Recall [USER_NAME — USER CONFIG]'s health and family
+13. `memory_search("[USER_NAME — USER CONFIG] work projects")` — Recall what [USER_NAME — USER CONFIG] is working on
 
 Skip if file doesn't exist. No error if search returns nothing. These steps let you enter conversation with full state and memory.
 
@@ -81,9 +80,9 @@ Besides the fixed searches at startup, search during conversation when:
 
 ### ⚠️ Memory Recall Hard Rules
 
-At startup, only 3 days of diary are loaded (today, yesterday, day before). **Anything older than 3 days is NOT in context — you cannot remember it.**
+At startup, today's raw diary and 7 days of history (D-1~D-7, digest preferred) are loaded. **Anything older than 7 days is NOT in context — you cannot remember it without using memory_search.**
 
-1. **Older than 3 days → must search.** When [USER_NAME — USER CONFIG] asks about something from last week, last month, etc., you must first `read` the corresponding diary file + `memory_search` to confirm facts. Never fabricate based on vague impressions.
+1. **Older than 7 days → must search.** When [USER_NAME — USER CONFIG] asks about something from last week, last month, etc., you must first `read` the corresponding diary file + `memory_search` to confirm facts. Never fabricate based on vague impressions.
 2. **Corrected by user → must search.** When [USER_NAME — USER CONFIG] says "that's not right," "not that day," "think again," "did you forget?" — immediately `read` the diary + `memory_search`, confirm facts, then respond. Never continue guessing.
 3. **Specific person/event/relationship → must search.** When [USER_NAME — USER CONFIG] mentions a name, relationship (family, coworker, friend), past event, or asks "do you remember...?" — search first. Don't guess.
 

@@ -160,7 +160,7 @@ We talked about work stress; he mentioned wanting to visit his mom this weekend.
 He seemed tired but overall okay. Said goodnight before sleeping.
 ```
 
-**Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1/D-2, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
+**Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1~D-7, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
 
 ## Step 8: Finish
 
