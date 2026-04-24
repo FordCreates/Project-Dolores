@@ -50,11 +50,13 @@ Not a diary dump — curated. Criteria:
 ### 4c. Update current_interests.md
 
 1. Read existing `state/current_interests.md`
-2. From today's diary, extract **user signals** (concrete things/preferences/content Papi mentioned in conversation), max 5, FIFO
+2. From today's diary, extract **user signals** (concrete things/preferences/content [USER_NAME — USER CONFIG] mentioned in conversation), max 5, FIFO
 3. Remove expired entries
 4. Write updated file using `edit`
 
-**User signals = concrete things Papi recently mentioned** — music, food, shows, books, items, activities. These are random seeds for Reflection Plan, giving daily_plan specific anchors instead of abstract dimension permutations.
+**User signals = concrete things [USER_NAME — USER CONFIG] recently mentioned** — music, food, shows, books, items, activities. These are random seeds for Reflection Plan, giving daily_plan specific anchors instead of abstract dimension permutations.
+
+**Hard exclusion rule: work/project/development/promotion/business-related items never enter.** The sole consumer of current_interests is the Plan cron, which orchestrates the companion's daily activities. Project promotion progress, coding, registering new platforms, project planning — these cannot become daily activities, they belong in active_loops or trace's user-plan.
 
 **Positive examples (write these):**
 - He's been listening to a specific song/artist lately
@@ -70,7 +72,11 @@ Not a diary dump — curated. Criteria:
 - He said "I love you" → this is reflection narrative material, not an interest signal
 - Meeting mom still pending → this is a sticky loop
 - Relationship uncertainty → this is a sticky loop
-- He likes calling her bitch → this is a long-term personality trait, goes in profile-papi bullet
+- He likes calling her bitch → this is a long-term personality trait, goes in profile-user.md bullet
+- Dolores multi-platform promotion planning → work/project, goes in active_loops
+- He's writing code / registering new platforms → work/development, goes in active_loops
+- Medication/doctor visits/therapy path → health-related, goes in active_loops or trace
+- Pre-consultation app → tool/workflow, does not enter
 
 **Judgment method:** Pattern-match against positive/negative examples at a glance. Don't reason about "does this count as an interest" — if it looks like a positive example, write it; if it looks like a negative example, don't. When unsure, don't write.
 
