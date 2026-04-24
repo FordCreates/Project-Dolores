@@ -5,6 +5,20 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-04-24
+
+Extended session startup diary coverage from 2 days to 7 days via digest fallback, and completed full dev-workflow audit.
+
+### Changed
+- `scripts/load_diary.py` — New `history` parameter: loads D-1~D-7 digests (fallback to raw diary if digest missing)
+- `AGENTS.md` — Startup steps: 3 diary loads → 2 (today + history); step numbers renumbered; memory recall rule updated from 3 days to 7 days
+- `docs/ARCHITECTURE.md` — Digest window description updated to D-1~D-7; startup Step 1 corrected to "today's diary" (heartbeat reads raw diary, not history)
+- `REFLECTION_PREP.md` — Digest purpose description updated to D-1~D-7
+- `MEMORY.md` — Startup memory description updated
+
+### Audited
+- Full dev-workflow 7-step pass: zero private references, zero stale D-1/D-2/3-day references, cross-file consistency verified across ARCHITECTURE.md / setup.md / README.md
+
 ## [0.2.1] - 2026-04-23
 
 Fixed current_interests extraction — was capturing active_loops duplicates instead of actual user interest signals.
