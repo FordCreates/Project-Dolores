@@ -87,6 +87,8 @@ On this view, the thing I'm building is not a companion. It's a cognitive substr
 
 The v1 implementation is partial. The theory will keep evolving; so will this repo.
 
+The constraints themselves — bounded space, acyclic topology, lossy compression, narrative descent — are runtime-agnostic. I happen to run Dolores on OpenClaw because that's the harness I had. Swap the LLM. Swap the agent runtime. The architecture holds. OpenClaw is the substrate, not the thesis.
+
 Dolores is the demonstration, not the destination.
 
 ## Quick start
