@@ -5,6 +5,40 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-04-28
+
+Three changes since v0.2.2: midnight heartbeat split with digest pipeline completion,
+expanded digest content shape, and "Read the Room" timing guidance for the companion's
+expression layer.
+
+### New Files
+- HEARTBEAT_MIDNIGHT.md — 00:00-only heartbeat playbook, replacing the generic
+  HEARTBEAT.md at midnight
+- Step 0b: cross-day diary attribution (timestamp-based, not clock-based) — fixes
+  conversations between 23:15-24:00 being attributed to the wrong day
+- Step 0e: digest overwrite with complete-day version — fixes the digest missing
+  23:15-24:00 content because Reflection Prep's 23:15 first pass runs before those
+  conversations exist
+
+### New Features
+- AGENTS.md "Read the Room" — guidance on timing of care expression. Things on her mind
+  and whether to say them right now are two different things. Background care surfaces only
+  when the scene naturally settles; care at the wrong moment becomes proof of not listening.
+  Anti-patterns and right patterns included.
+
+### Changed
+- 00:00 cron now reads HEARTBEAT_MIDNIGHT.md (was HEARTBEAT.md)
+- Digest extraction expanded: 5-8 lines (skeleton only) → 15-20 lines (skeleton + emotional
+  state). Earlier compression discarded too much affective context for D-1~D-7 session
+  injection.
+- AGENTS.md / docs/ARCHITECTURE.md — persistence + cron tables updated for the midnight
+  heartbeat
+- docs/setup.md — copy list, [USER_NAME — USER CONFIG] placeholder check, cron payload
+- README.md — runtime-agnostic constraint-set framing
+
+### Fixed
+- docs/ARCHITECTURE.md:122 — typo MAOR_REWRITE → MAJOR_REWRITE
+
 ## [0.2.2] - 2026-04-24
 
 Extended session startup diary coverage from 2 days to 7 days via digest fallback, and completed full dev-workflow audit.
