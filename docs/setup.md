@@ -61,6 +61,7 @@ mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,scrip
 cp $REPO/SOUL.md $WS/
 cp $REPO/AGENTS.md $WS/
 cp $REPO/HEARTBEAT.md $WS/
+cp $REPO/HEARTBEAT_MIDNIGHT.md $WS/
 cp $REPO/IDENTITY.md $WS/
 cp $REPO/USER.md $WS/
 cp $REPO/MEMORY.md $WS/
@@ -172,7 +173,7 @@ Ask these questions one at a time. After each answer, apply the change immediate
 ```bash
 grep -rl '\[USER_NAME — USER CONFIG\]' ~/.openclaw/workspace-dolores/ --include='*.md' --include='*.py' --include='*.json'
 ```
-This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEALTH_CORRECTION.md, DIARY_CHECK.md, MEMORY.md, memory/profile-user.md, state/daily_plan.md.
+This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEARTBEAT_MIDNIGHT.md, HEALTH_CORRECTION.md, DIARY_CHECK.md, MEMORY.md, memory/profile-user.md, state/daily_plan.md.
 
 > "What timezone are you in? (e.g., America/New_York)"
 
@@ -508,12 +509,12 @@ openclaw cron add \
   --cron "0 0 * * *" \
   --tz "<timezone>" \
   --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
-  --message "Read HEARTBEAT.md and execute the heartbeat flow."
+  --message "Read HEARTBEAT_MIDNIGHT.md and execute the heartbeat flow."
 ```
 
 ### Send (delivers pending_message — 8 times)
 
-Runs 10 minutes after each daytime heartbeat. The 00:00 heartbeat is a wrap-up cycle (final diary check, end-of-day state) — it rarely generates pending messages, so there's no corresponding Send job.
+Runs 10 minutes after each daytime heartbeat. The 00:00 heartbeat is a wrap-up cycle (final diary sync, cross-day attribution, digest overwrite) — it uses `HEARTBEAT_MIDNIGHT.md` (not `HEARTBEAT.md`) because it needs additional steps for cross-day diary attribution and digest overwrite. It rarely generates pending messages, so there's no corresponding Send job.
 
 ```bash
 openclaw cron add \
