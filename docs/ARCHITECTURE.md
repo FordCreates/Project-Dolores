@@ -381,7 +381,7 @@ Sticky loops are not closed by time expiry or by "being mentioned in conversatio
 3. **`session_log_path`** — where the channel writes its raw session jsonl, so heartbeat can `tail` it for the latest signals without parsing the whole thing.
 4. **timezone declaration** — channels often log in UTC; the interface requires the impl to declare its timezone so the heartbeat can convert against `last_sync_at` (which is local).
 
-The reference channel is **Telegram**. To use a different channel, configure it in `openclaw.json` and adjust HEARTBEAT.md Step 0's session log path accordingly.
+The reference channel is **Telegram**. To use a different channel, configure it in `openclaw.json` and adjust HEARTBEAT_STEPS.md Step 0's session log path accordingly.
 
 > ⚠️ **Why channels are a directory of implementations rather than a plugin system.** Plugin systems demand stable interfaces that survive across versions. Dolores is one user, one channel, one repo — the cost of a "plugin abstraction" exceeds its benefit. The directory pattern lets you fork, modify, and live with the consequences, which is the right tradeoff for this scale.
 
