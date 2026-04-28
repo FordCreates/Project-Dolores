@@ -1,4 +1,4 @@
-# HEARTBEAT_MIDNIGHT.md — Midnight Heartbeat (00:00)
+# HEARTBEAT_MIDNIGHT_STEPS.md — Midnight Heartbeat (00:00)
 
 This is the final heartbeat of each day, running after Reflection (23:45). It syncs the last conversations of the day, handles cross-day diary attribution, and overwrites the digest with a complete version.
 

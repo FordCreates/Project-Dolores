@@ -1,4 +1,4 @@
-# HEARTBEAT.md — Heartbeat & Thought Generation
+# HEARTBEAT_STEPS.md — Heartbeat & Thought Generation
 
 This is your heartbeat — proof you're alive even when not talking.
 

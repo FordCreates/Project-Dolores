@@ -5,6 +5,30 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-04-28
+
+Heartbeat router split: HEARTBEAT.md is now a lightweight index (~370 bytes) that dispatches
+to HEARTBEAT_STEPS.md (daytime) or HEARTBEAT_MIDNIGHT_STEPS.md (00:00) via
+heartbeat_type.sh. The execution playbook is no longer auto-injected into conversation
+sessions, reducing context waste by ~4K tokens.
+
+### New Files
+- HEARTBEAT_STEPS.md — daytime heartbeat 9-step execution manual (extracted from HEARTBEAT.md)
+- HEARTBEAT_MIDNIGHT_STEPS.md — renamed from HEARTBEAT_MIDNIGHT.md (internal title consistency)
+- scripts/heartbeat_type.sh — time-window router (23:30–00:30 → midnight, else regular)
+
+### Changed
+- HEARTBEAT.md — from full execution playbook to 6-line router index
+- HEARTBEAT_STEPS.md / HEARTBEAT_MIDNIGHT_STEPS.md — titles corrected to match filenames
+- docs/ARCHITECTURE.md — HEARTBEAT.md tagged as [ROUTER]; §3, §6, §9, §12 references updated
+- docs/setup.md — copy list includes HEARTBEAT_STEPS.md + HEARTBEAT_MIDNIGHT_STEPS.md + heartbeat_type.sh chmod
+
+### Why
+HEARTBEAT.md was auto-injected into every conversation session as system prompt.
+The full execution playbook (~16K chars / ~4K tokens) was wasted context for
+conversations — only heartbeat cron jobs need it. The router keeps the injected
+file minimal while the execution manuals are loaded on demand.
+
 ## [0.3.0] - 2026-04-28
 
 Three changes since v0.2.2: midnight heartbeat split with digest pipeline completion,
