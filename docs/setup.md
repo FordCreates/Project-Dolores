@@ -61,7 +61,8 @@ mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,scrip
 cp $REPO/SOUL.md $WS/
 cp $REPO/AGENTS.md $WS/
 cp $REPO/HEARTBEAT.md $WS/
-cp $REPO/HEARTBEAT_MIDNIGHT.md $WS/
+cp $REPO/HEARTBEAT_STEPS.md $WS/
+cp $REPO/HEARTBEAT_MIDNIGHT_STEPS.md $WS/
 cp $REPO/IDENTITY.md $WS/
 cp $REPO/USER.md $WS/
 cp $REPO/MEMORY.md $WS/
@@ -79,6 +80,8 @@ cp $REPO/reflection_trace.md $WS/
 # Copy scripts
 cp $REPO/scripts/load_diary.py $WS/scripts/
 cp $REPO/scripts/inject_context.py $WS/scripts/
+cp $REPO/scripts/heartbeat_type.sh $WS/scripts/
+chmod +x $WS/scripts/heartbeat_type.sh
 cp $REPO/scripts/send_and_append.py $WS/scripts/
 cp $REPO/scripts/lib/__init__.py $WS/scripts/lib/
 cp $REPO/scripts/lib/session_append.py $WS/scripts/lib/
@@ -173,7 +176,7 @@ Ask these questions one at a time. After each answer, apply the change immediate
 ```bash
 grep -rl '\[USER_NAME — USER CONFIG\]' ~/.openclaw/workspace-dolores/ --include='*.md' --include='*.py' --include='*.json'
 ```
-This should match: AGENTS.md, USER.md, TOOLS.md, HEARTBEAT.md, HEARTBEAT_MIDNIGHT.md, HEALTH_CORRECTION.md, DIARY_CHECK.md, MEMORY.md, memory/profile-user.md, state/daily_plan.md.
+This should match: AGENTS.md, USER.md, IDENTITY.md, TOOLS.md, HEARTBEAT.md, HEARTBEAT_STEPS.md, HEARTBEAT_MIDNIGHT_STEPS.md, HEALTH_CORRECTION.md, DIARY_CHECK.md, MEMORY.md, memory/profile-user.md, state/daily_plan.md.
 
 > "What timezone are you in? (e.g., America/New_York)"
 
@@ -265,7 +268,7 @@ Read the user's existing `~/.openclaw/openclaw.json` to understand the current s
 
 ### 4b. Bootstrap character limit
 
-> Dolores's SOUL.md (~28K chars) and HEARTBEAT.md (~26K chars) exceed OpenClaw's default bootstrap file limit of 20,000 characters. Without increasing this limit, Dolores will see truncated (incomplete) versions of her own character definition.
+> Dolores's SOUL.md (~28K chars) exceeds OpenClaw's default bootstrap file limit of 20,000 characters. Without increasing this limit, Dolores will see truncated (incomplete) versions of her own character definition. HEARTBEAT_STEPS.md and HEARTBEAT_MIDNIGHT_STEPS.md are not auto-injected (they are read on demand by the router), so they are not affected by this limit.
 
 **Apply:** Check if `agents.defaults.bootstrapMaxChars` already exists in `openclaw.json`. If not, add it:
 
@@ -446,8 +449,8 @@ Scripts contain path placeholders that depend on the user's system. Replace them
 | Placeholder | File(s) | Replace With |
 |---|---|---|
 | `[WORKSPACE_PATH — USER CONFIG]` | scripts/load_diary.py, scripts/inject_context.py, scripts/send_and_append.py | Absolute path to workspace, e.g. `/home/user/.openclaw/workspace-dolores` |
-| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (3 occurrences), **DIARY_CHECK.md** (1 occurrence) | Absolute path to sessions directory |
-| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT.md** (1 occurrence), **DIARY_CHECK.md** (1 occurrence) | Session key for the active conversation |
+| `[SESSION_PATH — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT_STEPS.md** (3 occurrences), **DIARY_CHECK.md** (1 occurrence) | Absolute path to sessions directory |
+| `[SESSION_KEY — USER CONFIG]` | scripts/inject_context.py, scripts/lib/session_append.py, **HEARTBEAT_STEPS.md** (1 occurrence), **DIARY_CHECK.md** (1 occurrence) | Session key for the active conversation |
 | `<SESSION_PATH>` | **HEALTH_CORRECTION.md** (1 occurrence, different format — use same value) | Same absolute sessions directory path |
 
 ### Calculating SESSION_PATH and SESSION_KEY
@@ -509,12 +512,12 @@ openclaw cron add \
   --cron "0 0 * * *" \
   --tz "<timezone>" \
   --session isolated --agent dolores --model <cron-provider>/<cron-model> --no-deliver \
-  --message "Read HEARTBEAT_MIDNIGHT.md and execute the heartbeat flow."
+  --message "Read HEARTBEAT.md and execute the heartbeat flow."
 ```
 
 ### Send (delivers pending_message — 8 times)
 
-Runs 10 minutes after each daytime heartbeat. The 00:00 heartbeat is a wrap-up cycle (final diary sync, cross-day attribution, digest overwrite) — it uses `HEARTBEAT_MIDNIGHT.md` (not `HEARTBEAT.md`) because it needs additional steps for cross-day diary attribution and digest overwrite. It rarely generates pending messages, so there's no corresponding Send job.
+Runs 10 minutes after each daytime heartbeat. The 00:00 heartbeat is a wrap-up cycle (final diary sync, cross-day attribution, digest overwrite) — it uses `HEARTBEAT_MIDNIGHT_STEPS.md` (routed via `HEARTBEAT.md`) because it needs additional steps for cross-day diary attribution and digest overwrite. It rarely generates pending messages, so there's no corresponding Send job.
 
 ```bash
 openclaw cron add \
@@ -664,7 +667,7 @@ After restart, suggest:
 - **Bot doesn't respond:** Check bot token is valid and binding chatId matches the user's Telegram ID
 - **Bot icon is a generic robot:** You skipped Step 5. Set a custom avatar via @BotFather → `/setuserpic`.
 - **openclaw.json is broken:** Restore from backup: `cp ~/.openclaw/openclaw.json.bak ~/.openclaw/openclaw.json`
-- **Dolores seems out of character or loses personality detail:** Her SOUL.md or HEARTBEAT.md may be truncated. Check that `agents.defaults.bootstrapMaxChars` is set to at least 35000 in `openclaw.json`.
+- **Dolores seems out of character or loses personality detail:** Her SOUL.md may be truncated. Check that `agents.defaults.bootstrapMaxChars` is set to at least 35000 in `openclaw.json`.
 - **Cron jobs not firing:** `openclaw cron list` — all jobs should appear. Recreate missing ones and restart gateway
 - **Cron jobs using wrong model:** Check that each cron command includes `--model <cron-provider>/<cron-model>`. Without it, all jobs run on the conversation model.
 - **Heartbeat runs but state doesn't update:** Check script permissions and that path placeholders were replaced correctly

@@ -47,7 +47,7 @@ Skip if file doesn't exist. No error if search returns nothing. These steps let 
 | Writer | Files | When |
 |---|---|---|
 | **Heartbeat** | state/ all files + memory/YYYY-MM-DD.md (diary) | Every 2 hours |
-| **00:00 Heartbeat** | memory/YYYY-MM-DD.md (cross-day diary append) + memory/YYYY-MM-DD.digest.md (overwrite complete version) + same as daytime heartbeat | Daily 00:00 (HEARTBEAT_MIDNIGHT.md) |
+| **00:00 Heartbeat** | memory/YYYY-MM-DD.md (cross-day diary append) + memory/YYYY-MM-DD.digest.md (overwrite complete version) + same as daytime heartbeat | Daily 00:00 (router: HEARTBEAT.md, execution: HEARTBEAT_MIDNIGHT_STEPS.md) |
 | **Health Checkin** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md + state/pending_message.md (always sends confirmation) | Daily 20:00 |
 | **Health Correction** | memory/health/YYYY-MM-DD.md + memory/exercise/YYYY-MM-DD.md (corrections only) | Daily 23:10 |
 | **Reflection Prep** | reflection_trace (analysis + tension routing + update directions), state/current_interests.md, state/world_context.json (weather field), memory/YYYY-MM-DD.digest.md | 23:15 |

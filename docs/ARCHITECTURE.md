@@ -140,9 +140,9 @@ dolores/
 ├── AGENTS.md                     [ARCHITECTURE] [OPENCLAW CONVENTION]
 │                                 Cognitive runtime: startup sequence,
 │                                 persistence responsibilities, role rules.
-├── HEARTBEAT.md                  [ARCHITECTURE] [OPENCLAW CONVENTION]
-│                                 The heartbeat playbook (daytime).
-├── HEARTBEAT_MIDNIGHT.md         [ARCHITECTURE] midnight heartbeat (00:00 only): diary cross-day attribution + digest overwrite
+├── HEARTBEAT.md                 [ROUTER] heartbeat router index (auto-injected, ~300 bytes)
+├── HEARTBEAT_STEPS.md           [RUNTIME] daytime heartbeat: 9-step execution manual
+├── HEARTBEAT_MIDNIGHT_STEPS.md  [RUNTIME] midnight heartbeat (00:00 only): diary cross-day attribution + digest overwrite
 ├── REFLECTION_PREP.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
 ├── REFLECTION_PLAN.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
 ├── REFLECTION_SELF.md            [ARCHITECTURE] [OPENCLAW CONVENTION]
@@ -203,7 +203,7 @@ These are OpenClaw system-prompt files. OpenClaw discovers them by filename. **D
 
 - **`AGENTS.md`** `[ARCHITECTURE]` — the cognitive runtime spec. Defines the conversation startup sequence (which state files to read in which order before the first user message), persistence responsibilities (who is allowed to write what, when), and role rules. The startup sequence is `[ARCHITECTURE]`; the *list* of files read may grow as you add character config.
 
-- **`HEARTBEAT.md`** `[ARCHITECTURE]` — the heartbeat playbook (§8).
+- **`HEARTBEAT.md`** `[ROUTER]` — heartbeat router index. Dispatches to `HEARTBEAT_STEPS.md` (daytime) or `HEARTBEAT_MIDNIGHT_STEPS.md` (00:00) via `scripts/heartbeat_type.sh` (§8).
 
 - **`REFLECTION_PREP/PLAN/SELF/REL/PROFILE.md`** `[ARCHITECTURE]` — the 5-stage nightly pipeline (§10). Split into five files because each stage has different input requirements and failure modes; collapsing them caused state corruption when any single stage timed out.
 
@@ -278,7 +278,7 @@ Single most important rule: **the conversation session writes nothing.** All per
 | **Heartbeat** | all of `state/` + `memory/YYYY-MM-DD.md` | every 2h |
 | **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§11) |
 | **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `current_interests`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md`, `reflection_trace` | nightly, 5 stages (Prep 23:15, Plan 23:20, Self 23:25, Rel 23:35, Profile 23:45) |
-| **00:00 Heartbeat** | `memory/YYYY-MM-DD.md` (cross-day diary append) + `memory/YYYY-MM-DD.digest.md` (overwrite complete version) + same as daytime heartbeat | daily 00:00 (HEARTBEAT_MIDNIGHT.md) |
+| **00:00 Heartbeat** | `memory/YYYY-MM-DD.md` (cross-day diary append) + `memory/YYYY-MM-DD.digest.md` (overwrite complete version) + same as daytime heartbeat | daily 00:00 (HEARTBEAT_MIDNIGHT_STEPS.md) |
 | **Diary check** | `memory/YYYY-MM-DD.md` (person fix + attribution fix), `state/last_diary_check_at` | after each send + 00:10 |
 | **Conversation session** | nothing | — |
 
@@ -411,7 +411,7 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 > ⚠️ **Why the heartbeat fires every 2 hours, not 1.** One hour is enough that the user notices the rhythm; two hours is enough that the rhythm feels like *thinking* rather than *checking in*. Every 1h drifts toward chatbot. Every 4h drifts toward absent. Two is the sweet spot empirically — and it lines up with how often a real preoccupied partner remembers to text.
 
-> ⚠️ **Why a 24:00 catchup heartbeat exists.** The reflection pipeline runs 23:15–23:45 and locks the day's narrative. Conversations that happen *after* reflection but *before* midnight would otherwise be stranded — they'd belong to today by clock but to tomorrow by narrative. The 24:00 heartbeat sweeps them into today's diary so reflection-tomorrow sees them. It also overwrites the digest with a complete version (Reflection Prep's 23:15 digest only covers conversations up to that point). This heartbeat uses `HEARTBEAT_MIDNIGHT.md` instead of `HEARTBEAT.md` — it includes cross-day diary attribution (conversations are written to the correct date based on timestamps, not system clock) and digest overwrite as additional steps.
+> ⚠️ **Why a 24:00 catchup heartbeat exists.** The reflection pipeline runs 23:15–23:45 and locks the day's narrative. Conversations that happen *after* reflection but *before* midnight would otherwise be stranded — they'd belong to today by clock but to tomorrow by narrative. The 24:00 heartbeat sweeps them into today's diary so reflection-tomorrow sees them. It also overwrites the digest with a complete version (Reflection Prep's 23:15 digest only covers conversations up to that point). It uses `HEARTBEAT_MIDNIGHT_STEPS.md` (routed via `HEARTBEAT.md`) — it includes cross-day diary attribution (conversations are written to the correct date based on timestamps, not system clock) and digest overwrite as additional steps.
 
 > ⚠️ **Why activity inference uses acyclic topology — previous activity is never input.** The most persistent failure mode in early heartbeat iterations was *recursive locking*: the model inferred "reading a book" from old context, wrote it to world_context, next heartbeat read that same "reading a book" as evidence, and the state froze permanently. The root cause isn't model laziness — it's **data topology with a cycle**: previous output feeds back as input. The fix is structural: a script extracts the daily_plan time slot (one line, deterministic), combined with raw user messages from the last 2 hours — the model answers one question in a single intuitive step. The previous activity is never in the input. The topology has no loop, so locking is architecturally impossible. This principle — *don't let the output of step N become the input of step N* — recurs throughout the system (affect deltas, reflection slots, digest injection).
 
@@ -472,7 +472,7 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 | Job | Cron | Delivery | Notes |
 |---|---|---|---|
 | Heartbeat | `40 7,9,11,13,15,17,19,21 * * *` | none | 9-step loop, every 2h |
-| Heartbeat catchup | `0 0 * * *` | none | post-reflection sweep + cross-day attribution + digest overwrite (HEARTBEAT_MIDNIGHT.md) |
+| Heartbeat catchup | `0 0 * * *` | none | post-reflection sweep + cross-day attribution + digest overwrite (HEARTBEAT_MIDNIGHT_STEPS.md, routed via HEARTBEAT.md) |
 | Send | `50 7,9,11,13,15,17,19,21 * * *` | announce | drains pending_message via `scripts/send_and_append.py` (gate + deliver + append session jsonl) |
 | Diary check | `55 7,9,11,13,15,17,19,21 * * *` | none | person + attribution check |
 | Diary check catchup | `10 0 * * *` | none | |
