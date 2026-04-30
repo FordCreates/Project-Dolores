@@ -121,7 +121,7 @@ I call this **Narrative Descent**: the gravitational pull by which high-weight e
 >
 > **3. MINOR_REFINE collapses to NO_CHANGE on weak models.** I tried three tiers (NO_CHANGE / MINOR_REFINE / MAJOR_REWRITE). On the cron model (GLM-5.1, Claude Sonnet), MINOR_REFINE empirically produced full rewrites with cosmetic differences from yesterday — drift dressed up as nuance. The three-tier system *added* a drift channel instead of removing one. Collapsing to binary (NO_CHANGE or MAJOR_REWRITE) eliminates it.
 >
-> **4. Digest as a topology breaker.** The diary feeds the session on D-1 through D-7 via the `history` command. Raw diary contains behavioral descriptions — "she hugged the pillow," "her ears went red" — which are high-pattern-density tokens that the model reproduces identically across sessions, creating *cross-day behavioral lock-in*. The digest retains event skeleton and emotional state (15-20 lines: what happened and how it felt, with all behavioral descriptions stripped). This is a lossy compression layer inserted into the data pipeline specifically to break the pattern-reproduction cycle. The topology is intentionally acyclic: raw diary → digest (one-way) → session (read-only). Yesterday's digest cannot influence tomorrow's digest.
+> **4. Digest as a topology breaker.** The diary feeds the session on D-1 through D-14 via the `history` command. Raw diary contains behavioral descriptions — "she hugged the pillow," "her ears went red" — which are high-pattern-density tokens that the model reproduces identically across sessions, creating *cross-day behavioral lock-in*. The digest retains event skeleton and emotional state (5-8 lines: what happened and overall mood, with all behavioral descriptions stripped). This is a lossy compression layer inserted into the data pipeline specifically to break the pattern-reproduction cycle. The topology is intentionally acyclic: raw diary → digest (one-way) → session (read-only). Yesterday's digest cannot influence tomorrow's digest.
 >
 > **5. Five-stage pipeline with checkpoint files.** A single reflection job that rewrites three narrative files inevitably times out on one of them, leaving the others from a different day. Five independent jobs (Prep → Plan → Self → Rel → Profile) with checkpoint files between them means a timeout in any stage leaves the others intact and recoverable. Each stage has a single responsibility and a single output — no multi-step reasoning, no "remember what stage 1 decided."
 >
@@ -177,7 +177,7 @@ dolores/
 │   ├── self-narrative.md         [ARCHITECTURE] reflection-owned
 │   ├── health/YYYY-MM-DD.md          [CHARACTER CONFIG] structured check-in data
 │   ├── exercise/YYYY-MM-DD.md        [CHARACTER CONFIG] structured exercise data
-│   ├── YYYY-MM-DD.digest.md    [ARCHITECTURE] diary event digest (Reflection Prep 23:15 first pass + 00:00 midnight heartbeat overwrite; used for session injection D-1~D-7 to prevent cross-day behavioral pattern lock-in)
+│   ├── YYYY-MM-DD.digest.md    [ARCHITECTURE] diary event digest (Reflection Prep 23:15 first pass + 00:00 midnight heartbeat overwrite; used for session injection D-1~D-14 to prevent cross-day behavioral pattern lock-in)
 │   └── YYYY-MM-DD.md             [ARCHITECTURE] daily diary
 │
 └── channels/                     [ARCHITECTURE] (directory, future)
@@ -263,7 +263,7 @@ Low-frequency, distilled, vector-indexed, written by reflection, read by session
 
 - **`exercise/YYYY-MM-DD.md`** `[CHARACTER CONFIG]` — structured daily exercise data from check-in modules.
 
-- **`YYYY-MM-DD.digest.md`** `[ARCHITECTURE]` — event digest. Reflection Prep generates a first pass at 23:15 (may be incomplete if conversations continue after that). The 00:00 midnight heartbeat overwrites it with the complete version (covers the full day). Contains event skeleton and emotional state/feelings (15-20 lines) with all behavioral descriptions stripped to prevent cross-day lock-in. Used for session injection on D-1~D-7 (with fallback to raw diary if digest doesn't exist). Reflection still reads raw diary — this file exists only on the injection path to break the cross-day pattern self-reinforcement loop.
+- **`YYYY-MM-DD.digest.md`** `[ARCHITECTURE]` — event digest. Reflection Prep generates a first pass at 23:15 (may be incomplete if conversations continue after that). The 00:00 midnight heartbeat overwrites it with the complete version (covers the full day). Contains event skeleton and emotional state (5-8 lines) with all behavioral descriptions stripped to prevent cross-day lock-in. Used for session injection on D-1~D-14 (with fallback to raw diary if digest doesn't exist). Reflection still reads raw diary — this file exists only on the injection path to break the cross-day pattern self-reinforcement loop.
 
 - **`YYYY-MM-DD.md`** `[ARCHITECTURE]` — the daily diary. Heartbeat appends to this at Step 0 and Step 6. Vector-indexed for memory search.
 

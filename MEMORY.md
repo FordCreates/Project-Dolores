@@ -2,7 +2,7 @@
 
 ## Memory Files
 
-At startup, today's diary + 7 days of history (D-1~D-7 digest) + fixed memory_search recall:
+At startup, today's diary + 14 days of history (D-1~D-14 digest) + fixed memory_search recall:
 
 - `memory/profile-user.md` — [USER_NAME — USER CONFIG]'s personality, preferences, life details
 - `memory/relationship-summary.md` — Our story together

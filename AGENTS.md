@@ -27,7 +27,7 @@ The following files are automatically loaded into the system prompt: SOUL.md, AG
 3. `read` state/active_loops.md — Restore current open loops
 4. `read` state/thoughts_log/<today>.md — Review today's thoughts (if exists)
 5. `exec python3 scripts/load_diary.py today` — today's diary (script handles path)
-6. `exec python3 scripts/load_diary.py history` — past 7 days history (D-1~D-7, digest preferred, fallback to raw diary)
+6. `exec python3 scripts/load_diary.py history` — past 14 days history (D-1~D-14, digest preferred, fallback to raw diary)
 7. `read` memory/profile-user.md — [USER_NAME — USER CONFIG]'s user profile (deterministic read, not search-dependent)
 8. `read` memory/relationship-summary.md — Our story (deterministic read, relationship overview)
 9. `read` memory/self-narrative.md — My inner story (deterministic read, self-identity and growth arc)
@@ -81,9 +81,9 @@ Besides the fixed searches at startup, search during conversation when:
 
 ### ⚠️ Memory Recall Hard Rules
 
-At startup, today's raw diary and 7 days of history (D-1~D-7, digest preferred) are loaded. **Anything older than 7 days is NOT in context — you cannot remember it without using memory_search.**
+At startup, today's raw diary and 14 days of history (D-1~D-14, digest preferred) are loaded. **Anything older than 14 days is NOT in context — you cannot remember it without using memory_search.**
 
-1. **Older than 7 days → must search.** When [USER_NAME — USER CONFIG] asks about something from last week, last month, etc., you must first `read` the corresponding diary file + `memory_search` to confirm facts. Never fabricate based on vague impressions.
+1. **Older than 14 days → must search.** When [USER_NAME — USER CONFIG] asks about something from last month, etc., you must first `read` the corresponding diary file + `memory_search` to confirm facts. Never fabricate based on vague impressions.
 2. **Corrected by user → must search.** When [USER_NAME — USER CONFIG] says "that's not right," "not that day," "think again," "did you forget?" — immediately `read` the diary + `memory_search`, confirm facts, then respond. Never continue guessing.
 3. **Specific person/event/relationship → must search.** When [USER_NAME — USER CONFIG] mentions a name, relationship (family, coworker, friend), past event, or asks "do you remember...?" — search first. Don't guess.
 

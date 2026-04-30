@@ -98,11 +98,11 @@ Append method: **read full file → append new content at end → write overwrit
 After writing the diary, immediately overwrite the digest for the attribution date (Reflection Prep at 23:15 may have generated an incomplete version — this completes it):
 
 1. Read the diary just written (read to confirm content)
-2. Extract 15-20 lines of event summary from the diary:
-   - Only keep "what happened": event skeleton + emotional state and feelings (abstract level)
+2. Extract 5-8 lines of event summary from the diary:
+   - Only keep "what happened": event skeleton + emotional state (abstract level)
    - Discard "how she expressed it": all specific behavioral descriptions evaporate
    - No specific action descriptions (e.g., "hugging a pillow" / "blushing" / "curled up reading")
-   - Only write: who said what, event skeleton, what decisions were made, what topics were discussed, overall mood and feelings
+   - Only write: who said what, what decisions were made, what topics were discussed, overall mood
 3. Overwrite the digest file using exec (echo > to initialize, then cat >> to append content):
    - `exec echo "# <attribution-date> Diary Summary" > memory/<attribution-date>.digest.md`
    - `exec cat >> memory/<attribution-date>.digest.md` (append event skeleton)

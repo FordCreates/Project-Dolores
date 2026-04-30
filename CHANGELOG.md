@@ -5,6 +5,16 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Digest extraction reverted: 15-20 lines → 5-8 lines (skeleton + emotional state). Broader
+  digests leaked behavioral descriptions that created cross-day pattern collapse (scene/pose
+  lock-in). Phase 2 memory cards will handle granular detail via a separate, controllable
+  channel. Digest stays minimal — topology safety first.
+- Diary history window expanded: 7 days (D-1~D-7) → 14 days (D-1~D-14). With strict 5-8 line
+  digests, 14 days ≈ 70-112 lines (~10-16KB), comparable to old 7-day window.
+
 ## [0.3.1] - 2026-04-28
 
 Heartbeat router split: HEARTBEAT.md is now a lightweight index (~370 bytes) that dispatches

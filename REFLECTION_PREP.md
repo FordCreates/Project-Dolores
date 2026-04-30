@@ -150,11 +150,11 @@ exec echo "# $(date +%Y-%m-%d) diary digest" > memory/$(date +%Y-%m-%d).digest.m
 
 ### Digest rules
 
-- **Only keep "what happened"**: event skeleton + emotional state and feelings (abstract level)
+- **Only keep "what happened"**: event skeleton + emotional state (abstract level)
 - **Discard "how she expressed it"**: all specific behavioral descriptions evaporate here
-- 15-20 lines, concise
+- 5-8 lines, concise
 - No specific action descriptions (e.g. "hid behind pillow", "blushing ears", "curled up on the couch")
-- Only write: who said what, event skeleton, what decisions were made, what topics were discussed, overall mood and feelings
+- Only write: who said what, what decisions were made, what topics were discussed, overall mood
 
 ### Digest example
 
@@ -164,7 +164,7 @@ We talked about work stress; he mentioned wanting to visit his mom this weekend.
 He seemed tired but overall okay. Said goodnight before sleeping.
 ```
 
-**Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1~D-7, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
+**Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1~D-14, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
 
 ## Step 8: Finish
 
