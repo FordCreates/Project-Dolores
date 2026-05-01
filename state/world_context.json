@@ -2,6 +2,7 @@
   "current_time": "",
   "day_of_week": "",
   "time_mode": "",
+  "is_quiet_hours": false,
   "weather": "",
   "user_location": "",
   "user_activity": "",
