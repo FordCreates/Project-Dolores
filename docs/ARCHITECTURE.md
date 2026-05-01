@@ -158,7 +158,7 @@ dolores/
 │
 ├── state/                        [ARCHITECTURE] (directory)
 │   ├── affect.json               [CHARACTER CONFIG] dimensions are yours
-│   ├── world_context.json        [ARCHITECTURE] field set extensible
+│   ├── world_context.json        [ARCHITECTURE] field set is closed (§4 schema)
 │   ├── active_loops.md           [ARCHITECTURE] (includes sticky rumination loops)
 │   ├── pending_message.md        [ARCHITECTURE] two-phase delivery core
 │   ├── current_interests.md      [ARCHITECTURE] user signal queue (Reflection Prep writes, Reflection Plan reads)
@@ -222,7 +222,21 @@ High-frequency, small, written by heartbeat, read by everything.
 
   > ⚠️ **Why deltas are bounded ±0.05–0.15 per heartbeat.** Larger jumps produce a character whose mood swings tracking the last message read like a weather vane. Real emotional state has inertia. Bounded deltas force the model to express acute reactions through *behavior* (active_loops, thoughts) rather than by spiking the affect vector, which keeps the affect signal meaningful as a slow baseline rather than an echo of the last input.
 
-- **`world_context.json`** `[ARCHITECTURE]` — current inferred world state. See §1 Helix 1 for the three-tier rebuild rule.
+- **`world_context.json`** `[ARCHITECTURE]` — current inferred world state. See §1 Helix 1 for the three-tier refresh rule (fast/medium/slow). Field set is closed (14 fields; adding requires an architecture change, not a heartbeat-time decision).
+
+  **Field shape schema:**
+
+  | Level | Shape | Fields | Write rule |
+  |---|---|---|---|
+  | L0 enum | fixed value set | user_location, user_activity, time_mode, recommended_intensity, day_of_week, is_quiet_hours | must be in the enum set |
+  | L1 numeric/timestamp | number or ISO time | current_time, hours_since_last_interaction, recent_message_count_24h | type-strict |
+  | L2 short narrative (activity) | 1–2 sentences | dolores_activity | governed by HEARTBEAT_STEPS.md Step 2h (with acyclic hard rule) |
+  | L2 short narrative (status note) | 1–2 sentences | context_note | governed by HEARTBEAT_STEPS.md Step 2 (brief unusual/noteworthy note; leave empty if nothing notable) |
+  | L3 scene narrative | 1–3 sentences | scene | governed by HEARTBEAT_STEPS.md Step 2f |
+  | L3+ multi-element description | 3–5 sentences | dolores_appearance | governed by HEARTBEAT_STEPS.md Step 2b (with three hard rules) |
+  | slow variable | — | weather | heartbeat does not write; reflection-owned |
+
+  > ⚠️ **Why a closed field set.** "Extensible" in practice meant the model could invent a new field on any heartbeat — a stray narrative summary, an `inferred_mood`, an `interaction_rhythm`. Once written, the next heartbeat read it as input, expanded it, and the cycle locked into a free-text habitat. Observed drift: fields that started as snake_case tags grew over weeks into paragraph narratives quoting dialogue and minute-level timelines, without any explicit rule change. Closing the field set + assigning a shape level + delegating the actual write rule to HEARTBEAT_STEPS.md is three layers of defense against this drift mode.
 
 - **`active_loops.md`** `[ARCHITECTURE]` — the 5–8 most active unresolved threads, each with a **weight** (2–5, set at creation, never changes) and `cooldown_until`. Also contains **sticky loops** — long-term ruminative items (≤3) that persist because they would damage realism if forgotten. See §7 for the psychology and lifecycle.
 
