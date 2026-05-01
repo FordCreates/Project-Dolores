@@ -7,13 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-05-01
+
+World context schema closure + digest pipeline tightening.
+
+### Added
+- **world_context.json field shape schema** (ARCHITECTURE.md §4). Field set closed at 14
+  fields. Each field declares a shape level: L0 enum / L1 numeric/timestamp / L2 short
+  narrative (activity + status note) / L3 scene narrative / L3+ multi-element description /
+  slow variable. Write rules delegated to HEARTBEAT_STEPS.md per field; the schema only
+  governs shape, not content.
+- `is_quiet_hours` to `state/world_context.json` seed template (was missing).
+
 ### Changed
+- HEARTBEAT_STEPS.md / HEARTBEAT_MIDNIGHT_STEPS.md Step 2:
+  - `recent_message_count_24h` spec tightened to integer (no narrative-string fallback).
+  - `scene` formula: `inferred_mood` input removed (cut from schema); uses `affect baseline`.
 - Digest extraction reverted: 15-20 lines → 5-8 lines (skeleton + emotional state). Broader
   digests leaked behavioral descriptions that created cross-day pattern collapse (scene/pose
   lock-in). Phase 2 memory cards will handle granular detail via a separate, controllable
   channel. Digest stays minimal — topology safety first.
 - Diary history window expanded: 7 days (D-1~D-7) → 14 days (D-1~D-14). With strict 5-8 line
   digests, 14 days ≈ 70-112 lines (~10-16KB), comparable to old 7-day window.
+
+### Why (schema closure)
+"Extensible" field set in practice meant the model could invent fields on any heartbeat. Once
+written, the next heartbeat read it as input, expanded it, and the cycle locked into a
+free-text habitat. Observed drift mode: fields like `context_note`, `inferred_mood`,
+`interaction_rhythm` started as snake_case tags and grew over weeks into paragraph narratives
+quoting dialogue and minute-level timelines — without any explicit rule change. Closing the
+field set + assigning shape levels + delegating write rules to HEARTBEAT_STEPS.md is three
+layers of defense against this drift mode.
 
 ## [0.4.0] - 2026-05-01
 
