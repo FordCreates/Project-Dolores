@@ -185,7 +185,7 @@ Overall mood — tired but okay. Said goodnight before sleep.
 **b. Interaction behavior:**
 
 - `hours_since_last_interaction` — extract the UTC timestamp from the last user message in Step 0 grep #4, subtract current UTC time for precise calculation (minute-level). grep #4 has no output → extract from Step 0 grep #3 (full conversation). No user messages at all → set to a large value
-- `recent_message_count_24h` — diary has today's interactions → set to nonzero. Diary is empty → "no interaction today"
+- `recent_message_count_24h` — integer. Diary has today's interactions → estimate count (≥1). Diary is empty → 0. ⚠️ Must be a number, no narrative strings.
 
 **c. User situation inference:**
 
@@ -213,7 +213,7 @@ Possible values: `working` / `meeting` / `exercising` / `resting` / `eating` / `
 
 **f. Scene description:**
 
-Based on all above info (time + user_location + weather + user_activity + inferred_mood), write a narrative scene description (1-3 sentences) into the `scene` field.
+Based on all above info (time + user_location + weather + user_activity + affect baseline), write a narrative scene description (1-3 sentences) into the `scene` field.
 
 ⚠️ Weather description must use `world_context.weather` field. Diary weather is historical, not current.
 
