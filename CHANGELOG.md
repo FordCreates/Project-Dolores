@@ -15,6 +15,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Diary history window expanded: 7 days (D-1~D-7) → 14 days (D-1~D-14). With strict 5-8 line
   digests, 14 days ≈ 70-112 lines (~10-16KB), comparable to old 7-day window.
 
+## [0.4.0] - 2026-05-01
+
+Active loop cognitive architecture overhaul — two-phase refactor of how the companion
+thinks about ongoing concerns.
+
+### Added
+- `scripts/loops_maintenance.py` — cursor-incremental suppressed counter updater +
+  weight≥4 sticky enforcement. Runs after each heartbeat Step 6.
+- Weight system (2-5) replacing priority. Weight anchors psychological importance, orthogonal
+  to urgency (expires_at). Weight≥4 auto-enforces sticky: true.
+- Suppressed counter — tracks consecutive thinking-but-not-saying rounds per loop.
+  Cross-day accumulation with fault-tolerant degradation.
+- Spontaneous thought paradigm (Phase B) — Step 5 no longer iterates over active_loops.
+  Thoughts emerge from scene context, not agenda processing. 0-3 thoughts per round.
+- Content field calibration — 5 error modes + 3 positive + 3 negative examples per heartbeat
+  manual. Content = caring context + felt texture, not event tracking.
+- §7.3 in ARCHITECTURE.md — spontaneous paradigm rationale + why-not-iterate explanation.
+
+### Changed
+- **Breaking:** `priority: high/medium/low` removed from active_loops format. Replaced by
+  `weight: 2-5` + `suppressed: 0`. Old format will stop working.
+- **Breaking:** Step 5 no longer iterates active_loops. Heartbeat manuals rewritten with
+  spontaneous paradigm prompt + 6 hard rules (no iteration, no per-loop thoughts,
+  no progress reports, no "Day N", care not PM, bounded 0-3).
+- HEARTBEAT_STEPS.md Step 4 — threshold gating + 5 meta-rules + 4-tier weight calibration
+  table with judgment questions + examples.
+- HEARTBEAT_MIDNIGHT_STEPS.md — synchronized Step 4/5/6 changes.
+- docs/ARCHITECTURE.md §7 — weight model, auto-sticky, suppressed counter, spontaneous paradigm.
+- docs/ARCHITECTURE.md §9 — Step 5 description + Step 6 script call.
+- AGENTS.md — active_loops description updated (priority → weight).
+
+### Fixed
+- `scripts/loops_maintenance.py` — removed hardcoded CST+08:00 timezone, uses system local
+  timezone (`datetime.now().astimezone()`).
+- `scripts/loops_maintenance.py` — fixed dead branch parsing `时间:` / `timestamp:`
+  (Akemi format) → `time:` (Dolores format). Cursor incremental mechanism now functional.
+- Private content residue cleaned from HEARTBEAT_MIDNIGHT_STEPS.md and REFLECTION_PREP.md
+  example digest texts (hotpot / visit-mom → generalized scenarios).
+
 ## [0.3.1] - 2026-04-28
 
 Heartbeat router split: HEARTBEAT.md is now a lightweight index (~370 bytes) that dispatches

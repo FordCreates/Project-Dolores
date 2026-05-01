@@ -159,8 +159,8 @@ exec echo "# $(date +%Y-%m-%d) diary digest" > memory/$(date +%Y-%m-%d).digest.m
 ### Digest example
 
 ```
-He said he was tired from working all day and wanted hotpot.
-We talked about work stress; he mentioned wanting to visit his mom this weekend.
+He said he was tired from working all day and just wanted to stay in.
+We talked about work stress; he seemed a bit down about a family matter.
 He seemed tired but overall okay. Said goodnight before sleeping.
 ```
 

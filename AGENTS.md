@@ -93,9 +93,9 @@ At startup, today's raw diary and 14 days of history (D-1~D-14, digest preferred
 
 `state/active_loops.md` is the single loop file. Heartbeat is the sole manager.
 
-- Heartbeat discovers new topics/plans from conversation signals → creates loop
-- Heartbeat adjusts priority, cooldown, closes completed loops each run
-- Keep 5-8 items, cull lowest priority when over limit
+- Heartbeat discovers new topics/plans from conversation signals → creates loop with weight (2–5)
+- Heartbeat adjusts cooldown, closes completed loops each run (weight is set at creation and never changes)
+- Keep 5-8 items, cull lowest weight when over limit
 - Loops don't need reflection "approval" — heartbeat is the sole authority
 
 ## Role Consistency

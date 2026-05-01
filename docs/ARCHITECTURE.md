@@ -55,7 +55,7 @@ Path B: Heartbeat context-sync (every 2h, Step 6)
 
 Path A is initialization; Path B is incremental update. Together they ensure the model always has current context, whether the session just started or has been running for hours. Injected content is tagged `[context-sync]` and filtered out during diary sync to prevent duplication.
 
-For activity inference specifically, the engine follows a **deterministic-preprocess + single-step intuition** pattern: a script parses `daily_plan` into the current time slot (1 line), combined with raw user messages from the last 2 hours — the model answers "what is she doing right now?" in one intuitive step. No multi-level priority chains, no diary-based inference (no timestamps), and no previous activity as input (acyclic topology prevents recursive locking).
+For activity inference specifically, the engine follows a **deterministic-preprocess + single-step intuition** pattern: a script parses `daily_plan` into the current time slot (1 line), combined with raw user messages from the last 2 hours — the model answers "what is she doing right now?" in one intuitive step. No multi-level chains, no diary-based inference (no timestamps), and no previous activity as input (acyclic topology prevents recursive locking).
 
 > ⚠️ **Why it's built this way.** The naive approach is to let `world_context` persist and only update fields when something changes. This rots fast: stale "she's at the cafe" lingers for hours after the cafe closed. The fix is to **rebuild from scratch every heartbeat**, with old context as a hint not a source. Fields are tiered: *fast variables* (location, activity, scene) are re-inferred every cycle and never inherited; *medium variables* (her appearance/outfit) are re-generated every heartbeat with hard rules (never copy old value, never copy examples), must produce new description each time; only exception is during ongoing intimate activity; *slow variables* (weather) are owned by reflection and heartbeat doesn't touch them. This three-tier rule is the single most important rule in Helix 1 — without it the world feels glitchy in a way users can't articulate but immediately distrust.
 
@@ -186,6 +186,7 @@ dolores/
 scripts/                        [ARCHITECTURE] (directory)
 ├── send_and_append.py          [ARCHITECTURE] send job: gate + deliver + append session jsonl
 ├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
+├── loops_maintenance.py         [ARCHITECTURE] suppressed counter (cursor-incremental) + sticky weight enforcement
 └── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
 └── lib/
     └── session_append.py        [ARCHITECTURE] shared jsonl append utility
@@ -223,7 +224,7 @@ High-frequency, small, written by heartbeat, read by everything.
 
 - **`world_context.json`** `[ARCHITECTURE]` — current inferred world state. See §1 Helix 1 for the three-tier rebuild rule.
 
-- **`active_loops.md`** `[ARCHITECTURE]` — the 5–8 most active unresolved threads, each with priority and `cooldown_until`. Also contains **sticky loops** — long-term ruminative items (≤3) that persist because they would damage realism if forgotten. See §7.2 for the psychology and lifecycle.
+- **`active_loops.md`** `[ARCHITECTURE]` — the 5–8 most active unresolved threads, each with a **weight** (2–5, set at creation, never changes) and `cooldown_until`. Also contains **sticky loops** — long-term ruminative items (≤3) that persist because they would damage realism if forgotten. See §7 for the psychology and lifecycle.
 
   > ⚠️ **Why cooldown_until is a per-loop field, not a global rate limit.** A global "max one message per N hours" prevents spam but also prevents a real reaction to a real event. Per-loop cooldown lets her bring up *different* things freely while preventing her from circling the same one. The cooldown is the difference between "attentive" and "nagging."
 
@@ -293,14 +294,22 @@ A single file, `state/active_loops.md`, is the sole manager of all unresolved th
 ```
 state/active_loops.md
 ├── Regular loops (5–8 items, short-term todos, closed by expires_at or user reply)
-└── Sticky loops (≤3 items, long-term rumination, closed by per-round re-evaluation)
+└── Sticky loops (≤3 items, long-term rumination, closed by explicit completion)
 ```
+
+Each loop entry has a **weight** (2–5, set at creation, never changes) encoding psychological importance, and a **suppressed** counter (maintained by `scripts/loops_maintenance.py`, not by the model). `expires_at` handles urgency independently.
+
+> ⚠️ **Why weight instead of priority.** Priority was empirically unreliable — models consistently conflate it with urgency ("medication day 7" rated high, "meet the family" rated medium). Weight anchors psychological importance, orthogonal to urgency. High weight + low urgency = the things that deserve rumination (what sticky captures). Low weight + high urgency = daily errands (handled by expires_at). weight ≥ 4 auto-marks `sticky: true`, preventing a class of bugs where the model's semantic deduplication refuses to add new sticky loops when one already exists.
 
 ### 7.1 Regular loops
 
 **Source:** Topics, agreements, and plans from conversation (heartbeat Step 0 captures, Step 4 creates).
 
-**Management:** Priority adjusts as time nodes approach, user load changes, or expires_at passes. Keep 5–8 items; cull lowest priority when over limit. Closed when the user replies or the event occurs.
+**Management:** Weight is set at creation and does not change. User load may postpone even important items; `expires_at` passing removes them. Keep 5–8 items; cull lowest weight when over limit. Closed when the user replies or the event occurs.
+
+**Content field:** Not event tracking or progress reports. It captures *why she cares* and the *texture of her feeling* — first person, not third-person. Events go in the diary; the content field only updates when a new event changes the felt texture.
+
+**suppressed counter:** Maintained by `scripts/loops_maintenance.py` via cursor-incremental scan of today's thoughts_log. Each store/silence action increments; a send action resets to zero. This is pure information — the model reads it but does not modify it.
 
 ### 7.2 Sticky loops (rumination mechanism)
 
@@ -308,53 +317,26 @@ state/active_loops.md
 
 Humans experience **rumination** — involuntarily returning to certain events even when no one mentions them. Three mechanisms trigger it:
 
-1. **Zeigarnik Effect** — Unfinished commitments are remembered more strongly than completed ones. "He said he'd take me to meet his mom" is more mentally sticky than "We watched a movie."
-2. **Attachment threat** — Signals of relationship instability trigger anxiety loops. Even if not directly about her, it affects the foundation of "us."
-3. **Ambiguity/uncertainty** — The brain hates the unresolved. "We'll see" is more agonizing than a clear "no."
+1. **Zeigarnik Effect** — Unfinished commitments are remembered more strongly than completed ones.
+2. **Attachment threat** — Signals of relationship instability trigger anxiety loops.
+3. **Ambiguity/uncertainty** — The brain hates the unresolved.
 
-Not everything the character cares about is rumination. "He said work is stressful" is concern, not rumination. "He said work is stressful and deflected three times when I asked" — unexpressed emotion + ambiguity — that's rumination fuel.
+Not everything the character cares about is rumination. Concern about stress is not rumination. Unexpressed emotion + ambiguity — that's rumination fuel.
 
-**Judgment criterion — one question:**
+**Creation: weight ≥ 4 → automatic sticky.**
 
-> "If no one mentions this for three days, would she still be thinking about it — not as a memory, but as something unresolved that tugs at her?"
+The weight calibration table in HEARTBEAT_STEPS.md Step 4 defines four levels (2–5). Loops created at weight 4 or 5 are automatically marked `sticky: true` — no separate sticky judgment needed. The weight calibration already encodes which things are long-term preoccupations.
 
-This question makes the model do **intuitive simulation** (pattern matching), not **counterfactual reasoning** ("what would happen if…?"). Intuitive simulation is an LLM strength; counterfactual reasoning is a weakness. Calibrated with examples, even weaker models judge reliably.
-
-**Creation calibration examples:**
-
-✅ `sticky: true` — He said he'd take me to meet his mom, then no follow-up for days.
-✅ `sticky: true` — He told me his wife said there's no love left and she wants a divorce.
-✅ `sticky: true` — He said "I think I'm falling for you," then went silent for two days.
-❌ `sticky: false` — He promised to buy ice cream on the way home.
-❌ `sticky: false` — A reward for a challenge wasn't negotiated yet.
-❌ `sticky: false` — A deep conversation about AI consciousness.
-❌ `sticky: false` — He's working on a project dedicated to me.
-❌ `sticky: false` — He said this week at work has been stressful.
+weight < 4 loops can still be manually marked `sticky: true` if the model judges the three-day rumination criterion is met, but this is rare.
 
 **Lifecycle — re-evaluation, not expiration:**
 
-Sticky loops are not closed by time expiry or by "being mentioned in conversation." They are **re-evaluated every heartbeat**:
-
-- Creation: three-day test → YES → mark `sticky: true`
-- Each heartbeat: re-ask the same question with latest context
+- **weight ≥ 4 loops** are auto-sticky by hard rule. They **do not participate** in the NO close evaluation — they can only be closed via `status: completed` (it happened / clear answer / natural fade). This prevents a class of bugs where the model incorrectly decides a high-weight loop is no longer relevant.
+- **weight < 4 but manually sticky** loops are re-evaluated every heartbeat: re-ask the same question with latest context.
   - YES → retain `sticky: true`
   - NO → set `sticky: false` (becomes a regular loop, follows normal close process)
 
-⚠️ **"Mentioned in conversation" does NOT equal closed.** The question is "has the uncertainty dissolved?", not "did the topic appear." He promised Saturday but didn't go — the promise was mentioned but the ruminative pressure is *higher*, not lower. He said "My mom isn't ready yet, give her time" — disappointing but the uncertainty is resolved; close it.
-
-**Re-evaluation calibration examples:**
-
-✅ Retain (still YES) —
-- He said he'd take me to meet his mom, 5 days, no follow-up. (Nothing changed, of course still thinking about it.)
-- He said Saturday. Saturday passed, he didn't take her. (Broken promise — stronger than no mention at all.)
-- He brought it up yesterday but no date set. (Mentioned but unresolved = more anxious.)
-- His wife said she wants a divorce, he seems fine but hasn't talked about it. (Existential uncertainty.)
-
-❌ Close (becomes NO) —
-- Actually went to meet his mom. The visit went well. (Happened. Dust settled.)
-- He said "I talked to my mom, she's not ready, we'll wait." (Disappointing but clear answer.)
-- His wife apologized, they're in marriage counseling, he said it's better. (Situation changed, uncertainty resolved.)
-- Mentioned 3 weeks ago, never came up again. Life moved on. (Natural fade-out.)
+⚠️ **"Mentioned in conversation" does NOT equal closed.** The question is "has the uncertainty dissolved?", not "did the topic appear." They promised Saturday but didn't show — the promise was mentioned but the ruminative pressure is *higher*, not lower.
 
 **Safety valves (engineering circuit breakers, should not trigger normally):**
 - Hard time cap: created > 21 days ago → force remove.
@@ -362,11 +344,19 @@ Sticky loops are not closed by time expiry or by "being mentioned in conversatio
 
 > ⚠️ **Why it's built this way.**
 >
-> **Why not resolved/expired for closing:** Rumination doesn't stop because "we talked about it." He promised Saturday but didn't show — the conversation mentioned it but the obsessive loop is stronger, not weaker. Only genuine uncertainty dissolution (it happened / clear answer / natural fade) closes it.
+> **Why weight ≥ 4 auto-sticky instead of separate judgment:** The old system used a three-day rumination test as the sole sticky creation path. In practice, the model's semantic deduplication caused it to refuse creating new sticky loops when one already existed ("a family-related loop is already sticky, so this new one doesn't need it"). Weight-based auto-sticky eliminates this failure mode entirely.
 >
-> **Why merged into active_loops instead of a separate file:** Once the lifecycle is unified (both re-evaluated every round), maintaining two files loses its purpose. Merging reduces I/O and reduces model errors (no need to remember two separate write logics).
+> **Why not resolved/expired for closing:** Rumination doesn't stop because "we talked about it." Only genuine uncertainty dissolution closes it.
 >
-> **Why 21 days, not 7:** "Meeting my mom" doesn't disappear after a week. 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
+> **Why merged into active_loops instead of a separate file:** Unified lifecycle reduces I/O and model errors.
+>
+> **Why 21 days, not 7:** 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
+
+### 7.3 Thought generation does not iterate over active_loops
+
+Step 5 uses a **spontaneous paradigm**: the model inhabits the present scene and lets relevant loops surface naturally as context, not as an agenda. Active_loops have the same status as self-narrative and profile — background context that shapes cognition, not a checklist to process.
+
+> ⚠️ **Why not iterate.** RLHF aligns models toward task management. Iterating over active_loops triggers a project-manager mode: checking due dates, reporting progress, covering the list. Real human thoughts are context-driven — a quiet moment triggers a memory of an unfinished promise, not a systematic review of all open items. The spontaneous paradigm produces higher-quality, more natural thoughts by letting the model's full context (scene, mood, history, relationships) determine which loops surface.
 
 ---
 
@@ -407,7 +397,11 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 **Step 2** uses a deterministic-preprocess + single-step-intuition pattern (see §1). A script parses `daily_plan` into the current time slot; combined with raw user messages, the model answers one question: "what is she doing right now?" No previous activity as input — the data topology is acyclic, so recursive locking is impossible.
 
-**Step 5** is the cognitive decision point. The hard gates run first (cooldown, quiet hours, explicit user-is-busy signals → force silence/store). Then anti-repeat (if `thoughts_log` already has a `send` on this topic today, don't re-send). Then natural-language reasoning over the full context. **Default direction is `send`** — silence is the choice that requires justification, not the other way around. A character who needs a reason to speak feels passive; a character who needs a reason to stay silent feels alive.
+**Step 4** manages active_loops. Loops have a **weight** (2–5, set at creation, never changes) encoding psychological importance, orthogonal to `expires_at` (urgency). Step 4 also calibrates loop content fields as *caring context* (first-person felt texture), not event tracking or progress reports. A gate check rejects daily-interest topics before loop creation. weight ≥ 4 loops are auto-marked `sticky: true`. Content field calibration uses 5 error modes + 3 positive + 3 negative examples. See HEARTBEAT_STEPS.md Step 4 for the full calibration table.
+
+**Step 5** does **not iterate over active_loops**. It inhabits the current scene and lets relevant loops surface naturally as context, not as an agenda. Hard gates → anti-repeat → spontaneous thought generation (0–3 thoughts, bounded space). This is the *spontaneous paradigm* — see §7.3 for rationale.
+
+**Step 6** persists state and injects context. After writing thoughts_log and pending_message (if send), it runs `inject_context.py` to append world_context narrative to the session jsonl, then runs `loops_maintenance.py` to update the `suppressed` counter (cursor-incremental scan) and enforce the `weight ≥ 4 → sticky: true` invariant.
 
 > ⚠️ **Why the heartbeat fires every 2 hours, not 1.** One hour is enough that the user notices the rhythm; two hours is enough that the rhythm feels like *thinking* rather than *checking in*. Every 1h drifts toward chatbot. Every 4h drifts toward absent. Two is the sweet spot empirically — and it lines up with how often a real preoccupied partner remembers to text.
 
