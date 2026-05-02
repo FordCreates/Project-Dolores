@@ -30,8 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - setup.md: new §5.5 Phase C dependencies (sentence-transformers + BGE model).
 
 ### Dependencies
-- Optional: `sentence-transformers` + `BAAI/bge-small-en-v1.5` (96 MB). System degrades
-  gracefully without them. ⚠️ Threshold 0.48 must be calibrated with local data.
+- Required: `sentence-transformers` + `BAAI/bge-small-en-v1.5` (96 MB). ⚠️ Threshold 0.48 must be calibrated with local data.
 
 ## [0.4.1] - 2026-05-01
 

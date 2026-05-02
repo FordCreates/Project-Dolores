@@ -444,9 +444,9 @@ If the user asks what kind of avatar works best: a realistic portrait photo (not
 
 ## Step 5.5: Phase C dependencies (sticky sampling)
 
-The sticky sampling script (`scripts/sticky_sampling.py`) uses BGE embeddings for associative priming. This is optional — if dependencies are missing, the script fails gracefully and Step 5 proceeds normally (degrade don't crash).
+The sticky sampling script (`scripts/sticky_sampling.py`) uses BGE embeddings for associative priming. This is a required dependency — without it, the sticky surfacing mechanism in ARCHITECTURE.md §7.4 does not function.
 
-**To enable:**
+**Install:**
 
 ```bash
 pip install sentence-transformers
@@ -459,8 +459,6 @@ python3 -c "from sentence_transformers import SentenceTransformer; SentenceTrans
 ```
 
 **⚠️ Threshold calibration required.** The default `PRIMING_THRESHOLD = 0.48` in `scripts/sticky_sampling.py` was calibrated on one user's Chinese-language data. English embeddings + your tag vocabulary + your scene phrasing produce different similarity distributions. After running for a week, check the stderr logs (which print scores for each loop) and adjust the threshold accordingly.
-
-**To disable:** Comment out the `exec python3 scripts/sticky_sampling.py` line in HEARTBEAT_STEPS.md Step 4 and HEARTBEAT_MIDNIGHT_STEPS.md Step 4. The system works identically without priming — only DMN roaming and spontaneous emergence are lost.
 
 ## Step 6: Replace script placeholders
 
