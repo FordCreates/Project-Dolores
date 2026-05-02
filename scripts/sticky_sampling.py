@@ -162,6 +162,14 @@ def write_primed_sticky(loop: dict | None):
 
 # ── Main ─────────────────────────────────────────────
 def main():
+    try:
+        _main()
+    except Exception as e:
+        print(f"sticky_sampling: error: {e}", file=sys.stderr)
+        write_primed_sticky(None)
+
+
+def _main():
     # 1. Read world_context
     if not WORLD_CTX.exists():
         print("sticky_sampling: world_context.json not found, skipping", file=sys.stderr)
