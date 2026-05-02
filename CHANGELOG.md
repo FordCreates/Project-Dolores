@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Phase C: Sticky surfacing via associative priming + DMN roaming.**
+  - `scripts/sticky_sampling.py`: BGE semantic matching (bge-small-en-v1.5) between
+    world_context scene and active loop tags → one primed loop written to
+    `state/primed_sticky.md` for Step 5 consumption.
+  - Two channels: **priming** (scene matches tags → associative recall) and **DMN roaming**
+    (no priming hit → random sticky loop sample).
+  - `tags` field on each active loop: 5–8 semantic association words, generated at
+    creation, preserved across Step 4 overwrites.
+  - `loop_id` immutability rule: loop IDs must never be renamed once created.
+  - HEARTBEAT_STEPS.md / HEARTBEAT_MIDNIGHT_STEPS.md: Step 4 runs sticky_sampling.py;
+    Step 5 reads primed_sticky.md.
+  - Thought count: removed fixed "0–3 bounded space"; now determined by actual inner
+    activity with no fixed bound.
+
+### Changed
+- `scripts/loops_maintenance.py`: `enforce_sticky_weight` is now idempotent (skips
+  rewrite when `expires_at` is already `-`).
+- ARCHITECTURE.md §7.2 → §7.4 bridge added; new §7.4 describes priming + DMN mechanism.
+- ARCHITECTURE.md §9 Step 4/5 descriptions updated for Phase C.
+- setup.md: new §5.5 Phase C dependencies (sentence-transformers + BGE model).
+
+### Dependencies
+- Optional: `sentence-transformers` + `BAAI/bge-small-en-v1.5` (96 MB). System degrades
+  gracefully without them. ⚠️ Threshold 0.48 must be calibrated with local data.
+
 ## [0.4.1] - 2026-05-01
 
 World context schema closure + digest pipeline tightening.

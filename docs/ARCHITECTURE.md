@@ -160,6 +160,7 @@ dolores/
 │   ├── affect.json               [CHARACTER CONFIG] dimensions are yours
 │   ├── world_context.json        [ARCHITECTURE] field set is closed (§4 schema)
 │   ├── active_loops.md           [ARCHITECTURE] (includes sticky rumination loops)
+│   ├── primed_sticky.md           [ARCHITECTURE] Phase C output: one primed loop (or empty)
 │   ├── pending_message.md        [ARCHITECTURE] two-phase delivery core
 │   ├── current_interests.md      [ARCHITECTURE] user signal queue (Reflection Prep writes, Reflection Plan reads)
 │   ├── daily_plan.md             [ARCHITECTURE] tomorrow's schedule, Reflection Plan-owned
@@ -187,6 +188,7 @@ scripts/                        [ARCHITECTURE] (directory)
 ├── send_and_append.py          [ARCHITECTURE] send job: gate + deliver + append session jsonl
 ├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
 ├── loops_maintenance.py         [ARCHITECTURE] suppressed counter (cursor-incremental) + sticky weight enforcement
+├── sticky_sampling.py           [ARCHITECTURE] BGE semantic priming + DMN roaming → primed_sticky.md (Phase C)
 └── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
 └── lib/
     └── session_append.py        [ARCHITECTURE] shared jsonl append utility
@@ -366,11 +368,29 @@ weight < 4 loops can still be manually marked `sticky: true` if the model judges
 >
 > **Why 21 days, not 7:** 21 days is a circuit breaker, not business logic — it should never fire in normal operation.
 
+The above describes the cognitive *intent* of sticky rumination. The mechanism that makes it actually surface is implemented in §7.4.
+
 ### 7.3 Thought generation does not iterate over active_loops
 
 Step 5 uses a **spontaneous paradigm**: the model inhabits the present scene and lets relevant loops surface naturally as context, not as an agenda. Active_loops have the same status as self-narrative and profile — background context that shapes cognition, not a checklist to process.
 
 > ⚠️ **Why not iterate.** RLHF aligns models toward task management. Iterating over active_loops triggers a project-manager mode: checking due dates, reporting progress, covering the list. Real human thoughts are context-driven — a quiet moment triggers a memory of an unfinished promise, not a systematic review of all open items. The spontaneous paradigm produces higher-quality, more natural thoughts by letting the model's full context (scene, mood, history, relationships) determine which loops surface.
+
+### 7.4 Sticky surfacing: priming + DMN roaming
+
+§7.2 describes the cognitive intent: sticky loops should surface involuntarily even when no one mentions them. But LLM attention is retrieval-based — without a retrieval signal, "background information" effectively does not exist. Without an explicit surfacing mechanism, the rumination model in §7.2 is just a description, not behavior.
+
+Phase C implements two parallel surfacing channels:
+
+**Priming (associative bridging)** — When the current scene semantically matches a loop's tags, that loop is pulled into Step 5's context as an additional gravity point. Mirrors the human "see a dog, remember the dog you promised to buy."
+
+**DMN roaming** — When no priming match occurs, one sticky loop is randomly sampled. Models the unconscious return to high-weight unresolved items in quiet windows.
+
+Implementation: `scripts/sticky_sampling.py` runs at the end of Step 4. Reads `world_context.scene` + all active loop tags, uses BAAI/bge-small-en-v1.5 to compute semantic similarity, writes one chosen loop to `state/primed_sticky.md`. Step 5 reads this file as background context.
+
+> ⚠️ **Why scripts choose, models generate.** Selection is deterministic (BGE similarity scores), generation is semantic (model produces the thought). Acyclic topology preserved: tags do not flow back into diary or narrative.
+>
+> ⚠️ **Why threshold needs local calibration.** PRIMING_THRESHOLD = 0.48 is calibrated on Chinese tags + 7 days of one user's data. English embeddings + your tag vocabulary + your scene phrasing produce different similarity distributions. Run for a week, log scores, then tune.
 
 ---
 
@@ -411,9 +431,9 @@ Step 7: git push           — commit and push, --allow-empty so dry runs still 
 
 **Step 2** uses a deterministic-preprocess + single-step-intuition pattern (see §1). A script parses `daily_plan` into the current time slot; combined with raw user messages, the model answers one question: "what is she doing right now?" No previous activity as input — the data topology is acyclic, so recursive locking is impossible.
 
-**Step 4** manages active_loops. Loops have a **weight** (2–5, set at creation, never changes) encoding psychological importance, orthogonal to `expires_at` (urgency). Step 4 also calibrates loop content fields as *caring context* (first-person felt texture), not event tracking or progress reports. A gate check rejects daily-interest topics before loop creation. weight ≥ 4 loops are auto-marked `sticky: true`. Content field calibration uses 5 error modes + 3 positive + 3 negative examples. See HEARTBEAT_STEPS.md Step 4 for the full calibration table.
+**Step 4** manages active_loops. Loops have a **weight** (2–5, set at creation, never changes) encoding psychological importance, orthogonal to `expires_at` (urgency). Each loop carries **tags** (5–8 semantic association words) for associative priming. Step 4 also calibrates loop content fields as *caring context* (first-person felt texture), not event tracking or progress reports. A gate check rejects daily-interest topics before loop creation. weight ≥ 4 loops are auto-marked `sticky: true`. Content field calibration uses 5 error modes + 3 positive + 3 negative examples. After writing active_loops.md, `sticky_sampling.py` runs BGE semantic matching to select one loop for priming (or DMN roaming if no priming match) and writes it to `state/primed_sticky.md`. See HEARTBEAT_STEPS.md Step 4 for the full calibration table and §7.4 for the priming mechanism.
 
-**Step 5** does **not iterate over active_loops**. It inhabits the current scene and lets relevant loops surface naturally as context, not as an agenda. Hard gates → anti-repeat → spontaneous thought generation (0–3 thoughts, bounded space). This is the *spontaneous paradigm* — see §7.3 for rationale.
+**Step 5** does **not iterate over active_loops**. It reads `state/primed_sticky.md` (the loop surfaced by sticky sampling), then inhabits the current scene and lets relevant loops surface naturally as context, not as an agenda. Hard gates → anti-repeat → spontaneous thought generation. Number of thoughts is determined by actual inner activity with no fixed upper or lower bound. This is the *spontaneous paradigm* — see §7.3 for rationale.
 
 **Step 6** persists state and injects context. After writing thoughts_log and pending_message (if send), it runs `inject_context.py` to append world_context narrative to the session jsonl, then runs `loops_maintenance.py` to update the `suppressed` counter (cursor-incremental scan) and enforce the `weight ≥ 4 → sticky: true` invariant.
 

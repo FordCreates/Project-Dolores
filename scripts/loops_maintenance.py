@@ -138,7 +138,11 @@ def enforce_sticky_weight(content: str) -> str:
             fields = fields.rstrip() + " | sticky: true"
 
         if "expires_at:" in fields:
-            fields = re.sub(r"expires_at:\s*\S+", "expires_at: -", fields)
+            current_val = re.search(r"expires_at:\s*(\S+)", fields)
+            if current_val and current_val.group(1).strip() == "-":
+                pass  # already correct, skip to avoid git noise
+            else:
+                fields = re.sub(r"expires_at:\s*\S+", "expires_at: -", fields)
 
         result.append(f"- **{loop_id}** |{fields}")
 
