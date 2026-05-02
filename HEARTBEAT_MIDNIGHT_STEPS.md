@@ -490,7 +490,7 @@ Re-evaluation calibration examples:
 ```bash
 exec python3 scripts/sticky_sampling.py
 ```
-This uses BGE semantic matching to prime one loop for Step 5. Output goes to `state/primed_sticky.md` (read by Step 5). If the script fails (e.g. sentence-transformers not installed), Step 5 proceeds normally — degrade don't crash.
+This uses BGE semantic matching to prime one loop for Step 5. Output goes to `state/primed_sticky.md` (read by Step 5). The script's top-level try/except clears primed_sticky.md on any unexpected failure, so Step 5 always reads a valid (possibly empty) file.
 
 ### Step 5: Generate Thoughts (Spontaneous Paradigm)
 
