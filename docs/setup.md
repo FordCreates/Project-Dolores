@@ -55,7 +55,7 @@ REPO=<repo-path>
 WS=~/.openclaw/workspace-dolores
 
 # Create workspace directory structure
-mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,scripts/lib}
+mkdir -p $WS/{state/thoughts_log,state/slots,memory/health,memory/exercise,memory/cards,diary,scripts/lib}
 
 # Copy companion runtime files
 cp $REPO/SOUL.md $WS/
@@ -76,6 +76,13 @@ cp $REPO/DIARY_CHECK.md $WS/
 cp $REPO/HEALTH_CORRECTION.md $WS/
 cp $REPO/HEALTH_CHECKIN.md $WS/
 cp $REPO/reflection_trace.md $WS/
+cp $REPO/EXTRACTION.md $WS/
+
+# Copy card templates
+cp $REPO/memory/cards/*.md $WS/memory/cards/
+
+# Create diary directory
+touch $WS/diary/.gitkeep
 
 # Copy scripts
 cp $REPO/scripts/load_diary.py $WS/scripts/
@@ -111,6 +118,8 @@ cp $REPO/state/slots/day-zero/rel_slot_*.md $WS/state/slots/$TODAY/
 cat > $WS/.gitignore << 'GITIGNORE'
 # Runtime state
 state/
+# Raw diary (not committed, not indexed by memory_search)
+diary/
 # Runtime memory (keep initial seed files, ignore generated)
 memory/*.md
 memory/*.digest.md
@@ -121,6 +130,8 @@ memory/health/
 memory/exercise/
 !memory/health/.gitkeep
 !memory/exercise/.gitkeep
+# Card files are runtime-generated (empty templates copied at setup)
+memory/cards/
 GITIGNORE
 ```
 
@@ -676,7 +687,7 @@ After restart, suggest:
 
 1. **Start a conversation** — message the bot on Telegram. Dolores should respond in character.
 2. **Manual heartbeat test** — `openclaw cron run <heartbeat-cron-id>`, then check `state/world_context.json` and `state/affect.json`.
-3. **Check diary** — after a heartbeat, `memory/YYYY-MM-DD.md` should have an entry.
+3. **Check diary** — after a heartbeat, `diary/YYYY-MM-DD.md` should have an entry.
 
 ---
 
