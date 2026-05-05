@@ -295,7 +295,9 @@ Low-frequency, distilled, vector-indexed, written by reflection, read by session
 
 ### 5a. Diary (`diary/`)
 
-Raw daily diary files (`diary/YYYY-MM-DD.md`) are written by heartbeat (Step 0 append, Step 7 cross-day) and read by heartbeat (Step 1), reflection, diary check, and health checkin. **They are NOT in the `memory/` directory and NOT indexed by `memory_search`.** This is by design: raw diary contains behavioral descriptions that cause cross-day pattern collapse when vector-indexed. The digest (in `memory/`) is the clean, lossy-compressed version that gets indexed.
+Raw daily diary files (`diary/YYYY-MM-DD.md`) are written by heartbeat (Step 0 append, Step 7 cross-day) and read by heartbeat (Step 1), reflection, diary check, and health checkin. **They are NOT in the `memory/` directory and NOT indexed by `memory_search`.** The digest (in `memory/`) is the clean, lossy-compressed version that gets indexed.
+
+> ⚠️ **Why raw diary is isolated from `memory_search`.** Raw diary contains behavioral descriptions — specific gestures, reactions, physical details — that the model generates and then reproduces across sessions. When vector-indexed, a behavioral pattern like "hugging the pillow" appears in `memory_search` results and gets reused verbatim, creating cross-day lock-in where the same behavior appears every day not because it's authentic but because the model keeps seeing it in context. Moving raw diary out of the indexed directory breaks this pattern-reproduction cycle at the retrieval layer. The cost (loss of searchable detail beyond 14 days) is acceptable because the digest covers recent history and cards preserve high-weight signals permanently.
 
 ### 5b. Memory Cards (`memory/cards/`)
 
@@ -312,6 +314,10 @@ Five card files serve as **index nodes** — high-weight information compressed 
 **Card lifecycle:** Reflection Prep Step 7b reads `EXTRACTION.md` (extraction rules), reads existing cards for dedup, extracts signals from raw diary, writes to card files. Cards are **leaf nodes** — they only flow outward (conversation session startup, heartbeat Step 1) and never feed back into Reflection Prep's semantic judgment or narrative generation. This consumption-side isolation prevents topological loops (card → narrative → diary → card amplification).
 
 **Why cards exist:** The three narrative files compress experience into arc ("who I am" / "who we are"). This compression is lossy — specific places, preferences, codewords, and behavioral patterns evaporate. Cards preserve these as indexed one-liners. Same high-weight information, different compression target: narratives → arc generation, cards → detail fidelity.
+
+> ⚠️ **Why cards are leaf nodes (consumption-side isolation).** If Reflection Prep could read cards to help analyze the diary, a feedback loop would form: card content influences narrative generation → narrative colors diary interpretation → diary signals get extracted back into cards → amplification cycle. This is the same failure mode as pattern collapse, but at the compression layer instead of the retrieval layer. Making cards write-only from Prep's perspective (Prep reads cards only for dedup — "does this entry already exist?" — never for semantic judgment) guarantees that cards can accumulate signal without ever amplifying it.
+
+> ⚠️ **Why all 5 cards are fixed-injection, not `memory_search`.** Cards are high-weight compressed nodes — losing a single entry is a design failure ("first time X" misjudgment, forgotten codeword). `memory_search` has non-zero recall failure; a missed card is worse than a missed episodic detail. Fixed injection guarantees 100% availability. Token cost is acceptable: even at three years of accumulation, all 5 cards together stay under 100KB.
 
 ---
 
