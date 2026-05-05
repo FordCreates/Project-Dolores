@@ -7,3 +7,5 @@
 > **Time, place, and people must be explicitly noted. If people are at different locations, note separately.**
 
 <!-- Entries populated by Reflection Prep Step 7b card extraction -->
+
+> See EXTRACTION.md for full extraction rules.

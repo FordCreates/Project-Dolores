@@ -5,3 +5,5 @@
 > Format: `- [YYYY-MM-DD] <symbol> — <origin/meaning> (status: active/archived)`
 
 <!-- Entries populated by Reflection Prep Step 7b card extraction -->
+
+> See EXTRACTION.md for full extraction rules.

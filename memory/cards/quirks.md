@@ -5,3 +5,5 @@
 > Format: `[type] preference — context (established YYYY-MM-DD)`
 
 <!-- Entries populated by Reflection Prep Step 7b card extraction -->
+
+> See EXTRACTION.md for full extraction rules.
