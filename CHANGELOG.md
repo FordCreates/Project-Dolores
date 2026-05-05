@@ -5,6 +5,39 @@ All notable changes to Project Dolores will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-05-05
+
+### Added
+- **Phase 2: Memory Cards system — index nodes for detail fidelity.**
+  - Five card files in `memory/cards/`: shared-history, quirks, taste, shared-language, routines.
+  - `EXTRACTION.md`: extraction rules for Reflection Prep Step 7b (read diary → extract signals → write cards).
+  - Cards are leaf nodes — read by conversation session and heartbeat, never feed back into reflection analysis.
+  - Consumption-side isolation prevents topological loops (card → narrative → diary → card amplification).
+- **Profile slimming with boundary protection.**
+  - `profile-user.md` "Relationship Dynamics" section now only contains long-term personality traits.
+  - Behavioral patterns, preferences, and private vocabulary migrated to `memory/cards/`.
+  - Three red lines in `REFLECTION_PROFILE.md` enforce the boundary.
+- **Diary relocation (`memory/` → `diary/`).** Raw diaries moved to `diary/` directory, outside `memory_search` index scope.
+  - Prevents cross-day behavioral pattern collapse caused by vector-indexed behavioral descriptions.
+- **Digest quality rules.** First-person mandatory, subject-object completeness, direction correctness.
+  - Prevents reconstruction errors when sessions load digest without original context.
+
+### Changed
+- AGENTS.md: session startup adds Step 10–14 (five card reads). `exec` commands add `cd` prefix warning.
+- HEARTBEAT_STEPS.md / HEARTBEAT_MIDNIGHT_STEPS.md: Step 1 adds Step 11–15 (five card reads). All raw diary paths → `diary/`.
+- REFLECTION_PREP.md: adds Step 7b (card extraction), Step 4e boundary rules, digest quality upgrade.
+- REFLECTION_SELF/REL/PROFILE.md: raw diary paths → `diary/`.
+- DIARY_CHECK.md / HEALTH_CHECKIN.md: raw diary paths → `diary/`.
+- scripts/load_diary.py: today branch reads from `diary/`, `cd` prefix warning added.
+- ARCHITECTURE.md: §2 file tree (diary/ + cards/ + EXTRACTION.md), §5 memory layer + §5a diary + §5b cards, §6 persistence table.
+- README.md: file structure section updated.
+
+### ⚠️ Migration note for existing users
+If you are already running Dolores with data in `memory/YYYY-MM-DD.md`, after updating:
+1. Move all raw diary files from `memory/` to `diary/` (keep `.digest.md` files in `memory/`)
+2. Delete your vector index file (`~/.openclaw/memory/<agentId>.sqlite`) — it will rebuild automatically with only `memory/` content
+3. Without step 2, old raw diary vectors will still be recalled by `memory_search`, defeating the purpose of the move
+
 ## [0.5.0] - 2026-05-02
 
 ### Added

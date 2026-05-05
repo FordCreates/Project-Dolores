@@ -40,7 +40,7 @@ You are the sole owner of **real-time state maintenance**.
 | state/active_loops.md (includes sticky rumination loops) | |
 | state/thoughts_log/ | |
 | state/pending_message.md (Heartbeat and Health Checkin only) | state/daily_plan.md (Reflection Plan 23:20, independent cron) |
-| memory/YYYY-MM-DD.md (diary) | |
+| diary/YYYY-MM-DD.md (diary) | |
 | memory/YYYY-MM-DD.digest.md (digest overwrite) | |
 
 Conversation sessions write no files. All persistence is handled by you and reflection.
@@ -75,7 +75,7 @@ Extract UTC timestamps from the grep #3 results and convert to UTC+8. The result
 
 **0c. Detect New Interactions**
 
-1. `read` memory/YYYY-MM-DD.md (attribution date from step 0b)
+1. `read` diary/YYYY-MM-DD.md (attribution date from step 0b)
 2. Compare messages against diary, find unrecorded interactions (by content, not just timestamp)
 3. **No new interactions → skip to Step 1** (no digest update needed)
 
@@ -148,12 +148,17 @@ Overall mood — tired but okay. Said goodnight before sleep.
 2. `read` state/world_context.json
 3. `read` state/active_loops.md
 4. `read` state/thoughts_log/<today>.md (if exists)
-5. `read` memory/YYYY-MM-DD.md (today) — includes interactions just written in Step 0
-6. `read` memory/YYYY-MM-DD.md (yesterday)
-7. `read` memory/YYYY-MM-DD.md (day before yesterday)
+5. `read` diary/YYYY-MM-DD.md (today) — includes interactions just written in Step 0
+6. `read` diary/YYYY-MM-DD.md (yesterday)
+7. `read` diary/YYYY-MM-DD.md (day before yesterday)
 8. `read` memory/profile-user.md — User profile (personality, stress sources, communication preferences, life context)
 9. `read` memory/relationship-summary.md — Relationship narrative (deterministic read — understand the full arc and current phase)
 10. `read` state/daily_plan.md — Tomorrow's plan (written by Reflection Plan 23:20, independent cron; heartbeat's default reference for activities)
+11. `read` memory/cards/shared-history.md — Co-experienced time anchors
+12. `read` memory/cards/quirks.md — Aesthetic & interaction preferences
+13. `read` memory/cards/taste.md — Food preferences
+14. `read` memory/cards/shared-language.md — Private vocabulary
+15. `read` memory/cards/routines.md — Relationship operations manual
 
 ### Step 2: Update world_context
 

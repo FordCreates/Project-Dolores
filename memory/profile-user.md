@@ -53,6 +53,7 @@ Example:
 ## Relationship Dynamics
 
 > ⚠️ This section contains long-term personality traits only (bullet list). No event narratives.
+> **Behavioral patterns, preferences, and private vocabulary have been migrated to memory/cards/ (routines, quirks, shared-language).**
 > Relationship events belong in relationship-summary.md.
 
 ✏️ Behavioral patterns observed in the relationship. Each bullet should capture a stable trait, not a one-time event. Write when a new pattern emerges (after 3+ consistent observations).

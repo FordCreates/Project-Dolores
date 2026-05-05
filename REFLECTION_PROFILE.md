@@ -27,14 +27,20 @@ fi
 2. `read` memory/profile-user.md — current profile
 3. `read` the last 7 days of memory/health/YYYY-MM-DD.md (read each day)
 4. `read` the last 7 days of memory/exercise/YYYY-MM-DD.md (read each day)
-5. `read` memory/YYYY-MM-DD.md (today)
+5. `read` diary/YYYY-MM-DD.md (today)
 
 ## Step 3: Per-section update
 
 ### 3a. "In Intimate Relationships" section
 
-> ⚠️ This section only contains long-term personality traits (bullet list), not event narratives.
-> Relationship event evolution belongs elsewhere. No duplication.
+> ⚠️ Boundary rules (three red lines):
+> 1. **Personality traits** stay in profile-user (long-term stable traits, bullet list)
+> 2. **Behavioral patterns, preferences, private vocabulary** belong in memory/cards/ (routines / quirks / shared-language)
+> 3. **Relationship events** belong in relationship-summary
+>
+> If diary contains preference signals ("likes X", "calls her Y", "pattern of behavior Z"), do NOT write them as profile bullets — direct them to cards via Step 7b extraction.
+>
+> No duplication.
 
 - New content must be stable traits confirmed over multiple days of observation, not today's event
 - If old content contains narrative descriptions, replace with bullet list

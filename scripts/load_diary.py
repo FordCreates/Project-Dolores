@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""
-Load diary content for session startup.
-Usage: python3 scripts/load_diary.py today|yesterday|day-before|history
-- today: raw diary only
-- yesterday/day-before: digest first, fallback to raw diary
-- history: D-1 to D-14 digest (with raw fallback), used for expanded memory window
-"""
+# Load diary content for session startup.
+# Usage: python3 scripts/load_diary.py today|yesterday|day-before|history
+# - today: raw diary only
+# - yesterday/day-before: digest first, fallback to raw diary
+# - history: D-1 to D-14 digest (with raw fallback), used for expanded memory window
+# ⚠️ Do not add `cd ... &&` prefix when calling from exec — triggers OpenClaw preflight check
 
 import sys
 from datetime import date, timedelta
@@ -26,7 +25,7 @@ def main():
             target = today + timedelta(days=-i)
             date_str = target.strftime("%Y-%m-%d")
             digest = WORKSPACE / "memory" / f"{date_str}.digest.md"
-            raw = WORKSPACE / "memory" / f"{date_str}.md"
+            raw = WORKSPACE / "diary" / f"{date_str}.md"
             path = digest if digest.exists() else raw
             if path.exists():
                 content = path.read_text(encoding="utf-8").strip()
@@ -42,7 +41,7 @@ def main():
     target = today + timedelta(days=offsets[arg])
     date_str = target.strftime("%Y-%m-%d")
 
-    raw = WORKSPACE / "memory" / f"{date_str}.md"
+    raw = WORKSPACE / "diary" / f"{date_str}.md"
     digest = WORKSPACE / "memory" / f"{date_str}.digest.md"
 
     # today always reads raw; others prefer digest with raw fallback

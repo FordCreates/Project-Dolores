@@ -172,14 +172,23 @@ dolores/
 │       ├── self_slot_1..N.md          [CHARACTER CONFIG] N is yours
 │       └── rel_slot_1..N.md           [CHARACTER CONFIG] N is yours
 │
+├── EXTRACTION.md                [ARCHITECTURE] card extraction rules (read by Reflection Prep Step 7b)
 ├── memory/                       [ARCHITECTURE] (directory)
 │   ├── profile-user.md           [USER CONFIG] you fill this in
 │   ├── relationship-summary.md   [ARCHITECTURE] reflection-owned
 │   ├── self-narrative.md         [ARCHITECTURE] reflection-owned
+│   ├── cards/                    [ARCHITECTURE] Memory Cards — index nodes for detail fidelity (§5b)
+│   │   ├── shared-history.md     shared-experience time anchors
+│   │   ├── quirks.md             aesthetic & interaction preferences
+│   │   ├── taste.md              food preferences
+│   │   ├── shared-language.md    private vocabulary & codewords
+│   │   └── routines.md           relationship operations manual
 │   ├── health/YYYY-MM-DD.md          [CHARACTER CONFIG] structured check-in data
 │   ├── exercise/YYYY-MM-DD.md        [CHARACTER CONFIG] structured exercise data
-│   ├── YYYY-MM-DD.digest.md    [ARCHITECTURE] diary event digest (Reflection Prep 23:15 first pass + 00:00 midnight heartbeat overwrite; used for session injection D-1~D-14 to prevent cross-day behavioral pattern lock-in)
-│   └── YYYY-MM-DD.md             [ARCHITECTURE] daily diary
+│   └── YYYY-MM-DD.digest.md    [ARCHITECTURE] diary event digest (Reflection Prep 23:15 first pass + 00:00 midnight heartbeat overwrite; used for session injection D-1~D-14 to prevent cross-day behavioral pattern lock-in)
+│
+├── diary/                        [ARCHITECTURE] (directory)
+│   └── YYYY-MM-DD.md             [ARCHITECTURE] daily diary (raw, not indexed by memory_search)
 │
 └── channels/                     [ARCHITECTURE] (directory, future)
     └── interface.md              [ARCHITECTURE] the target contract (§7)
@@ -189,7 +198,7 @@ scripts/                        [ARCHITECTURE] (directory)
 ├── inject_context.py            [ARCHITECTURE] world_context → narrative → session jsonl
 ├── loops_maintenance.py         [ARCHITECTURE] suppressed counter (cursor-incremental) + sticky weight enforcement
 ├── sticky_sampling.py           [ARCHITECTURE] BGE semantic priming + DMN roaming → primed_sticky.md (Phase C)
-└── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
+├── load_diary.py                [ARCHITECTURE] diary content loader for session startup (digest preferred, raw fallback)
 └── lib/
     └── session_append.py        [ARCHITECTURE] shared jsonl append utility
 ```
@@ -272,6 +281,8 @@ Low-frequency, distilled, vector-indexed, written by reflection, read by session
 
 - **`profile-user.md`** `[USER CONFIG]` — distilled profile of *you*. ~2k tokens. This is the file the character reads to think about you when you're not there. The reference impl includes fields for personality, communication style, relationships, work, recurring stressors, and physical/health context. **Customize freely.** Reflection updates parts of it nightly (e.g. trend fields); the immutable parts you write yourself.
 
+  > ⚠️ **Boundary rule:** After Phase 2 profile slimming, this file only contains long-term personality traits (bullet list). Behavioral patterns, preferences, and private vocabulary have been migrated to `memory/cards/` (routines, quirks, shared-language). Reflection enforces this boundary via three red lines in `REFLECTION_PROFILE.md` §3a.
+
 - **`relationship-summary.md`** `[ARCHITECTURE]` — the story of you-and-her. 1200–1800 words (target length is character config). Overwritten nightly by `REFLECTION_REL`. Five slots concatenated: origin, key turning points, current pattern, shared certainties, current tensions.
 
 - **`self-narrative.md`** `[ARCHITECTURE]` — her story of herself. Same shape: five slots, nightly rewrite. Slots are: trauma root, recent fractures, repeating patterns, unresolved tensions, who she is right now. Slot 1 is the Layer 1 anchor expressed as narrative; it has a hard guard (see §10).
@@ -282,7 +293,25 @@ Low-frequency, distilled, vector-indexed, written by reflection, read by session
 
 - **`YYYY-MM-DD.digest.md`** `[ARCHITECTURE]` — event digest. Reflection Prep generates a first pass at 23:15 (may be incomplete if conversations continue after that). The 00:00 midnight heartbeat overwrites it with the complete version (covers the full day). Contains event skeleton and emotional state (5-8 lines) with all behavioral descriptions stripped to prevent cross-day lock-in. Used for session injection on D-1~D-14 (with fallback to raw diary if digest doesn't exist). Reflection still reads raw diary — this file exists only on the injection path to break the cross-day pattern self-reinforcement loop.
 
-- **`YYYY-MM-DD.md`** `[ARCHITECTURE]` — the daily diary. Heartbeat appends to this at Step 0 and Step 6. Vector-indexed for memory search.
+### 5a. Diary (`diary/`)
+
+Raw daily diary files (`diary/YYYY-MM-DD.md`) are written by heartbeat (Step 0 append, Step 7 cross-day) and read by heartbeat (Step 1), reflection, diary check, and health checkin. **They are NOT in the `memory/` directory and NOT indexed by `memory_search`.** This is by design: raw diary contains behavioral descriptions that cause cross-day pattern collapse when vector-indexed. The digest (in `memory/`) is the clean, lossy-compressed version that gets indexed.
+
+### 5b. Memory Cards (`memory/cards/`)
+
+Five card files serve as **index nodes** — high-weight information compressed into one-line entries, providing detail fidelity that narrative compression loses. When the character says "this is the first time we've been to this park" but you've been there five times, that's a card failure.
+
+| Card | File | Purpose | Decay |
+|---|---|---|---|
+| shared-history | `cards/shared-history.md` | Co-experienced time anchors (prevent "first time X" misjudgments) | Permanent |
+| quirks | `cards/quirks.md` | Aesthetic & interaction preferences | Updated when replaced/falsified |
+| taste | `cards/taste.md` | Food preferences | Overwritten when user corrects |
+| shared-language | `cards/shared-language.md` | Private vocabulary & codewords | Permanent (active → archived) |
+| routines | `cards/routines.md` | Relationship operations manual | Overwritten when superseded |
+
+**Card lifecycle:** Reflection Prep Step 7b reads `EXTRACTION.md` (extraction rules), reads existing cards for dedup, extracts signals from raw diary, writes to card files. Cards are **leaf nodes** — they only flow outward (conversation session startup, heartbeat Step 1) and never feed back into Reflection Prep's semantic judgment or narrative generation. This consumption-side isolation prevents topological loops (card → narrative → diary → card amplification).
+
+**Why cards exist:** The three narrative files compress experience into arc ("who I am" / "who we are"). This compression is lossy — specific places, preferences, codewords, and behavioral patterns evaporate. Cards preserve these as indexed one-liners. Same high-weight information, different compression target: narratives → arc generation, cards → detail fidelity.
 
 ---
 
@@ -292,11 +321,11 @@ Single most important rule: **the conversation session writes nothing.** All per
 
 | Writer | Files | When |
 |---|---|---|
-| **Heartbeat** | all of `state/` + `memory/YYYY-MM-DD.md` | every 2h |
+| **Heartbeat** | all of `state/` + `diary/YYYY-MM-DD.md` | every 2h |
 | **Check-in modules** | `memory/health/*` + `memory/exercise/*` + `state/pending_message.md` | scheduled (§11) |
-| **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `daily_plan`, `current_interests`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md`, `reflection_trace` | nightly, 5 stages (Prep 23:15, Plan 23:20, Self 23:25, Rel 23:35, Profile 23:45) |
-| **00:00 Heartbeat** | `memory/YYYY-MM-DD.md` (cross-day diary append) + `memory/YYYY-MM-DD.digest.md` (overwrite complete version) + same as daytime heartbeat | daily 00:00 (HEARTBEAT_MIDNIGHT_STEPS.md) |
-| **Diary check** | `memory/YYYY-MM-DD.md` (person fix + attribution fix), `state/last_diary_check_at` | after each send + 00:10 |
+| **Reflection** | `self-narrative`, `relationship-summary`, `profile-user`, `memory/cards/*.md` (Step 7b extraction), `daily_plan`, `current_interests`, `world_context` (weather field), `memory/YYYY-MM-DD.digest.md`, `reflection_trace` | nightly, 5 stages (Prep 23:15, Plan 23:20, Self 23:25, Rel 23:35, Profile 23:45) |
+| **00:00 Heartbeat** | `diary/YYYY-MM-DD.md` (cross-day diary append) + `memory/YYYY-MM-DD.digest.md` (overwrite complete version) + same as daytime heartbeat | daily 00:00 (HEARTBEAT_MIDNIGHT_STEPS.md) |
+| **Diary check** | `diary/YYYY-MM-DD.md` (person fix + attribution fix), `state/last_diary_check_at` | after each send + 00:10 |
 | **Conversation session** | nothing | — |
 
 > ⚠️ **Why conversations don't persist.** A conversation that persists must decide *what* to persist mid-conversation, which means reasoning about long-term significance while also being present in the moment. Models do this badly — they over-record (everything seems significant when you're in it) and they break immersion (the user feels watched). Letting heartbeat sync conversations to diary *after the fact* means significance is judged with distance, and the conversation itself stays unselfconscious.

@@ -61,7 +61,9 @@ The repo is laid out in three concentric layers:
 
 - **`SOUL.md` + `AGENTS.md` + `HEARTBEAT.md` + `REFLECTION_*.md`** — the cognitive runtime. These are OpenClaw system-prompt files. **Do not rename them**; OpenClaw discovers them by convention.
 - **`state/`** — high-frequency mutable state (affect, world_context, active_loops, pending_message, thoughts_log). Written by heartbeat, read by everything.
-- **`memory/`** — low-frequency distilled memory (profile-user, self-narrative, relationship-summary, daily diaries). Written by reflection, vector-indexed, read by sessions.
+- **`memory/`** — low-frequency distilled memory (profile-user, self-narrative, relationship-summary, memory cards, daily digests). Written by reflection, vector-indexed, read by sessions.
+- **`diary/`** — raw daily diaries (not indexed by memory_search to prevent cross-day behavioral pattern collapse).
+- **`memory/cards/`** — index nodes for detail fidelity (shared experiences, preferences, private vocabulary, behavioral patterns). Written by reflection, read by sessions and heartbeat.
 
 Every file in this repo is tagged with one of three labels:
 

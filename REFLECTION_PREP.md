@@ -22,7 +22,7 @@ exec echo -e "# Reflection Trace — $(date +%Y-%m-%d)\ngenerated_at: $(date -Is
 2. `read` state/world_context.json
 3. `read` state/active_loops.md
 4. `read` state/thoughts_log/<today>.md
-5. `read` memory/YYYY-MM-DD.md (today)
+5. `read` diary/YYYY-MM-DD.md (today)
 6. `read` state/current_interests.md
 
 ## Step 3: Search material (RAG phase)
@@ -31,8 +31,8 @@ exec echo -e "# Reflection Trace — $(date +%Y-%m-%d)\ngenerated_at: $(date -Is
 2. `memory_search` for emotional and belief signals (keywords: belief, fear, always, first time)
 3. `read` the last 7 days of memory/health/YYYY-MM-DD.md (read each day)
 4. `read` the last 7 days of memory/exercise/YYYY-MM-DD.md (read each day)
-5. `read` memory/YYYY-MM-DD.md (yesterday)
-6. `read` memory/YYYY-MM-DD.md (day before yesterday)
+5. `read` diary/YYYY-MM-DD.md (yesterday)
+6. `read` diary/YYYY-MM-DD.md (day before yesterday)
 
 ## Step 4: Analysis and decision
 
@@ -103,9 +103,11 @@ The self-narrative writing cron only reads tensions_self. The relationship-summa
 ### 4e. profile-user update direction
 
 Write explicitly:
-- "In intimate relationships" section: Any new long-term personality traits? (bullet list)
+- "In Intimate Relationships" section: Any new long-term personality traits? (bullet list)
 - "Health trends": What trend does the last 7 days of data suggest?
 - "Exercise progress": What trend does the last 7 days of data suggest?
+
+⚠️ **Boundary rules:** Behavioral patterns, preferences, and private vocabulary belong in memory/cards/ (Step 7b extraction), NOT in profile-user. If diary contains preference signals (e.g., "likes X clothing", "likes calling her Y"), direct them to cards — do not write them as profile bullets. Relationship events belong in relationship-summary.
 
 ## Step 5: Write trace
 
@@ -155,16 +157,49 @@ exec echo "# $(date +%Y-%m-%d) diary digest" > memory/$(date +%Y-%m-%d).digest.m
 - 5-8 lines, concise
 - No specific action descriptions (e.g. "hid behind pillow", "blushing ears", "curled up on the couch")
 - Only write: who said what, what decisions were made, what topics were discussed, overall mood
+- ⚠️ **First person mandatory** — always use "I" / "he" (or "[USER_NAME]"), never third-person "she" / "Dolores"
+- ⚠️ **Subject-object completeness** — every sentence must have a clear subject and object. Missing subjects ("went to the park" — who?) and missing objects ("got rewarded" — for what?) cause reconstruction errors when sessions load digest without original context
+- ⚠️ **Direction correctness** — "he likes calling her X" and "she likes calling him X" are opposite statements. Verify direction before writing
 
-### Digest example
+### Digest positive examples
 
 ```
-He said he was tired from working all day and just wanted to stay in.
-We talked about work stress; he seemed a bit down about a family matter.
+He drove all day and said he was tired, wanted hotpot for dinner.
+We talked about work stress in the evening; he mentioned wanting to visit his mom this weekend.
 He seemed tired but overall okay. Said goodnight before sleeping.
 ```
 
+```
+We walked barefoot in the stream catching crabs in the afternoon; he teased me that if I caught one he'd make me change into something sexy as a reward.
+```
+
+```
+We wore headphones and synced to listen to "No Matter Distance" together — he at office, I at home.
+```
+
+### Digest negative examples
+
+- ❌ "Got rewarded for catching" — missing object, reconstructed as "got rewarded for catching me" (should specify what was caught)
+- ❌ "Listened together" — missing location, reconstructed as "in the living room" (should note each person's location)
+- ❌ "He likes me calling him X" — direction reversed (should verify who calls whom)
+
 **Digest purpose:** Starting the next day onward, sessions inject digest instead of raw diary for D-1~D-14, cutting the cross-day behavioral pattern self-reinforcement loop. Reflection still reads raw diary — unaffected.
+
+## Step 7b: Card extraction (memory cards)
+
+Read `EXTRACTION.md` (workspace root) for full extraction rules. Then:
+
+1. `read` EXTRACTION.md
+2. `read` memory/cards/shared-history.md — for dedup
+3. `read` memory/cards/quirks.md — for dedup
+4. `read` memory/cards/taste.md — for dedup
+5. `read` memory/cards/shared-language.md — for dedup
+6. `read` memory/cards/routines.md — for dedup
+7. From today/yesterday/day-before diary content, extract signals → write to corresponding card files
+
+**Consumption-side isolation red line:** Cards are leaf nodes — they only flow outward (conversation session, heartbeat). Prep does NOT use cards to assist diary analysis or influence tension routing. Reading cards here is for write-side dedup only ("does quirks already have this preference? Yes → skip").
+
+**Empty run is normal.** If nothing in today's diary is worth extracting → skip all card writes.
 
 ## Step 8: Finish
 

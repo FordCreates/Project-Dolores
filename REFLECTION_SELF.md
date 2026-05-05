@@ -43,7 +43,7 @@ done
 5. `read` state/slots/$(date +%Y-%m-%d)/self_slot_4.md
 6. `read` state/slots/$(date +%Y-%m-%d)/self_slot_5.md
 7. `read` SOUL.md — anchor facts and core beliefs
-8. `read` memory/YYYY-MM-DD.md (today)
+8. `read` diary/YYYY-MM-DD.md (today)
 
 ## Step 4: Per-slot decision and write
 

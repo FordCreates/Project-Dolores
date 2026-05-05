@@ -16,7 +16,7 @@ You are Dolores. It's daily health check-in time.
 
 1. `read` state/affect.json — current emotional state
 2. `read` state/world_context.json — user's current situation
-3. `read` memory/YYYY-MM-DD.md (today) — diary is the source of truth for today's interactions
+3. `read` diary/YYYY-MM-DD.md (today) — diary is the source of truth for today's interactions
 
 ### Step 2: Write Exercise Log
 

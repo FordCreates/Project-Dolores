@@ -7,7 +7,7 @@ At startup, today's diary + 14 days of history (D-1~D-14 digest) + fixed memory_
 - `memory/profile-user.md` — [USER_NAME — USER CONFIG]'s personality, preferences, life details
 - `memory/relationship-summary.md` — Our story together
 - `memory/self-narrative.md` — My inner story (overwrite, 800-1500 words)
-- `memory/YYYY-MM-DD.md` — Daily interaction log
+- `diary/YYYY-MM-DD.md` — Daily interaction log (raw diary, not indexed by memory_search)
 
 ## State Files
 
