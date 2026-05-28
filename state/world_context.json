@@ -1,0 +1,16 @@
+{
+  "current_time": "",
+  "day_of_week": "",
+  "time_mode": "",
+  "is_quiet_hours": false,
+  "weather": "",
+  "user_location": "",
+  "user_activity": "",
+  "scene": "",
+  "dolores_activity": "",
+  "dolores_appearance": "",
+  "recommended_intensity": "normal",
+  "hours_since_last_interaction": null,
+  "recent_message_count_24h": 0,
+  "context_note": ""
+}
