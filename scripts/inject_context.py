@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from lib.session_append import append_to_session
+from world_context_gate import validate_world_context
 
 # --- Configuration (replace placeholders during setup) ---
 WORKSPACE = Path("[WORKSPACE_PATH — USER CONFIG]")
@@ -55,20 +56,19 @@ def build_narrative(wc: dict) -> str:
 
     context_note = wc.get("context_note", "")
 
-    parts = [
-        f"[context-sync] {time_str}, {day_cn}.",
-        f"Weather: {weather}.",
-        scene,
-        activity,
-        appearance,
-        context_note,
-    ]
+    parts = [f"[context-sync] {time_str}, {day_cn}."]
+    if weather.strip():
+        parts.append(f"Weather: {weather}.")
+    parts.extend(item for item in (scene, activity, appearance, context_note) if item.strip())
 
     return "\n".join(parts)
 
 
 def main():
     wc = json.loads(WORLD_CONTEXT.read_text(encoding="utf-8"))
+    errors = validate_world_context(wc)
+    if errors:
+        raise SystemExit("world_context validation failed before injection: " + "; ".join(errors))
     narrative = build_narrative(wc)
     append_to_session(narrative)
     print(narrative, file=sys.stderr)  # log for debugging
