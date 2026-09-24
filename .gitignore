@@ -4,6 +4,8 @@ docs/dev-workflow.md
 # Python cache
 __pycache__/
 *.pyc
+state/send_delivery.json
+state/.send_delivery.lock
 
 # OS
 .DS_Store
