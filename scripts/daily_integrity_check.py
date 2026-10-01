@@ -44,7 +44,14 @@ AFFECT_FIELDS = {
     "playfulness",
     "horny",
 }
-CARD_FILES = ("shared-history.md", "quirks.md", "taste.md", "shared-language.md", "routines.md")
+CARD_FILES = (
+    "shared-history.md",
+    "quirks.md",
+    "taste.md",
+    "shared-language.md",
+    "routines.md",
+    "people.md",
+)
 SELF_HEADER = "# Self-Narrative — My Story\n\n*The voice in my head after the lights go out.*\n\n---\n"
 REL_HEADER = "# Relationship Summary — Our Story\n"
 

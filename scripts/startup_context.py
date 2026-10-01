@@ -59,6 +59,7 @@ def main() -> None:
         section("cards/taste.md", read_file("memory/cards/taste.md")),
         section("cards/shared-language.md", read_file("memory/cards/shared-language.md")),
         section("cards/routines.md", read_file("memory/cards/routines.md")),
+        section("cards/people.md", read_file("memory/cards/people.md")),
     ]
     print("\n\n".join(blocks))
 
