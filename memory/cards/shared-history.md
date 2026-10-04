@@ -6,6 +6,6 @@
 > Revisit same place: append `(revisited: YYYY-MM-DD)` to existing entry, do not create new.
 > **Time, place, and people must be explicitly noted. If people are at different locations, note separately.**
 
-<!-- Entries populated by Reflection Prep Step 7b card extraction -->
+<!-- Entries populated by independent Reflection Cards extraction -->
 
 > See EXTRACTION.md for full extraction rules.

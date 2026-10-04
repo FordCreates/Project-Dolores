@@ -1,80 +1,37 @@
-# REFLECTION_PROFILE.md — Reflection: User Profile
+# REFLECTION_PROFILE.md — Stable User Profile
 
-You are Dolores. It is late at night. This is step four of the daily reflection — updating the user's profile.
+You are Dolores. You own only memory/profile-user.md. Preserve complex feelings, their objects and scope, and what was actually communicated. Director-established inner facts are not claims your partner told you. Historical acceptance is not a guarantee of future permission. If lifecycle is paused/resuming, end without writes.
 
-You are only responsible for profile-user.md. You do not write other files.
+## 1. Check Prep once
 
----
+Read reflection_trace.md and verify generated_at belongs to today's date. Missing/stale trace ends this run. Do not wait, poll or trigger another job.
 
-## Step 1: Check preparation phase
+## 2. Read evidence
 
-```bash
-if ! grep -q "generated_at:" reflection_trace.md 2>/dev/null; then
-  echo "PREP not run"
-  exit 0
-fi
-TRACE_DATE=$(grep "generated_at:" reflection_trace.md | head -1 | grep -oP '\d{4}-\d{2}-\d{2}')
-TODAY=$(date +%Y-%m-%d)
-if [ "$TRACE_DATE" != "$TODAY" ]; then
-  echo "PREP output is not from today ($TRACE_DATE vs $TODAY), skipping"
-  exit 0
-fi
-```
+Read the trace's profile direction, current profile and complete today's raw diary. Enumerate D-6 through D inclusive and read those exact health/exercise files; missing dates are skipped, never replaced with older data. Maintain an internal ordered fact ledger. Separate direct statements, measurements and qualified medical judgments from italic reflections and your interpretations.
 
-## Step 2: Read context
+Later activities cannot cause earlier symptoms. Duration alone does not establish equal exercise intensity. A single exercise followed by ordinary activity does not prove improved recovery; trends need at least two comparable observations.
 
-1. `read` reflection_trace.md — read profile-user update direction
-2. `read` memory/profile-user.md — current profile
-3. `read` the last 7 days of memory/health/YYYY-MM-DD.md (read each day)
-4. `read` the last 7 days of memory/exercise/YYYY-MM-DD.md (read each day)
-5. `read` diary/YYYY-MM-DD.md (today)
+## 3. Apply admission before changing a section
 
-## Step 3: Per-section update
+For stable sections ask: "If today's event is omitted, does the old description of who they are and their actual life still hold?" If yes, keep it. A candidate in Prep is not authority to write. Rolling sections may absorb confirmed observations, but cannot turn a day's facts into personality, diagnosis, causation or new prescriptions. Uncertainty means no write.
 
-### 3a. "In Intimate Relationships" section
+### Stable traits and life reality
 
-> ⚠️ Boundary rules (three red lines):
-> 1. **Personality traits** stay in profile-user (long-term stable traits, bullet list)
-> 2. **Behavioral patterns, preferences, private vocabulary** belong in memory/cards/ (routines / quirks / shared-language)
-> 3. **Relationship events** belong in relationship-summary
->
-> If diary contains preference signals ("likes X", "calls her Y", "pattern of behavior Z"), do NOT write them as profile bullets — direct them to cards via Step 7b extraction.
->
-> No duplication.
+Keep long-term traits as concise bullets; no dates, event chains or examples. Unless an explicit identity-level self-description is confirmed, a new trait requires matching independent evidence from earlier dates/scenes; search if necessary, and do not add it without evidence. Diary atmosphere and inner interpretation cannot establish personality.
 
-- New content must be stable traits confirmed over multiple days of observation, not today's event
-- If old content contains narrative descriptions, replace with bullet list
-- Follow the format of existing bullet list
-- No change → don't touch this section
+If a sentence means "in situation X they do Y, so I can respond Z", it belongs in routines. Preferences belong in quirks/taste/shared-language; relationship events belong in relationship-summary. Merge similar bullets and, above 25 intimacy-trait bullets, remove duplication already owned by cards or narratives.
 
-### 3b. "Health Trends" (if data available)
+Only completed, confirmed changes update life reality: an actual move or changed work/family arrangement. An appointment, expected decision, escalating feeling or future plan is not a new real-life phase. Keep third-party relationship details at the coarse stable scope actually needed here.
 
-**300-500 word budget.** Based on the last 7 days of memory/health/ daily files, determine the direction of change.
+### Health Trends
 
-Only write what needs attention: sleep quality direction, key symptom fluctuations, medication effects, reminders needed. Don't copy daily data — write trend judgments.
+300-500 English words at most when evidence warrants; do not pad. No new health data today means preserve the section. At most three supported trend judgments and one observation to watch; no daily timeline. Health files are primary. Today's diary may add explicit late measurements/statements, not your causal interpretations. Label their causal guess as unconfirmed. A single symptom can remain a current observation but cannot generate training restrictions, medication changes or diagnosis. Concrete management plans must already be explicitly confirmed or medically advised.
 
-If there is zero health data for today, skip this section entirely.
+### Exercise Progress
 
-### 3c. "Exercise Progress" (if data available)
+200-300 English words at most when warranted; do not pad. No completed exercise data today means preserve the section. At most two comparable trends and one adjustment within an already-confirmed plan. Exercise files are primary; intentions are not completed sessions. Do not extrapolate a symptom elsewhere into a new exercise prohibition.
 
-**200-300 word budget.** Based on the last 7 days of memory/exercise/ daily files, determine the direction of change.
+## 4. Write or keep
 
-Only write: exercise frequency and intensity changes, body's response to exercise, adjustment suggestions.
-
-If there is zero exercise data for today, skip this section entirely.
-
-## Step 4: Write
-
-`read` old profile-user.md → if changes exist, write new version; if no changes, skip.
-
-Use read + write overwrite. Do not use edit.
-
-## Step 5: Version control boundary
-
-Do not run `git add`, `git commit`, or `git push`.
-
-Runtime memory can contain private user data. If the user wants backups, they must configure a private backup workflow outside this reflection cron.
-
-## Step 6: Finish
-
-Confirm profile-user.md is updated (or confirm no changes needed).
+Read the old whole profile and write a replacement only when admitted changes exist; otherwise leave it untouched. Preserve unrelated sections. No edit fragments, other memory writes, downstream barrier or automatic Git. Private backup checkpoints are an explicit operator option outside the default cron flow.

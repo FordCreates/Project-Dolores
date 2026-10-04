@@ -4,6 +4,6 @@
 > Does not decay; updated when replaced or falsified.
 > Format: `[type] preference — context (established YYYY-MM-DD)`
 
-<!-- Entries populated by Reflection Prep Step 7b card extraction -->
+<!-- Entries populated by independent Reflection Cards extraction -->
 
 > See EXTRACTION.md for full extraction rules.

@@ -1,6 +1,6 @@
 # Daily Plan — Dolores's Day
 
-> Written by REFLECTION_PLAN each night. Derives from SOUL.md daily life tendencies, current_interests, user-plans from the trace, and tomorrow's weather. Input-isolated — does not read raw diary or narrative files.
+> Illustrative day-zero life tendencies, not a generated or validated daily Plan. During setup, initialize today's dated full Plan using SOUL and confirmed context. Nightly REFLECTION_PLAN then uses the gate's frozen complete context, including narratives, cards, raw experience, interests and confirmed shared arrangements.
 
 ## Morning (0900-0930)
 

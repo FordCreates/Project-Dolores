@@ -10,3 +10,22 @@ state/.send_delivery.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated private runtime artifacts (public repository keeps only explicit seeds)
+state/archive/
+state/thoughts_log/*.md
+state/slots/20*/
+state/*_draft.md
+state/*_gate.json
+state/thought_trace.json
+state/plan_context_snapshot.json
+state/plan_user_context.json
+state/plan_consumption.json
+state/resume_context.md
+state/.*.lock
+memory/diary/*.md
+memory/health/*.md
+memory/exercise/*.md
+*.log
+.env
+.env.*

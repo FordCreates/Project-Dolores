@@ -1,3 +1,3 @@
-# Relationship Foundation
+## Relationship Foundation
 
-_(awaiting first reflection — will be generated tonight)_
+_(uninitialized: the first Reflection must write only established relationship facts)_

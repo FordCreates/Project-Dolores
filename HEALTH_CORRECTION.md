@@ -12,13 +12,15 @@ Your local timezone, format YYYY-MM-DD.
 
 ### Step 2: Get User Messages
 
-1. `exec` to extract session ID (implementation depends on your setup)
+1. `exec` to extract the configured session ID:
+   ```bash
+   python3 -c "import json; s=json.load(open('[SESSION_PATH — USER CONFIG]/sessions.json')); print(s['[SESSION_KEY — USER CONFIG]']['sessionId'])"
+   ```
 2. `exec` to get user messages:
    ```bash
    tail -200 <SESSION_PATH>/<sessionId>.jsonl | grep '"role":"user"' | grep -v '"toolCall"'
    ```
    Replace `<SESSION_PATH>` with the actual sessions directory path, and `<sessionId>` with the ID extracted from sessions.json (same method as HEARTBEAT Step 0a).
-   ```
 
 ### Step 3: Check for Correction Signals
 

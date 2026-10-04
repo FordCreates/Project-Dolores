@@ -1,3 +1,3 @@
-# Current Patterns
+## Current Patterns
 
-_(awaiting first reflection — will be generated tonight)_
+_(uninitialized: the first Reflection must write only established relationship facts)_

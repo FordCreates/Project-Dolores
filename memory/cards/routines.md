@@ -6,6 +6,6 @@
 > Contradictory routines may coexist (activated by different scenes).
 > Format: `- [tag] <cognition> — <actionable response> (first seen YYYY-MM-DD, latest YYYY-MM-DD, N=count)`
 
-<!-- Entries populated by Reflection Prep Step 7b card extraction -->
+<!-- Entries populated by independent Reflection Cards extraction -->
 
 > See EXTRACTION.md for full extraction rules.

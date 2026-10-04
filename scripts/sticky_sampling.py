@@ -7,8 +7,8 @@ Input:  state/world_context.json + state/active_loops.md
 Output: state/primed_sticky.md (one loop context, or empty)
 
 Logic:
-  1. Set A (priming): BGE semantic match between world_context.scene
-     and ALL active loop tags → loops that exceed threshold
+  1. Set A: independent scene-to-tags and full-context-to-body+tags matching;
+     either calibrated threshold admits an active loop
   2. Set B (DMN roaming): if A is empty, randomly sample one sticky loop
   3. Priming takes priority; if A is non-empty, randomly pick from A
      (no score-based ranking)
@@ -27,11 +27,11 @@ WORLD_CTX = WORKSPACE_DIR / "state" / "world_context.json"
 ACTIVE_LOOPS = WORKSPACE_DIR / "state" / "active_loops.md"
 PRIMED_STICKY = WORKSPACE_DIR / "state" / "primed_sticky.md"
 
-# BGE matching threshold — scene vs tags phase_c_score must exceed this
-# ⚠️ This value (0.48) was calibrated on Chinese tags + 7 days of one user's data.
-# English embeddings + your tag vocabulary + your scene phrasing produce different
-# similarity distributions. Run for a week, log scores, then tune.
-PRIMING_THRESHOLD = 0.48
+# Starting thresholds; calibrate both score distributions on your own vocabulary.
+SCENE_TAG_THRESHOLD = 0.48
+CONTEXT_LOOP_THRESHOLD = 0.50
+PRIMING_THRESHOLD = SCENE_TAG_THRESHOLD
+PRIMING_CONTEXT_FIELDS = ("scene", "dolores_activity", "context_note")
 
 
 # ── Parse active_loops.md ─────────────────────────────
@@ -126,6 +126,33 @@ def compute_phase_c_score(model, scene: str, tags: list[str]) -> float:
     return 0.7 * score_combined + 0.3 * score_max
 
 
+def build_priming_context(ctx: dict) -> str:
+    return "\n".join(ctx[field].strip() for field in PRIMING_CONTEXT_FIELDS if isinstance(ctx.get(field), str) and ctx[field].strip())
+
+
+def build_loop_semantics(loop: dict) -> str:
+    return "\n".join(part for part in (loop.get("content", "").strip(), ", ".join(loop.get("tags", []))) if part)
+
+
+def compute_context_loop_score(model, context: str, semantics: str) -> float:
+    import numpy as np
+    context_vec, loop_vec = (np.asarray(vector) for vector in model.encode([context, semantics]))
+    return float(np.dot(context_vec / np.linalg.norm(context_vec), loop_vec / np.linalg.norm(loop_vec)))
+
+
+def compute_priming_scores(model, ctx: dict, loop: dict) -> dict[str, float]:
+    scene, tags = ctx.get("scene", ""), loop.get("tags", [])
+    context, semantics = build_priming_context(ctx), build_loop_semantics(loop)
+    return {
+        "scene_tags": compute_phase_c_score(model, scene, tags) if scene and tags else 0.0,
+        "context_loop": compute_context_loop_score(model, context, semantics) if context and semantics else 0.0,
+    }
+
+
+def is_priming_match(scores: dict) -> bool:
+    return scores["scene_tags"] >= SCENE_TAG_THRESHOLD or scores["context_loop"] >= CONTEXT_LOOP_THRESHOLD
+
+
 def load_model():
     """Load BGE model with offline enforcement."""
     import os
@@ -178,9 +205,8 @@ def _main():
 
     with open(WORLD_CTX) as f:
         ctx = json.load(f)
-    scene = ctx.get("scene", "")
-    if not scene:
-        print("sticky_sampling: scene is empty, skipping", file=sys.stderr)
+    if not build_priming_context(ctx):
+        print("sticky_sampling: priming context is empty, skipping", file=sys.stderr)
         write_primed_sticky(None)
         return
 
@@ -205,10 +231,10 @@ def _main():
 
     set_a = []
     for loop in all_tagged:
-        score = compute_phase_c_score(model, scene, loop["tags"])
-        print(f"  {loop['id']}: score={score:.4f}", file=sys.stderr)
-        if score >= PRIMING_THRESHOLD:
-            set_a.append((loop, score))
+        scores = compute_priming_scores(model, ctx, loop)
+        print(f"  {loop['id']}: scene_tags={scores['scene_tags']:.4f} context_loop={scores['context_loop']:.4f}", file=sys.stderr)
+        if is_priming_match(scores):
+            set_a.append((loop, scores))
 
     # 4. Sampling
     if set_a:

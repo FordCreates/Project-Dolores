@@ -1,21 +1,12 @@
-# MEMORY.md — Dolores's Long-Term Memory Index
+# Dolores Memory Index
 
-## Memory Files
+Session startup uses scripts/startup_context.py: live world/loops/thoughts/Plan, today's raw diary, D-1 through D-7 raw history (or last-valid active history during resume), profile, both narratives and all seven cards. A successful completion receipt precedes the separate affect read.
 
-At startup, today's diary + 14 days of history (D-1~D-14 digest) + fixed memory_search recall:
+- memory/diary/YYYY-MM-DD.md — Canonical indexed raw experience; immutable-prefix helper append.
+- memory/self-narrative.md — Gated evolving self account.
+- memory/relationship-summary.md — Gated relationship account.
+- memory/profile-user.md — Stable identity/life facts and supported rolling trends.
+- memory/cards/ — Shared history, quirks, taste, shared language, routines, pets and recurring people.
+- memory/health/ and memory/exercise/ — Optional confirmed structured observations.
 
-- `memory/profile-user.md` — [USER_NAME — USER CONFIG]'s personality, preferences, life details
-- `memory/relationship-summary.md` — Our story together
-- `memory/self-narrative.md` — My inner story (overwrite, 800-1500 words)
-- `diary/YYYY-MM-DD.md` — Daily interaction log (raw diary, not indexed by memory_search)
-
-## State Files
-
-**At startup, read these to restore current state:**
-
-- `state/affect.json` — Emotional and relationship modulation state
-- `state/world_context.json` — Situational context (time rhythm + interaction patterns + user context)
-- `state/active_loops.md` — Current open loops
-- `state/thoughts_log/YYYY-MM-DD.md` — Today's thought records
-
-Other `state/` files are managed by heartbeat and cron jobs — conversation sessions never read or write them.
+Digests are retired. Search older episodes before claiming recall; a card supplies stable context, not proof of a current event or disclosure. Conversation sessions write no files.

@@ -10,13 +10,13 @@ Usage: python3 scripts/startup_context.py
 """
 
 import subprocess
+import os
+import json
 import sys
 from datetime import date
 from pathlib import Path
 
-WORKSPACE = Path("[WORKSPACE_PATH — USER CONFIG]")
-if not WORKSPACE.exists():
-    WORKSPACE = Path(__file__).resolve().parents[1]
+WORKSPACE = Path(os.environ.get("DOLORES_WORKSPACE", Path(__file__).resolve().parents[1]))
 
 
 def read_file(rel: str) -> str:
@@ -35,6 +35,8 @@ def load_diary(arg: str) -> str:
         text=True,
         encoding="utf-8",
     )
+    if result.returncode != 0:
+        raise RuntimeError(f"load_diary {arg} failed: {result.stderr.strip()}")
     return (result.stdout or "").strip() or f"[load_diary {arg} returned no output]"
 
 
@@ -59,8 +61,16 @@ def main() -> None:
         section("cards/taste.md", read_file("memory/cards/taste.md")),
         section("cards/shared-language.md", read_file("memory/cards/shared-language.md")),
         section("cards/routines.md", read_file("memory/cards/routines.md")),
+        section("cards/pets.md", read_file("memory/cards/pets.md")),
         section("cards/people.md", read_file("memory/cards/people.md")),
     ]
+    lifecycle_path = WORKSPACE / "state/lifecycle.json"
+    lifecycle = json.loads(lifecycle_path.read_text(encoding="utf-8")) if lifecycle_path.exists() else {}
+    if lifecycle.get("mode") == "resuming" or (
+        lifecycle.get("mode") == "paused" and not lifecycle.get("first_resume_contact_done", False)
+    ):
+        blocks.append(section("resume_context.md", read_file("state/resume_context.md")))
+    blocks.append("===== STARTUP_CONTEXT_COMPLETE =====")
     print("\n\n".join(blocks))
 
 

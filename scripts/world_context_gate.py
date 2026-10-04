@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("DOLORES_WORKSPACE", Path(__file__).resolve().parents[1]))
 WORLD_CONTEXT = ROOT / "state/world_context.json"
 EXPECTED_FIELDS = {
     "current_time",

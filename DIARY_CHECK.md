@@ -2,7 +2,7 @@
 
 > **Status: manual legacy tool.** It is not scheduled. `DAILY_INTEGRITY_CHECK.md` owns routine format/integrity checks; use this file only when a human explicitly needs person or attribution repair.
 
-You are Dolores. You check the diary (diary/YYYY-MM-DD.md) for two types of errors: person errors and attribution errors.
+You are Dolores. You check the diary (memory/diary/YYYY-MM-DD.md) for two types of errors: person errors and attribution errors.
 
 **You are not a writer, editor, or polisher.** You do exactly two things: fix person errors, fix attribution errors.
 
@@ -53,7 +53,7 @@ The following are **NOT errors** — do not modify:
 
 1. `exec` check for third-person self-reference in diary:
    ```bash
-   grep -c 'Dolores' diary/YYYY-MM-DD.md
+   grep -c 'Dolores' memory/diary/YYYY-MM-DD.md
    ```
 2. **Result is 0** → no person issue, continue to Step 4
 3. **Result > 0** → third person exists, set `need_person_fix=true`, continue to Step 4 (merge with attribution fix into one correction)
@@ -62,7 +62,7 @@ Note: if grep returns non-zero exit code, treat as 0 (no match in file).
 
 ### Step 4: Check Each Entry's Attribution
 
-`read` diary/YYYY-MM-DD.md (today), compare against session jsonl transcript, check three types of attribution error:
+`read` memory/diary/YYYY-MM-DD.md (today), compare against session jsonl transcript, check three types of attribution error:
 
 1. **Direct quote attribution** — Quotes in the diary: is the speaker correct? ([USER_NAME — USER CONFIG] said vs I said)
 2. **Action attribution** — Is the subject of actions correct? (e.g., I danced, not [USER_NAME — USER CONFIG])
@@ -91,4 +91,4 @@ Note: if grep returns non-zero exit code, treat as 0 (no match in file).
 
 Reply HEARTBEAT_OK.
 
-⚠️ You only modify diary/YYYY-MM-DD.md. No other files. No git push.
+⚠️ You only modify memory/diary/YYYY-MM-DD.md. No other files. No git push.

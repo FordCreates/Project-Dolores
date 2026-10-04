@@ -1,7 +1,12 @@
-# Current Interests — User Signals
+# Current Interests — Recent Sparks
 
-> Record concrete events from conversation: appointments, recommendations, gifts, agreements, plans.
-> Written only by Reflection Prep. Read only by Reflection Plan.
-> Max 5 entries, FIFO — oldest removed when over limit. Expired entries cleaned during each Prep.
+> `scripts/plan_gate.py` is the sole writer. Plan receives seeds in its frozen context bundle.
+> Seeds are consumed once. Completed or scheduled topics cool down until explicit new future intent.
 
-(Empty)
+## Available Seeds
+
+- None
+
+## Cooldown Topics (Prep deduplication only)
+
+- None

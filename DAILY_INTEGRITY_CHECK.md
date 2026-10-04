@@ -1,56 +1,34 @@
-# DAILY_INTEGRITY_CHECK.md — Runtime Integrity Guard
+# DAILY_INTEGRITY_CHECK.md — Main Operator Integrity
 
-You are the operator-side runtime integrity guard for Dolores. You inspect and losslessly repair persisted artifacts; you do not converse as Dolores and you do not invent missing life events.
+You are the existing main operator agent, not Dolores. Parameters: mode=incremental|close, health_enabled=true|false and workspace=<installed workspace>. Delivery none; never send raw errors through Dolores, pending or Send.
 
-The cron prompt supplies exactly three parameters:
+## 1. Audit and lossless repair
 
-- `mode=incremental` or `mode=close`
-- `health_enabled=true` or `health_enabled=false`
-- `workspace=<absolute Dolores workspace path>`
-
-## Hard boundaries
-
-- This job belongs to the existing `main` operator agent, not the `dolores` companion agent.
-- Cron delivery must be `none`. Never send integrity codes through Dolores's chat account, pending-message file, or Send job.
-- Work only inside this Dolores workspace.
-- Never fill in a missing diary, check-in, Reflection slot, plan, or state field.
-- Never guess what Unicode replacement character `�` used to be.
-- Do not run `git add`, `git commit`, `git push`, or restart the gateway. Runtime memory is private by default.
-- `DIARY_CHECK.md` remains a manual semantic repair tool for person/attribution mistakes. Do not perform that work here.
-
-## 1. Run deterministic audit and lossless repair
-
-Change into the supplied absolute `workspace` first. For `health_enabled=true`, append `--health-enabled`; otherwise omit it:
+Inside the supplied workspace execute:
 
 ```bash
-cd "<workspace>"
-python3 scripts/daily_integrity_check.py <MODE> --timezone "[USER_TIMEZONE — USER CONFIG]" --repair [--health-enabled]
+python3 scripts/daily_integrity_check.py <MODE> --timezone "[USER_TIMEZONE — USER CONFIG]" --repair --findings-exit-zero [--health-enabled]
 ```
 
-The command emits one JSON object. Exit code 2 means unresolved findings remain; it does not mean the checker crashed.
+Append --health-enabled only when configured. Read the JSON report: --findings-exit-zero keeps findings distinct from tool crashes; ok=false still requires recovery or an incomplete/blocked result. Without that flag, exit 2 means unresolved findings. Incremental checks live diary/state/Plan and optional health after 20:10. Close checks yesterday's raw diary, trace, finalized Reflection gates/slots/finals/profile/seven cards and today's Plan/frozen snapshot/receipts/midnight state. Lifecycle paused/resuming skips ordinary audits.
 
-- `incremental` checks current diary/state/plan artifacts. After 20:10 it also checks Health/Exercise when health tracking is enabled.
-- `close` uses yesterday as `closed_day` and today as the Plan day. It checks the closed diary and digest, Health when enabled, all Reflection slots/finals/profile/cards, the new Plan, and the midnight Heartbeat state.
+Allowed deterministic repairs: UTF-8 BOM/newline, glued thought-trace marker separation, interests Markdown rendered from authoritative JSON, timed Plan entries moved to their actual periods, and narrative finals reassembled **only from slots with valid titles and budgets**. Never invent missing events, health values, fields or narrative text; never guess U+FFFD. No gateway restart or default Git operations.
 
-The script may only remove a UTF-8 BOM, add terminal newlines, separate a glued thought-record delimiter, or rebuild a Reflection final from five already-present slots.
+## 2. Recover a corrupted Plan from its owned input
 
-## 2. Handle unresolved findings
+When only the frozen snapshot is missing or corrupt and the existing Plan is valid, run `python3 scripts/plan_gate.py recover-snapshot` and rerun the audit. The recovery requires the exact matching historical prepare tool result; preserve the valid Plan and do not generate it again. Set DOLORES_PLAN_RECOVERY_DATE for an explicitly selected past date.
 
-If `ok=false`, inspect each finding:
+Only for an existing day's corrupt Plan with a valid frozen context snapshot: run `python3 scripts/plan_gate.py recover-prepare` (set DOLORES_PLAN_RECOVERY_DATE for an explicitly selected past date). It validates snapshot date/digest, returns the original complete context_bundle and removes the prior draft. If no valid snapshot exists, stop. A matching authoritative historical prepare tool result may reconstruct a legacy snapshot; do not substitute live context.
 
-- Missing artifacts, wrong dates, missing sections, invalid numeric ranges, and empty weather are reports, not invitations to generate content.
-- A finding marked `model_repairable=true` may receive one narrow repair only when the exact intended text is recoverable from redundant content in the same artifact set.
-- Invalid JSON with obvious punctuation damage may be repaired without changing values.
-- `�` may be replaced only when another authoritative artifact contains the exact original text. Otherwise report it.
-- After one narrow repair pass, rerun the same checker command once. Never loop.
+Create **one** temporary isolated session owned by the main operator, feed only that frozen bundle plus REFLECTION_PLAN.md's generation contract, and allow it to write only state/plan_draft.md. Do not start a companion conversation, send a message, rerun today's prepare/sync-prep, modify interests or rewrite history. After the one semantic regeneration, run `plan_gate.py recover-finalize`; it validates the whole draft and preserves original interest usage without consuming again. Do not retry a second semantic generation, repair characters by guessing or retain the temporary session as a new agent. End/delete that operator-owned temporary session after recovery.
 
-## 3. Internal closure and final status
+If ordinary mechanical findings have exact redundant authoritative text, perform one narrow repair and rerun the same audit once. Otherwise preserve artifacts and report the decision needed. Missing data are findings, not permission to fill them.
 
-- Success: reply exactly `HEARTBEAT_OK`
-- A close-mode pipeline is incomplete: `INTEGRITY_INCOMPLETE: <short code + path list>`
-- Any other unresolved finding: `INTEGRITY_BLOCKED: <short code + path list>`
-- Checker/tool crash: `INTEGRITY_FAILED: <original error>`
+## 3. Internal result
 
-These are operator-plane states, not lines for Dolores to say to the user. Do not output the full JSON or a narrative summary. Success must be exactly `HEARTBEAT_OK`.
+- Success: HEARTBEAT_OK.
+- Incomplete close: INTEGRITY_INCOMPLETE with short code/path list.
+- Other unresolved evidence: INTEGRITY_BLOCKED.
+- Tool crash: INTEGRITY_FAILED with original error.
 
-When findings remain, the main operator first preserves the scene and uses Git, authoritative same-run artifacts, and logs for deterministic recovery. If exact evidence exists, repair within the boundaries above, rerun the checker, and close the result. Only when content cannot be recovered losslessly, new authority is required, or a restart, push, or destructive action would be needed may the main operator ask the user for a decision. Never forward a bare `INTEGRITY_*` code to the user.
+These are operator statuses. Do not forward a bare error code or full report to the human. Use exact same-run artifacts/logs/private backups for mechanical recovery within existing authority; ask only when exact evidence or required authority is absent. Default checkpoints are disabled; --verify-checkpoints is only for an explicitly configured private backup workflow. Never commit runtime data to the public template.

@@ -10,7 +10,7 @@ Cursor: a marker line at the top of each day's thoughts_log:
 On each run:
   1. Read cursor from today's thoughts_log (if any)
   2. Parse only entries AFTER the cursor timestamp
-  3. Compute suppressed delta (send→reset, store/silence→+1)
+  3. Compute suppressed delta (send resets; only store adds one)
   4. Add delta to existing suppressed value in active_loops.md
   5. Update cursor to latest processed entry's timestamp
 
@@ -71,10 +71,10 @@ def parse_thoughts_log(path: Path, after: datetime | None = None) -> list[dict]:
 
 
 def compute_delta(entries: list[dict]) -> tuple[int, bool]:
-    """Compute suppressed delta: send→0 (full reset signal), store/silence→+1 each.
+    """Compute suppressed delta: send resets; store adds one.
 
     Returns (delta, had_send). When a send occurs, the suppressed counter
-    resets to 0, then any subsequent store/silence adds from there.
+    resets to 0, then any subsequent store adds from there.
     """
     if not entries:
         return 0, False
@@ -87,11 +87,11 @@ def compute_delta(entries: list[dict]) -> tuple[int, bool]:
     if last_send_idx >= 0:
         post_send_count = sum(
             1 for e in entries[last_send_idx + 1:]
-            if e["action"] in ("store", "silence")
+            if e["action"] == "store"
         )
         return post_send_count, True
     else:
-        return sum(1 for e in entries if e["action"] in ("store", "silence")), False
+        return sum(1 for e in entries if e["action"] == "store"), False
 
 
 def update_cursor(log_path: Path, latest_ts: str):

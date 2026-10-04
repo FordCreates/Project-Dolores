@@ -25,13 +25,7 @@ SESSION_KEY = "[SESSION_KEY — USER CONFIG]"
 
 WORLD_CONTEXT = WORKSPACE / "state" / "world_context.json"
 
-# Override session_append defaults
-import lib.session_append as _sa
-_sa.SESSIONS_JSON = SESSION_PATH / "sessions.json"
-_sa.SESSION_DIR = SESSION_PATH
-_sa.SESSION_KEY = SESSION_KEY
-
-WEEKDAY_CN = {
+WEEKDAY_SHORT = {
     "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed",
     "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat", "Sunday": "Sun",
 }
@@ -41,22 +35,17 @@ def build_narrative(wc: dict) -> str:
     current_time = wc.get("current_time", "")
     time_str = current_time.split("T")[1][:5] if "T" in current_time else current_time
     day_en = wc.get("day_of_week", "")
-    day_cn = WEEKDAY_CN.get(day_en, day_en)
+    day_short = WEEKDAY_SHORT.get(day_en, day_en)
 
     weather = wc.get("weather", "")
     scene = wc.get("scene", "")
 
     appearance = wc.get("dolores_appearance", "")
-    if appearance:
-        appearance = f"I {appearance}"
-
     activity = wc.get("dolores_activity", "")
-    if activity:
-        activity = f"I {activity}"
 
     context_note = wc.get("context_note", "")
 
-    parts = [f"[context-sync] {time_str}, {day_cn}."]
+    parts = [f"[context-sync] {time_str}, {day_short}."]
     if weather.strip():
         parts.append(f"Weather: {weather}.")
     parts.extend(item for item in (scene, activity, appearance, context_note) if item.strip())
@@ -70,7 +59,10 @@ def main():
     if errors:
         raise SystemExit("world_context validation failed before injection: " + "; ".join(errors))
     narrative = build_narrative(wc)
-    append_to_session(narrative)
+    append_to_session(
+        narrative, sessions_json=SESSION_PATH / "sessions.json",
+        session_dir=SESSION_PATH, session_key=SESSION_KEY, raise_on_error=True,
+    )
     print(narrative, file=sys.stderr)  # log for debugging
 
 
