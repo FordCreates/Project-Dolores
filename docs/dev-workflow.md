@@ -65,6 +65,7 @@ Before creating a GitHub release, review the changelog / release notes:
 - **Never reproduce the leaked content when describing a leak fix.** Write "ungeneralized character name" not the actual name.
 - Apply the same zero-private-references rule from Checklist #2 to release notes.
 - Treat release notes as public-facing documentation — they are more visible than any individual file.
+- Create an annotated `vX.Y.Z` tag on the reviewed release commit with `--cleanup=verbatim`, using the matching changelog entry as its message so Markdown headings remain intact. `.github/workflows/release.yml` publishes a GitHub Release from that reviewed tag message using repository-scoped permissions.
 
 ## Placeholder Reference
 

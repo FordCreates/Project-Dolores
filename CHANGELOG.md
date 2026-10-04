@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-04
+
 ### Added
 - Independent seven-card Reflection, four-stage thought trace, mechanical Self/Relationship gates, full-context frozen Plan generation and original-input recovery.
 - Atomic indexed raw-diary append, fresh Heartbeat final-state verification, reviewed pause/resume continuity and explicit private-only scoped checkpoint support.
 - Anonymous temporary-workspace regression tests for write gates, Unicode, ownership, consumption, snapshots and acknowledged Send recovery.
+- Tag-triggered GitHub Releases with reviewed notes from annotated version tags and repository-scoped publishing permissions.
 
 ### Changed
 - Retired daily digests; canonical raw experience lives in memory/diary. Profile updates require stable invalidation or supported rolling evidence.
@@ -25,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced reference-derived calibration details with independent fictional examples and unfilled health fields. Added semantic source review for translated examples, narrative seeds and intimate-content rules.
 - Removed remaining source-derived attention and activity examples. Public development rules prohibit importing private episodes or people through renaming, translation or partial detail changes, and require history and artifact review before publication.
 - Removed source-derived material from earlier repository revisions and retired affected legacy publication references. Historical file removal is followed by reintroducing the reviewed current guides.
+
+### Migration
+- Back up existing private workspaces before updating. Merge runtime guides and scripts without overwriting personalized character files, memories or live state with repository seeds.
+- Move legacy raw diaries into `memory/diary/`, reconcile conflicting dates without overwriting either copy, and keep retired digests in a private archive outside indexed memory. Follow the existing-installation instructions in `docs/setup.md`.
+- Update the six independent Reflection jobs, tool permissions and model budgets using the setup guide. Initialize new lifecycle and interest state only when absent; private Git checkpoints remain opt-in.
+
+### Validation
+- 33 regression tests passed in anonymous temporary workspaces, along with Python, shell, Markdown, JSON and SVG checks.
 
 ## [0.7.0] - 2026-05-28
 
