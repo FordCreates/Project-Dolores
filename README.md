@@ -34,21 +34,22 @@ Dolores has two intertwined data flows — the **Dual Helix**:
 
 ```
 HELIX 1 — Pseudo-life stream (input side: "where is she, what's happening")
-  daily_plan → world_context
-  (nightly)    (every 2h)
-                  ↓
+  daily_plan (nightly prior) + recent user messages + time/profile
+                           ↓
+                  world_context (each Heartbeat)
+                           ↓
             ┌─ context bridge ─────────────┐
-            │  path A: startup read        │
+            │  path A: conversation read   │
             │  path B: heartbeat inject    │
             └──────────────┬───────────────┘
-                           ↓ session jsonl (loaded on every turn)
+                           ↓ conversation context
 
 HELIX 2 — Three-layer cognition (processing side: "how does she react")
   [context from bridge] + external input
-    → core beliefs      (SOUL.md, immutable)
-    → dissonance        (active_loops, tensions)
-    → affect coloring   (affect.json)
-    → real-person gate  (cooldown, quiet hours, anti-repeat)
+    → core beliefs      (SOUL stable facts + self slot 1 interpretation)
+    → dissonance        (active_loops + self slots 2/4)
+    → actual thoughts   (colored by affect.json)
+    → fixed draft → ownership (private/shared) → function/timing gate
     → private silence / shared send, store, duplicate, discard
 
 CLOSURE — Narrative descent (output → long-term memory)
@@ -59,15 +60,15 @@ CLOSURE — Narrative descent (output → long-term memory)
 
 Helix 1 feeds Helix 2. Without Helix 1, the cognition runs in a vacuum. Without Helix 2, the life stream is just a logbook.
 
-The repo is laid out in three concentric layers:
+The repo contains runtime instructions, live state and indexed memory:
 
-- **`SOUL.md` + `AGENTS.md` + `HEARTBEAT.md` + `REFLECTION_*.md`** — the cognitive runtime. These are OpenClaw system-prompt files. **Do not rename them**; OpenClaw discovers them by convention.
-- **`state/`** — high-frequency mutable state (affect, world_context, active_loops, pending_message, thoughts_log). Written by heartbeat, read by everything.
-- **`memory/`** — low-frequency distilled memory (profile-user, self-narrative, relationship-summary, memory cards and indexed raw diary). Written by reflection, vector-indexed, read by sessions.
+- **`SOUL.md` + `AGENTS.md` + `HEARTBEAT.md` + `REFLECTION_*.md`** — the cognitive runtime. OpenClaw recognizes its bootstrap filenames, with inclusion or retrieval depending on the harness and session settings. Dolores's Reflection and detailed execution handbooks are read explicitly by job prompts or routers. Keep bootstrap names unchanged; rename a handbook only together with its callers.
+- **`state/`** — mutable runtime state (affect, world_context, active_loops, pending_message, thoughts_log). Written only by the designated runtime job and read according to each handbook's input boundaries.
+- **`memory/`** — narratives/profile rewritten by Reflection, cards updated by independent Cards, and raw diary appended by Heartbeat. Indexed for recall and explicitly read according to each session or job's input boundaries.
 - **`memory/diary/`** — canonical indexed raw diaries, appended atomically; digests are retired.
 - **`memory/cards/`** — index nodes for detail fidelity and social continuity (shared experiences, preferences, private vocabulary, behavioral patterns, confirmed pets and recurring people). Written by independent Cards, read by sessions, Heartbeat and Plan.
 
-Every file in this repo is tagged with one of three labels:
+The documentation distinguishes required structure from configurable content with three labels:
 
 - `[ARCHITECTURE]` — the system requires a file of this kind. You can't remove it without breaking the loop.
 - `[CHARACTER CONFIG]` — the *shape* is required, the *content* is yours. Change it to make Dolores into someone else.

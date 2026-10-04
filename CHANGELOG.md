@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Aligned architecture and README diagrams with observed-message inputs, the three cognitive layers and four separate thought/expression stages.
+- Scoped deterministic startup to user-facing conversation sessions so scheduled jobs retain their handbook input boundaries; corrected bootstrap-loading claims and the six independent Reflection jobs.
+- Corrected Heartbeat read stages, channel migration requirements, nonexistent interface references and affect-schema extension requirements.
+
 ## [0.8.0] - 2026-10-04
 
 ### Added

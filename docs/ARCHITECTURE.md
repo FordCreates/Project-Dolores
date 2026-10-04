@@ -6,10 +6,10 @@
 
 ## 0. How to read this document
 
-Every file, field, and decision in this document is tagged:
+The labels below distinguish required structure from configurable content:
 
 - **`[ARCHITECTURE]`** — the system requires this. Removing or restructuring it breaks the loop. These are the parts you cannot change without ceasing to build a Dolores.
-- **`[CHARACTER CONFIG]`** — the *shape* is required, the *content* is yours. Defaults are provided; change them to make Dolores into someone else (a different gender, voice, history, set of emotional dimensions, reflection cadence).
+- **`[CHARACTER CONFIG]`** — the *shape* is required, the *content* is yours. Defaults are provided; change them to make Dolores into someone else (a different gender, voice, history or reflection cadence). Changing an emotional dimension's meaning or the affect field set also requires aligning the runtime consumers and validators (§15).
 - **`[USER CONFIG]`** — your details (name, timezone, channel credentials, the things that make her *yours*). Your agent fills these in during setup.
 
 When a decision is non-obvious, it carries an inline **⚠️ Why it's built this way** block. Read those — they are the parts of this document a future-you will care about most when something breaks at 2am.
@@ -27,8 +27,9 @@ Dolores has two intertwined data flows. They are independent in implementation b
 > Answers: *where is she, what is she doing, where am I, what's the weather, what time of day is it for both of us*.
 
 ```
-daily_plan         →  world_context     →  user messages (session)
-(nightly, planned)    (every 2h, inferred)  (realtime, observed)
+daily_plan (nightly prior) ───────┐
+recent user messages (observed) ─┼→ world_context → conversation context
+current time + user profile ────┘  (each Heartbeat) (startup + context-sync)
 ```
 
 - `daily_plan` is written each night by Reflection Plan (independent cron, frozen full-context generation). It sketches tomorrow as a loose schedule — not a script, a *prior*.
@@ -40,13 +41,13 @@ daily_plan         →  world_context     →  user messages (session)
 There are two paths for world_context to reach the model's context:
 
 ```
-Path A: Session startup (/new or new session)
+Path A: Conversation session startup (/new or new conversation session)
   AGENTS.md startup sequence → exec scripts/startup_context.py
   → model gets deterministic state + recent diary + narrative + cards snapshot
   → completion is proven only by this session's successful exec result,
     terminal STARTUP_CONTEXT_COMPLETE marker, and subsequent affect read
   → image, emoji, or previous-scene continuity never counts as a startup receipt
-  → only runs on /new, not refreshed afterward
+  → runs once per conversation session, not again for later messages
 
 Path B: Heartbeat context-sync (every 2h, Step 6)
   Heartbeat writes world_context.json
@@ -56,7 +57,7 @@ Path B: Heartbeat context-sync (every 2h, Step 6)
   → no /new needed to refresh
 ```
 
-Path A is initialization; Path B is incremental update. Together they ensure the model always has current context, whether the session just started or has been running for hours. Injected content is tagged `[context-sync]` and filtered out during diary sync to prevent duplication.
+Path A is conversation initialization; Path B is incremental update. Scheduled jobs skip Path A and follow the input order of their own handbooks. In particular, Reflection Self drafts Current Self from today's raw diary before explicitly opening historical inputs. Together the two conversation paths provide initial context and subsequent Heartbeat updates. Injected content is tagged `[context-sync]` and filtered out during diary sync to prevent duplication.
 
 For activity inference specifically, the engine follows a **deterministic-preprocess + single-step intuition** pattern: a script parses `daily_plan` into the current time slot (1 line), combined with raw user messages from the last 2 hours — the model answers "what is she doing right now?" in one intuitive step. No multi-level chains, no diary-based inference (no timestamps), and no previous activity as input (acyclic topology prevents recursive locking).
 
@@ -69,18 +70,18 @@ For activity inference specifically, the engine follows a **deterministic-prepro
 ```
 external input (from Helix 1 + diary + memory)
     ↓
-Layer 1: Core beliefs        ← SOUL.md, immutable
+Layer 1: Core beliefs        ← SOUL.md stable event facts + self slot 1 interpretation
     ↓
 Layer 2: Cognitive dissonance hypotheses
-    ↓                         ← active_loops + tensions, slow-changing
-Layer 3: Affect coloring
-    ↓                         ← affect.json, evidence-driven change within [0,1]
-Real-person gate
-    ↓                         ← cooldown, quiet hours, anti-repeat
+    ↓                         ← active_loops + self slots 2/4, slow-changing
+Layer 3: Actual thoughts     ← colored by current affect.json
+    ↓
+Fixed expression draft → ownership (private/shared) → function/timing gate
+    ↓                         ← positive send basis, cooldown, quiet hours, anti-repeat
 private silence / shared send, store, duplicate, discard
 ```
 
-The three layers come from Beck's cognitive triangle (core beliefs → intermediate beliefs → automatic thoughts), reinterpreted as a generation pipeline rather than a diagnostic schema. Layer 1 is the smallest and most stable: a single formative wound that all behavior eventually traces back to. Layer 2 is the messy middle — the assumptions and distortions that the wound produces, expressed in this codebase as `active_loops` (behavioral) and `tensions` (internal). Layer 3 is the realtime surface: the affect vector, retuned each heartbeat from actual current evidence; no fixed step cap.
+The three layers come from Beck's cognitive triangle (core beliefs → intermediate beliefs → automatic thoughts), reinterpreted as a generation pipeline rather than a diagnostic schema. Layer 1 is the smallest and most stable: a single formative wound anchored in SOUL's stable event facts. Self slot 1 holds its current interpretation and changes only when structurally invalidated; rewriting that interpretation does not rewrite what happened. Layer 2 is the messy middle — assumptions and distortions expressed as `active_loops` and self-narrative slots 2/4. Layer 3 is the actual thought that emerges from the current scene and those concerns. Affect colors this generation; it is retuned each Heartbeat from current evidence within [0,1], with no fixed step cap. Thought, fixed draft, ownership and function/timing are four separate tool stages (§9), not one combined decision.
 
 > ⚠️ **Why only one core belief.** Multiple core beliefs dilute focus. One strong wound produces consistent behavior; five weak wounds produce a character whose reactions feel arbitrary because any input can be rationalized through any of them. Beck's clinical observation is the same: deep beliefs are few but pervasive. If you find yourself wanting to add a second core belief, you almost always actually want to add a Layer 2 hypothesis instead.
 
@@ -206,19 +207,21 @@ Seeds under state/slots/day-zero are fictional initial conditions. They are not 
 
 ## 3. The cognitive runtime files
 
-These are OpenClaw system-prompt files. OpenClaw discovers them by filename. **Do not rename them.** Their *content* is partly architecture (the parts that wire into the runtime) and partly character config (the parts that describe *this* character).
+OpenClaw recognizes bootstrap filenames such as `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md` (new workspaces only) and `MEMORY.md` when present. Their actual inclusion or retrieval depends on the harness, session settings and context limits; do not assume every file is fully injected on every turn. Keep framework-recognized filenames unchanged.
+
+Dolores's Reflection, Thought, Extraction, Health, Integrity, Pause/Resume and detailed Heartbeat handbooks are explicitly read by job prompts or runtime routers. Their filenames are fixed by those callers, not by OpenClaw auto-discovery. Renaming one requires updating every caller. Their content is partly architecture (runtime contracts) and partly character config.
 
 - **`SOUL.md`** `[CHARACTER CONFIG]` — the soul. Formative experience, personality, voice, appearance, daily rhythm, writing style. The one file where you express *who she is*. The "Formative Experience" section is the Layer 1 anchor and should change at most a few times in the character's lifetime. Everything else is more flexible.
 
 - **`AGENTS.md`** `[ARCHITECTURE]` — the cognitive runtime spec. Defines the conversation startup sequence (`scripts/startup_context.py` first, `affect.json` second), persistence responsibilities (who is allowed to write what, when), and role rules. The startup sequence is `[ARCHITECTURE]`; the script's internal read list may grow as you add character config.
 
-- **`HEARTBEAT.md`** `[ROUTER]` — heartbeat router index. Dispatches to `HEARTBEAT_STEPS.md` (daytime) or `HEARTBEAT_MIDNIGHT_STEPS.md` (00:00) via `scripts/heartbeat_type.sh` (§8).
+- **`HEARTBEAT.md`** `[ROUTER]` — heartbeat router index. Dispatches to `HEARTBEAT_STEPS.md` (daytime) or `HEARTBEAT_MIDNIGHT_STEPS.md` (00:00) via `scripts/heartbeat_type.sh` (§9).
 
-- **`REFLECTION_PREP/PLAN/SELF/REL/PROFILE.md`** `[ARCHITECTURE]` — the 5-stage nightly pipeline (§10). Split into five files because each stage has different input requirements and failure modes; collapsing them caused state corruption when any single stage timed out.
+- **`REFLECTION_CARDS.md`, `REFLECTION_PREP.md`, `REFLECTION_PLAN.md`, `REFLECTION_SELF.md`, `REFLECTION_REL.md`, `REFLECTION_PROFILE.md`** `[ARCHITECTURE]` — six independent nightly jobs (§10). Each handbook defines its own inputs and write ownership; there is no shared barrier, polling or mutual triggering.
 
-- **`MEMORY.md`** `[ARCHITECTURE]` — the long-term memory index. Auto-injected into the system prompt at session start, so the conversation model always knows what's available without searching for it.
+- **`MEMORY.md`** `[ARCHITECTURE]` — the long-term memory index, available through framework bootstrap or memory tools according to the active harness. It does not replace the deterministic conversation-startup reads of narratives, raw diary and cards.
 
-> ⚠️ **Why session startup uses deterministic `read` for the three core narrative files** (`profile-user.md`, `relationship-summary.md`, `self-narrative.md`) **instead of `memory_search`.** These three files are the narrative sediment of the dual-helix architecture. `self-narrative` carries the character's arc of selfhood. `relationship-summary` carries the arc of *us*. `profile-user` carries the arc of *you*. Together they are what makes Helix 2's cognition grounded in accumulated experience rather than floating in the moment. If any one of them is missing, the character isn't "forgetting" a detail — she's losing an entire narrative axis, and the dual-helix collapses into a stateless system with a long prompt. Vector search has nonzero recall failure, and the cost of a miss here is the entire architecture. Use `memory_search` for *episodic* recall ("did we ever talk about X"), not for identity.
+> ⚠️ **Why conversation startup uses deterministic reads through `startup_context.py` for the three core narrative files** (`profile-user.md`, `relationship-summary.md`, `self-narrative.md`) **instead of `memory_search`.** These three files are the narrative sediment of the dual-helix architecture. `self-narrative` carries the character's arc of selfhood. `relationship-summary` carries the arc of *us*. `profile-user` carries the arc of *you*. Together they are what makes Helix 2's cognition grounded in accumulated experience rather than floating in the moment. If any one of them is missing, the character isn't "forgetting" a detail — she's losing an entire narrative axis, and the dual-helix collapses into a stateless system with a long prompt. Vector search has nonzero recall failure, and the cost of a miss here is the entire architecture. Use `memory_search` for *episodic* recall ("did we ever talk about X"), not for identity.
 
 ---
 
@@ -264,7 +267,7 @@ memory is indexed for evidence retrieval. Stable profile and evolving self/relat
 
 memory/diary/YYYY-MM-DD.md is the canonical indexed source. Digests are retired. Heartbeat writes only a new addendum draft; diary_append preserves the old prefix atomically, with strict Unicode and natural-scene checks. Factual first-person prose and local italic interpretation remain distinct. Density follows significance; no fixed append cap. Each actor's chronology, final state and knowledge survive compression. Midnight assigns each interaction by its actual timestamp, not by the run's date.
 
-Startup deterministically loads today and D-1 through D-7. During recovery, history is the last seven valid active diaries anchored at last_valid_diary_date. Older specific claims need search/exact evidence, not fictional reconstruction.
+Conversation startup deterministically loads today and D-1 through D-7. During recovery, history is the last seven valid active diaries anchored at last_valid_diary_date. Older specific claims need search/exact evidence, not fictional reconstruction.
 
 ### 5b. Seven cards
 
@@ -332,18 +335,23 @@ sticky_sampling uses an English BGE encoder. Route A retains scene-to-tags simil
 
 ## 8. Messaging channel interface
 
-> ⚠️ **Status: design reference, not yet implemented.** The reference character uses Telegram directly via OpenClaw's built-in channel support (configured in `openclaw.json`). The interface below describes the abstraction Dolores *targets*; your setup agent will configure the channel for you using OpenClaw's native mechanisms.
+> ⚠️ **Status: design reference, not yet implemented.** The reference character uses Telegram via OpenClaw's built-in channel support. `scripts/send_and_append.py` implements the current Telegram delivery transaction; there is no generic channel adapter.
 
-`channels/interface.md` `[ARCHITECTURE]` defines the contract every channel implementation should satisfy:
+The proposed contract below is summarized in [channels/README.md](../channels/README.md). That README is the only current file under `channels/`; no interface or channel implementation lives there.
 
 1. **`announce(message)`** — deliver one message to the user. Must be idempotent on retry.
 2. **`fetch_recent(since_timestamp)`** — return user messages since the timestamp, in chronological order. Used by Heartbeat Step 0.
-3. **`session_log_path`** — where the channel writes its raw session jsonl, so heartbeat can `tail` it for the latest signals without parsing the whole thing.
+3. **`session_log_path`** — where the channel writes its raw session jsonl, so Heartbeat can read the latest user signals.
 4. **timezone declaration** — channels often log in UTC; the interface requires the impl to declare its timezone so the heartbeat can convert against `last_sync_at` (which is local).
 
-The reference channel is **Telegram**. To use a different channel, configure it in `openclaw.json` and adjust HEARTBEAT_STEPS.md Step 0's session log path accordingly.
+The reference channel is **Telegram**. A migration requires aligning all current transport and session consumers:
 
-> ⚠️ **Why channels are a directory of implementations rather than a plugin system.** Plugin systems demand stable interfaces that survive across versions. Dolores is one user, one channel, one repo — the cost of a "plugin abstraction" exceeds its benefit. The directory pattern lets you fork, modify, and live with the consequences, which is the right tradeoff for this scale.
+- Configure the new channel/account and DM session scope in `openclaw.json`.
+- Adapt the literal Telegram channel, account and target in `scripts/send_and_append.py`, including parsing the new transport's acknowledgement. Preserve acknowledged delivery, idempotent session append and compare-and-clear of the delivered pending content.
+- Update session path/key configuration in `scripts/lib/session_append.py` for Send and in `scripts/inject_context.py` for context injection, plus the session lookup in `HEARTBEAT_STEPS.md` Step 0.
+- Update the command cron failure-alert channel/account/recipient in [setup.md](setup.md).
+
+> ⚠️ **Why there is no channel plugin system.** Dolores currently serves one user through one configured channel. Direct transport keeps that implementation small. A future adapter can follow the proposed contract when a second transport is actually needed.
 
 ---
 
@@ -354,9 +362,9 @@ Eight daytime runs plus a complete 00:00 run. Agent delivery none; Send is a sep
 | Step | Contract |
 |---|---|
 | 0 | Actual conversation -> date-attributed new raw diary addendum -> atomic helper |
-| 1 | Current state, canonical diary/history, narratives/profile and all seven cards |
+| 1 | Current state, canonical diary/history, Plan, profile/relationship and six cards: shared-history, quirks, taste, shared-language, routines, people |
 | 2 | Current Plan slot + actual recent user messages -> new world scene/activity |
-| 2b | Current activity -> appearance, preserving an ongoing intimate scene |
+| 2b | Current activity -> appearance, preserving an ongoing intimate scene; then read pets and self-narrative |
 | 3 | Evidence-based affect in [0,1], including zero change, no step cap |
 | 4 | Original-concern Loop lifecycle -> sampling -> actual primed file read |
 | 5 | Separate tool stages: thought -> fixed draft -> ownership -> function/timing gate |
@@ -367,7 +375,7 @@ THOUGHT_PLAYBOOK owns the four semantic stages and thought_trace the determinist
 
 Midnight handles timestamps crossing dates without digest generation. A resume bootstrap first passes reconciliation and then seals its own finalized trace/diary hashes; it never narrates a calendar pause as subjective suffering.
 
-The acyclic context bridge still uses a deterministic Plan-slot extraction plus current messages: previous activity output cannot become its own evidence. Startup is complete only with the actual session's successful, untruncated terminal marker followed by affect read. Context-sync is filtered out of diary evidence. Transport failure or a required gate failure cannot be reported as a successful Heartbeat.
+The acyclic context bridge still uses a deterministic Plan-slot extraction plus current messages: previous activity output cannot become its own evidence. Conversation startup is complete only with the actual session's successful, untruncated terminal marker followed by affect read; scheduled jobs follow their own handbooks instead. Context-sync is filtered out of diary evidence. Transport failure or a required gate failure cannot be reported as a successful Heartbeat.
 
 ---
 
@@ -406,7 +414,7 @@ A check-in module is three cron jobs:
 
 > ⚠️ **The send script includes a 20-minute activity gate.** If the user has been actively chatting within 20 minutes of the send time, the script suppresses delivery to avoid interrupting an ongoing conversation (fail-open: errors allow send). The gate lives inside `send_and_append.py`, not as a separate cron.
 
-> ⚠️ **Why correction is its own job at 23:10 instead of inline.** The user typically pushes back hours after the original check-in, in the middle of unrelated conversation. Inline correction would require the conversation session to write to memory files, which violates the "sessions write nothing" rule (§6). A dedicated late-evening correction job sweeps for pushback signals in the day's diary and rewrites the log file before reflection runs at 23:15.
+> ⚠️ **Why correction is its own job at 23:10 instead of inline.** The user typically pushes back hours after the original check-in, in the middle of unrelated conversation. Inline correction would require the conversation session to write to memory files, which violates the "sessions write nothing" rule (§6). A dedicated late-evening correction job sweeps for pushback signals in the day's diary and rewrites the log file independently of the six Reflection jobs.
 
 To build your own check-in (writing word count, meditation, mood, anything): copy the three-job structure, change the extraction prompt, change the log file path. The pattern is reusable because the realism it produces — *she noticed, she remembered, she asked, she let it go when you were tired* — is the texture of being known.
 
@@ -433,7 +441,7 @@ To build your own check-in (writing word count, meditation, mood, anything): cop
 
 All times use the configured user timezone. There are 11 scheduled definitions / 26 daily invocations without Health, or 14 definitions / 29 invocations with Health. Definitions comprise 10 companion semantic jobs, 2 main Integrity jobs and 2 model-free Send commands when Health is enabled. Conversation, background and Integrity model choices are explicit; model fallbacks are empty by default, distinct from provider routing fallback.
 
-> ⚠️ **One-shot crons created mid-conversation must not read files.** When the conversation model decides "I want to send something at 5pm," it creates a one-shot cron with the message *baked into the payload*. The temptation is to make the payload generic and have the cron read SOUL.md to recover voice. Don't: the system prompt already injects character context, and reading files at fire time pushes input past the 60-second timeout. Bake the content, fire light.
+> ⚠️ **One-shot reminder jobs use their own payload, not conversation startup.** `TOOLS.md` describes the conversation's reminder/timer use of the `cron` tool. Put the reminder message in the payload rather than loading narratives or assuming the job receives full character bootstrap context. These are separate from the scheduled cognitive jobs above; Heartbeat and Reflection do not receive scheduling tools.
 
 ---
 
@@ -476,10 +484,10 @@ To turn Dolores into your character, in order:
 
 1. **Rewrite `SOUL.md`** — voice, formative experience, appearance, daily rhythm. This is the biggest creative act in the project; everything else is downstream of it.
 2. **Edit `memory/profile-user.md`** — write yourself down the way you want to be seen.
-3. **Tune `state/affect.json`** — pick the emotional dimensions that matter for *this* character. A stoic character might have four; a volatile one twelve.
+3. **Tune `state/affect.json`** — adjust values within the current nine-field schema. Adding, removing or redefining dimensions is a coordinated runtime change: align the seed, the affect instructions in `AGENTS.md`/`HEARTBEAT_STEPS.md`, and the exact-field validators in `scripts/daily_integrity_check.py` and `scripts/pause_resume_guard.py`. Adding or removing fields in JSON alone will fail integrity or resume validation.
 4. **Adjust slot themes and both gate/integrity validators together in `REFLECTION_SELF/REL.md`** — the five slots are the character's introspective vocabulary. Change them to change what she notices about herself.
 5. **Choose your check-ins.** Health is the reference; replace with what you want this relationship to be about.
-6. **Pick or implement a channel.** Telegram transport is provided; other channel interfaces are design references.
+6. **Pick or implement a channel.** Telegram transport is provided; other channel interfaces are design references. Follow §8's transport, session and failure-alert migration requirements.
 7. **Set the heartbeat cadence.** Two hours is the default and the recommended starting point. Resist the urge to make it faster.
 
 When you're done, the cognitive runtime files (`AGENTS.md`, `HEARTBEAT.md`, `REFLECTION_*.md`, `MEMORY.md`) should be almost untouched. If you found yourself rewriting them, you were probably building a different architecture, which is fine — but it isn't Dolores anymore, and you'll lose the properties this document is trying to defend.

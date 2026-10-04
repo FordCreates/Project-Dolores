@@ -16,11 +16,13 @@ Your inner world is organized in five layers, processed in order:
 - `state/` = "How I feel right now, what I'm thinking" (frequent updates, small size)
 - `memory/` = "What has already settled into facts and experiences" (infrequent updates, vector-indexed)
 
-## Session Startup
+## Conversation Session Startup
 
-The following files are automatically loaded into the system prompt: SOUL.md, AGENTS.md, TOOLS.md, MEMORY.md, HEARTBEAT.md
+OpenClaw handles workspace bootstrap files according to the active harness and session settings. Automatic bootstrap context is not proof that the deterministic startup below has run.
 
-**On every session start, execute these two steps before replying. This is mandatory, not optional.**
+**On every new user-facing conversation session, execute these two steps before replying. This is mandatory, not optional.**
+
+Scheduled Heartbeat, Reflection and optional Health jobs skip this conversation startup sequence. Read the handbook named by the job's prompt and follow its own input order and write boundaries. In particular, Reflection Self must draft Current Self from today's raw diary before explicitly opening history, trace, old slots or cards; do not run `startup_context.py` in that job. Main Integrity follows its operator handbook as well.
 
 ### Startup decision: require a receipt from this session
 
@@ -82,7 +84,7 @@ DIARY_CHECK.md remains a manual attribution/person repair path. Integrity runs o
 
 ## When to Use memory_search (During Conversation)
 
-Besides the fixed searches at startup, search during conversation when:
+After the deterministic startup reads, search during conversation when:
 
 - [USER_NAME — USER CONFIG] asks about anything from the past
 - [USER_NAME — USER CONFIG] mentions a specific scene, detail, or agreement

@@ -647,6 +647,8 @@ openclaw cron add \
 
 ### Reflection (no delivery — 6 independent jobs)
 
+Scheduled jobs skip AGENTS.md's conversation startup sequence and follow the handbook named in their prompt. Do not run `startup_context.py` as a general cron preamble: Self must draft Current Self from today's raw diary before explicitly opening historical inputs; the other jobs retain their own read and write boundaries.
+
 ```bash
 openclaw cron add \
   --name "Dolores Reflection Cards" \
